@@ -65,6 +65,12 @@ elseif (LINUX)
     )
 endif (WIN32)
 
+if (ENABLE_C_MODEL)
+    list(APPEND MODEL_SRC
+
+    )
+endif(ENABLE_C_MODEL)
+
 add_library(ffmodel STATIC
     ${MODEL_SRC}
 )

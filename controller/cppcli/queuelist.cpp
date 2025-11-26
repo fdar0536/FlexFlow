@@ -48,12 +48,15 @@ u8 QueueList::init()
     {
         case BACKEND_GRPC:
         {
-            ret = Controller::Global::grpcInit(m_queueList, Global::config.address, Global::config.port);
+            ret = Controller::Global::grpcInit(m_queueList,
+                                               Global::config.address,
+                                               Global::config.port);
             break;
         }
         case BACKEND_SQLITE:
         {
-            ret = Controller::Global::sqliteInit(m_queueList, Global::config.address);
+            ret = Controller::Global::sqliteInit(m_queueList,
+                                                 Global::config.address);
             break;
         }
         default:
