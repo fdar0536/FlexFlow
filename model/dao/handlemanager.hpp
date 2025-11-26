@@ -34,12 +34,33 @@ namespace Model
 namespace DAO
 {
 
+typedef enum class Parent
+{
+    invaild,
+    IConnect,
+    IQueueList,
+    IQueue
+} Parent;
+
+typedef enum class Type
+{
+    invaild,
+    GRPCConnect,
+    GRPCQueueList,
+    GRPCQueue,
+    SQLiteConnect,
+    SQLiteQueueList,
+    SQLiteQueue
+} Type;
+
 typedef struct Entry
 {
     void *ptr = nullptr;
     u16 generation = 0;
     void (*deleter)(void *) = nullptr;
     bool alive = false;
+    Parent parent = Parent::invaild;
+    Type type = Type::invaild;
 } Entry;
 
 class HandleManager
@@ -50,9 +71,9 @@ public:
     ~HandleManager();
 
     template<class T>
-    u8 create(Handle &h, T *obj)
+    u8 create(Handle *h, T *obj, Parent parent, Type type)
     {
-        if (!obj) return 1;
+        if (!obj || !h) return 1;
 
         u32 idx;
         if (!m_free_indices.empty())
@@ -62,30 +83,39 @@ public:
         }
         else
         {
-            idx = (u32)m_entries.size();
+            idx = static_cast<u32>(m_entries.size());
             m_entries.emplace_back();
         }
 
-        h.index      = idx;
-        h.generation = m_entries[idx].generation;
+        h->index      = idx;
+        h->generation = m_entries[idx].generation;
 
-        m_entries[idx].ptr   = obj;
-        m_entries[idx].alive = true;
-        m_entries[idx].deleter = [](void* p) { delete static_cast<T *>(p); };
+        m_entries.at(idx).ptr   = obj;
+        m_entries.at(idx).alive = true;
+        m_entries.at(idx).deleter = [](void* p) { delete static_cast<T *>(p); };
+        m_entries.at(idx).parent = parent;
+        m_entries.at(idx).type = type;
 
         return 0;
     }
 
+    bool isNotValid(Handle h);
+
+    u8 removeOwned(Handle h);
+
+    Parent parent(Handle h);
+
+    Type type(Handle h);
+
     template<class T>
     T *get(Handle h)
     {
-        if (h.index >= m_entries.size()) return nullptr;
-
-        const Entry &e = m_entries[h.index];
-
-        if (!e.alive || e.generation != h.generation)
+        if (isNotValid(h))
+        {
             return nullptr;
+        }
 
+        const Entry &e = m_entries.at(h.index);
         return e.ptr;
     }
 

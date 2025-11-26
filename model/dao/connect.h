@@ -1,6 +1,6 @@
 /*
- * Simple Task Queue
- * Copyright (c) 2024 fdar0536
+ * Flex Flow
+ * Copyright (c) 2025-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,41 +21,26 @@
  * SOFTWARE.
  */
 
-#ifndef _CONTROLLER_CLI_CONFIG_HPP_
-#define _CONTROLLER_CLI_CONFIG_HPP_
+#ifndef _MODEL_DAO_CONNECT_H_
+#define _MODEL_DAO_CONNECT_H_
 
-#include <string>
+#include "handle.h"
 
-#include "spdlog/common.h"
-
-#include "controller/global/defines.h"
-
-namespace Controller
+#ifdef __cplusplus
+extern "C"
 {
+#endif
 
-namespace CppCLI
-{
+u8 connect_init(Handle *out, u8 backend);
 
-class Config
-{
-public:
+u8 connect_startConnect(Handle h, const char *target, const i32 port);
 
-    u8 backend = BACKEND_GRPC;
+void *connect_onnectToken(Handle h);
 
-    std::string logFile = "";
+u8 connect_targetPath(Handle h, char *buf, size_t *bufSize);
 
-    std::string address = "127.0.0.1";
+#ifdef __cplusplus
+}
+#endif
 
-    u16 port = 12345;
-
-    bool autoConnect = true;
-
-    i32 logLevel = static_cast<i32>(spdlog::level::level_enum::info);
-
-}; // end class Config
-
-} // end namespace CppCLI
-
-} // end namespace Controller
-
-#endif // _CONTROLLER_CLI_MAIN_HPP_
+#endif // _MODEL_DAO_CONNECT_H_

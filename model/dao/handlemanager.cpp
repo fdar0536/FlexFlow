@@ -34,18 +34,71 @@ HandleManager::~HandleManager()
     for (size_t i = 0; i < m_entries.size(); ++i)
     {
         Entry &e = m_entries.at(i);
-        if (e.ptr) e.deleter(e.ptr);
+        if (e.ptr)
+        {
+            if (e.deleter) e.deleter(e.ptr);
+        }
+
     } // for (size_t i = 0; i < m_entries.size(); ++i)
+}
+
+bool HandleManager::isNotValid(Handle h)
+{
+    if (h.index >= m_entries.size()) return true;
+
+    const Entry &e = m_entries.at(h.index);
+
+    if (!e.alive || e.generation != h.generation)
+        return true;
+
+    return false;
+}
+
+u8 HandleManager::removeOwned(Handle h)
+{
+    if (isNotValid(h))
+    {
+        return 1;
+    }
+
+    Entry &e = m_entries.at(h.index);
+    e.deleter = nullptr;
+
+    return 0;
+}
+
+Parent HandleManager::parent(Handle h)
+{
+    if (isNotValid(h))
+    {
+        return Parent::invaild;
+    }
+
+    const Entry &e = m_entries.at(h.index);
+    return e.parent;
+}
+
+Type HandleManager::type(Handle h)
+{
+    if (isNotValid(h))
+    {
+        return Type::invaild;
+    }
+
+    const Entry &e = m_entries.at(h.index);
+    return e.type;
 }
 
 void HandleManager::remove(Handle h)
 {
-    if (h.index >= m_entries.size()) return;
+    if (isNotValid(h))
+    {
+        return;
+    }
 
-    Entry &e = m_entries[h.index];
-    if (!e.alive || e.generation != h.generation) return;
+    Entry &e = m_entries.at(h.index);
 
-    e.deleter(e.ptr);
+    if (e.deleter) e.deleter(e.ptr);
     e.ptr   = nullptr;
     e.alive = false;
     e.generation++;
