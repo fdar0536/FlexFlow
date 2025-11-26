@@ -44,9 +44,9 @@ bool isAdmin();
 
 u8 spdlogInit(const std::string &);
 
-u8 sqliteInit(std::shared_ptr<Model::DAO::IQueueList> &out, const std::string &target);
+u8 sqliteInit(Model::DAO::IQueueList *out, const std::string &target);
 
-u8 grpcInit(std::shared_ptr<Model::DAO::IQueueList> &out, const std::string &target, const i32 port);
+u8 grpcInit(Model::DAO::IQueueList *out, const std::string &target, const i32 port);
 
 } // end namesapce Global
 

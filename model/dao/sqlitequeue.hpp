@@ -45,8 +45,8 @@ public:
 
     ~SQLiteQueue();
 
-    virtual u8 init(std::shared_ptr<IConnect> &connect,
-                    std::shared_ptr<Proc::IProc> &process,
+    virtual u8 init(IConnect *connect,
+                    Proc::IProc *process,
                     const std::string &name) override;
 
     virtual u8 listPending(std::vector<int> &out) override;

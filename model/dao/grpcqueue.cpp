@@ -44,8 +44,8 @@ GRPCQueue::~GRPCQueue()
 {}
 
 u8
-GRPCQueue::init(std::shared_ptr<IConnect> &connect,
-                std::shared_ptr<Proc::IProc> &process,
+GRPCQueue::init(IConnect *connect,
+                Proc::IProc *process,
                 const std::string &name)
 {
     UNUSED(process);

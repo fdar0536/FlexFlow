@@ -43,13 +43,15 @@ class Queue
 {
 public:
 
+    ~Queue();
+
     u8 init();
 
-    i32 run(const std::string &, std::shared_ptr<Model::DAO::IQueue> &);
+    i32 run(const std::string &, Model::DAO::IQueue *);
 
 private:
 
-    std::shared_ptr<Model::DAO::IQueue> m_queue;
+    Model::DAO::IQueue *m_queue;
 
     std::unordered_map<std::string, std::function<i32(void)>> m_funcs;
 

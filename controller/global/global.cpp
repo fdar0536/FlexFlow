@@ -175,13 +175,13 @@ u8 spdlogInit(const std::string &path)
     return 0;
 }
 
-u8 sqliteInit(std::shared_ptr<Model::DAO::IQueueList> &out, const std::string &target)
+u8 sqliteInit(Model::DAO::IQueueList *out, const std::string &target)
 {
     Model::DAO::SQLiteConnect *conn(nullptr);
     try
     {
         conn = new Model::DAO::SQLiteConnect();
-        if (conn == nullptr)
+        if (!conn)
         {
             spdlog::error("{}:{} Fail to allocate memory", __FILE__, __LINE__);
             return 1;
@@ -200,7 +200,6 @@ u8 sqliteInit(std::shared_ptr<Model::DAO::IQueueList> &out, const std::string &t
         return 1;
     }
 
-    auto connPtr = std::shared_ptr<Model::DAO::IConnect>(conn);
     Model::DAO::SQLiteQueueList *sqlPtr;
     try
     {
@@ -212,18 +211,19 @@ u8 sqliteInit(std::shared_ptr<Model::DAO::IQueueList> &out, const std::string &t
         return 1;
     }
 
-    if (sqlPtr->init(connPtr))
+    if (sqlPtr->init(conn))
     {
         spdlog::error("{}:{} Fail to initialize sqlite queue list", __FILE__, __LINE__);
         delete sqlPtr;
+        delete conn;
         return 1;
     }
 
-    out = std::shared_ptr<Model::DAO::IQueueList>(sqlPtr);
+    out = sqlPtr;
     return 0;
 }
 
-u8 grpcInit(std::shared_ptr<Model::DAO::IQueueList> &out, const std::string &target, const i32 port)
+u8 grpcInit(Model::DAO::IQueueList *out, const std::string &target, const i32 port)
 {
     Model::DAO::GRPCConnect *conn = new (std::nothrow) Model::DAO::GRPCConnect;
     if (!conn)
@@ -254,18 +254,15 @@ u8 grpcInit(std::shared_ptr<Model::DAO::IQueueList> &out, const std::string &tar
         return 1;
     }
 
-    std::shared_ptr<Model::DAO::IConnect> connPtr =
-        std::shared_ptr<Model::DAO::IConnect>(conn);
-    if (queueList->init(connPtr))
+    if (queueList->init(conn))
     {
         delete queueList;
         spdlog::error("{}:{} Fail to initialize queue list", __FILE__, __LINE__);
+        delete conn;
         return 1;
     }
 
-    out = std::shared_ptr<Model::DAO::IQueueList>
-        (reinterpret_cast<Model::DAO::IQueueList *>(queueList));
-
+    out = queueList;
     return 0;
 }
 

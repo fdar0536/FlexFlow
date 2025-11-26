@@ -43,8 +43,8 @@ public:
 
     virtual ~IQueue() {}
 
-    virtual u8 init(std::shared_ptr<IConnect> &connect,
-                    std::shared_ptr<Proc::IProc> &process,
+    virtual u8 init(IConnect *connect,
+                    Proc::IProc *process,
                     const std::string &name) = 0;
 
     virtual u8 listPending(std::vector<int> &out) = 0;
@@ -77,7 +77,7 @@ public:
 
 protected:
 
-    std::shared_ptr<Model::Proc::IProc> m_process;
+    Model::Proc::IProc *m_proc;
 
 }; // end class IQueue
 

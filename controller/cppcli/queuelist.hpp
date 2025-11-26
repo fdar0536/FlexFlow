@@ -45,6 +45,8 @@ public:
 
     QueueList();
 
+    ~QueueList();
+
     u8 init();
 
     i32 run();
@@ -53,7 +55,7 @@ private:
 
     std::string m_prefix;
 
-    std::shared_ptr<Model::DAO::IQueueList> m_queueList;
+    Model::DAO::IQueueList *m_queueList;
 
     std::unordered_map<std::string, std::function<i32(void)>> m_funcs;
 

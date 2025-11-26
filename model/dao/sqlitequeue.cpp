@@ -48,20 +48,23 @@ static bool isDBColumnNameInit = false;
 
 SQLiteQueue::SQLiteQueue() :
     m_token(nullptr)
-{}
+{
+    m_proc = nullptr;
+}
 
 SQLiteQueue::~SQLiteQueue()
 {
     stopImpl();
+    if (m_proc) delete m_proc;
 }
 
 u8
-SQLiteQueue::init(std::shared_ptr<IConnect> &connect,
-                  std::shared_ptr<Proc::IProc> &process,
+SQLiteQueue::init(IConnect *connect,
+                  Proc::IProc *process,
                   const std::string &name)
 {
     static_cast<void>(connect);
-    if (process == nullptr)
+    if (!process)
     {
         spdlog::error("{}:{} process is nullptr.", __FILE__, __LINE__);
         return ErrCode_INVALID_ARGUMENT;
@@ -105,7 +108,7 @@ SQLiteQueue::init(std::shared_ptr<IConnect> &connect,
         return ErrCode_OS_ERROR;
     }
 
-    m_process = process;
+    m_proc = process;
     m_isRunning.store(false, std::memory_order_relaxed);
     m_start.store(false, std::memory_order_relaxed);
     return ErrCode_OK;
@@ -193,7 +196,7 @@ bool SQLiteQueue::isRunning() const
 void SQLiteQueue::readCurrentOutput(std::vector<std::string> &out)
 {
     out.clear();
-    m_process->readCurrentOutput(out);
+    m_proc->readCurrentOutput(out);
 }
 
 u8 SQLiteQueue::start()
@@ -1051,7 +1054,7 @@ void SQLiteQueue::mainLoop()
         }
 
         // invoke process
-        if (m_process->start(m_currentTask))
+        if (m_proc->start(m_currentTask))
         {
             spdlog::error("{}:{} Fail to start process.", __FILE__, __LINE__);
             mainLoopFin();
@@ -1059,7 +1062,7 @@ void SQLiteQueue::mainLoop()
             continue;
         }
 
-        while(m_process->isRunning())
+        while(m_proc->isRunning())
         {
             sleep(1);
         }
@@ -1130,7 +1133,7 @@ exit:
 void SQLiteQueue::mainLoopFin()
 {
     std::unique_lock<std::mutex> lock(m_currentTaskMutex);
-    if (m_process->exitCode(m_currentTask.exitCode))
+    if (m_proc->exitCode(m_currentTask.exitCode))
     {
         spdlog::error("{}:{} Fail to get exit code.", __FILE__, __LINE__);
         m_start.store(false, std::memory_order_relaxed);
@@ -1171,7 +1174,7 @@ void SQLiteQueue::stopImpl()
     }
 
     m_start.store(false, std::memory_order_relaxed);
-    m_process->stop();
+    m_proc->stop();
     m_isRunning.store(false, std::memory_order_relaxed);
 }
 

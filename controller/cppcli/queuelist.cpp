@@ -40,6 +40,11 @@ QueueList::QueueList() :
     m_queueList(nullptr)
 {}
 
+QueueList::~QueueList()
+{
+    if (m_queueList) delete m_queueList;
+}
+
 // public member functions
 u8 QueueList::init()
 {

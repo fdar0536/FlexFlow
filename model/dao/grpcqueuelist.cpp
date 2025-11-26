@@ -41,11 +41,13 @@ GRPCQueueList::GRPCQueueList() :
 {}
 
 GRPCQueueList::~GRPCQueueList()
-{}
-
-u8 GRPCQueueList::init(std::shared_ptr<IConnect> &connect)
 {
-    if (connect == nullptr)
+    if (m_conn) delete m_conn;
+}
+
+u8 GRPCQueueList::init(IConnect *connect)
+{
+    if (!connect)
     {
         spdlog::error("{}:{} connect is nullptr", __FILE__, __LINE__);
         return ErrCode_INVALID_ARGUMENT;
@@ -168,7 +170,7 @@ u8 GRPCQueueList::renameQueue(const std::string &oldName,
     return ErrCode_OS_ERROR;
 }
 
-std::shared_ptr<IQueue> GRPCQueueList::getQueue(const std::string &name)
+IQueue *GRPCQueueList::getQueue(const std::string &name)
 {
     ff::QueueReq req;
     req.set_name(name);
@@ -187,15 +189,14 @@ std::shared_ptr<IQueue> GRPCQueueList::getQueue(const std::string &name)
             return nullptr;
         }
 
-        std::shared_ptr<Proc::IProc> proc = std::shared_ptr<Proc::IProc>(nullptr);
-        if (queue->init(m_conn, proc, name))
+        if (queue->init(m_conn, nullptr, name))
         {
             spdlog::error("{}:{} Fail to initialize queue", __FILE__, __LINE__);
             delete queue;
             return nullptr;
         }
 
-        return std::shared_ptr<IQueue>(queue);
+        return queue;
     }
 
     GRPCUtils::buildErrMsg(__FILE__, __LINE__, status);

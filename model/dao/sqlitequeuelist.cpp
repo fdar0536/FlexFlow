@@ -45,15 +45,19 @@ namespace DAO
 {
 
 SQLiteQueueList::SQLiteQueueList()
-{}
+{
+    m_conn =nullptr;
+}
 
 SQLiteQueueList::~SQLiteQueueList()
-{}
+{
+    if (m_conn) delete m_conn;
+}
 
 u8
-SQLiteQueueList::init(std::shared_ptr<IConnect> &connect)
+SQLiteQueueList::init(IConnect *connect)
 {
-    if (connect == nullptr)
+    if (!connect)
     {
         spdlog::error("{}:{} \"connect\" is nullptr.", __FILE__, __LINE__);
         return ErrCode_INVALID_ARGUMENT;
@@ -141,8 +145,7 @@ u8 SQLiteQueueList::createQueue(const std::string &name)
         return ErrCode_OS_ERROR;
     }
 
-    std::shared_ptr<Proc::IProc> procPtr = std::shared_ptr<Proc::IProc>(proc);
-    if (queue->init(m_conn, procPtr, name))
+    if (queue->init(m_conn, proc, name))
     {
         delete queue;
         spdlog::error("{}:{} Fail to initialize queue", __FILE__, __LINE__);
@@ -204,13 +207,11 @@ SQLiteQueueList::renameQueue(const std::string &oldName,
     return ErrCode_NOT_FOUND;
 }
 
-std::shared_ptr<IQueue>
-SQLiteQueueList::getQueue(const std::string &name)
+IQueue *SQLiteQueueList::getQueue(const std::string &name)
 {
     auto it = m_queueList.find(name);
     if (it == m_queueList.end()) return nullptr;
-    return it->second;
-
+    return it->second.get();
 }
 
 } // end namespace DAO

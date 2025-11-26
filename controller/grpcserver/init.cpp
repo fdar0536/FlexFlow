@@ -40,7 +40,7 @@ Config config;
 
 GRPCServer::Server server;
 
-std::shared_ptr<Model::DAO::IQueueList> sqliteQueueList = nullptr;
+Model::DAO::IQueueList *sqliteQueueList = nullptr;
 
 u8 init(int argc, char **argv)
 {
@@ -91,6 +91,7 @@ u8 init(int argc, char **argv)
 void fin()
 {
     Global::consoleFin();
+    if (sqliteQueueList) delete sqliteQueueList;
 }
 
 } // end namespace GRPCServer

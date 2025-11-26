@@ -42,7 +42,7 @@ extern Config config;
 
 extern GRPCServer::Server server;
 
-extern std::shared_ptr<Model::DAO::IQueueList> sqliteQueueList;
+extern Model::DAO::IQueueList *sqliteQueueList;
 
 u8 init(int argc, char **argv);
 

@@ -48,6 +48,11 @@ namespace Controller
 namespace CppCLI
 {
 
+Queue::~Queue()
+{
+    if (m_queue) delete m_queue;
+}
+
 u8 Queue::init()
 {
     m_funcs["list"] = std::bind(&Queue::list, this);
@@ -115,9 +120,9 @@ u8 Queue::init()
 }
 
 i32 Queue::run(const std::string &prefix,
-               std::shared_ptr<Model::DAO::IQueue> &queuePtr)
+               Model::DAO::IQueue *queuePtr)
 {
-    if (queuePtr == nullptr)
+    if (!queuePtr)
     {
         spdlog::error("{}:{} you should never see this line");
         fmt::println("queuePtr is nullptr");

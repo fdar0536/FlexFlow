@@ -42,7 +42,7 @@ public:
 
     virtual ~IQueueList() {}
 
-    virtual u8 init(std::shared_ptr<IConnect> &connect) = 0;
+    virtual u8 init(IConnect *connect) = 0;
 
     virtual u8 createQueue(const std::string &name) = 0;
 
@@ -53,11 +53,11 @@ public:
     virtual u8 renameQueue(const std::string &oldName,
                            const std::string &newName) = 0;
 
-    virtual std::shared_ptr<IQueue> getQueue(const std::string &name) = 0;
+    virtual IQueue *getQueue(const std::string &name) = 0;
 
 protected:
 
-    std::shared_ptr<IConnect> m_conn;
+    IConnect *m_conn;
 
 }; // end class IQueueList
 

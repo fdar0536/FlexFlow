@@ -43,7 +43,7 @@ public:
 
     ~GRPCQueueList();
 
-    u8 init(std::shared_ptr<IConnect> &connect) override;
+    u8 init(IConnect *connect) override;
 
     u8 createQueue(const std::string &name) override;
 
@@ -54,7 +54,7 @@ public:
     u8 renameQueue(const std::string &oldName,
                    const std::string &newName) override;
 
-    std::shared_ptr<IQueue> getQueue(const std::string &name) override;
+    IQueue *getQueue(const std::string &name) override;
 
 private:
 
