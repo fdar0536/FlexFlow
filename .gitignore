@@ -11,3 +11,5 @@
 /.cache
 /.cache/*
 /.vscode
+/.qtcreator
+/.qtcreator/*

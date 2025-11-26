@@ -1,5 +1,5 @@
-if(ENABLE_CLI)
-    set(FF_CLI_LIBS
+if(ENABLE_CPP_CLI)
+    set(FF_CPP_CLI_LIBS
         protobuf::libprotobuf
         gRPC::grpc++
         cxxopts::cxxopts
@@ -9,7 +9,7 @@ if(ENABLE_CLI)
         spdlog::spdlog
     )
 
-    set(CLI_CONTROLLER_SRC
+    set(CPP_CLI_CONTROLLER_SRC
         controller/cli/args.cpp
         controller/cli/args.hpp
         controller/cli/config.hpp
@@ -23,24 +23,24 @@ if(ENABLE_CLI)
         controller/cli/queuelist.hpp
     )
 
-    add_executable(FlexFlowCLI
-        ${CLI_CONTROLLER_SRC}
+    add_executable(FlexFlowCppCLI
+        ${CPP_CLI_CONTROLLER_SRC}
 
-        climain.cpp)
+        cppclimain.cpp)
 
-    add_dependencies(FlexFlowCLI grpc_common ffmodel)
+    add_dependencies(FlexFlowCppCLI grpc_common ffmodel)
 
-    target_link_libraries(FlexFlowCLI
+    target_link_libraries(FlexFlowCppCLI
         PRIVATE
 
-        ${FF_CLI_LIBS}
+        ${FF_CPP_CLI_LIBS}
         ffmodel
     )
 
-    target_include_directories(FlexFlowCLI PRIVATE ${INIPP_INCLUDE_DIRS})
+    target_include_directories(FlexFlowCppCLI PRIVATE ${INIPP_INCLUDE_DIRS})
 
     if (MSVC AND WIN32 AND NOT MSVC_VERSION VERSION_LESS 142)
-        target_link_options(FlexFlowCLI PRIVATE $<$<CONFIG:Debug>:/INCREMENTAL>)
-        target_compile_options(FlexFlowCLI PRIVATE $<$<CONFIG:Debug>:/ZI>)
+        target_link_options(FlexFlowCppCLI PRIVATE $<$<CONFIG:Debug>:/INCREMENTAL>)
+        target_compile_options(FlexFlowCppCLI PRIVATE $<$<CONFIG:Debug>:/ZI>)
     endif()
-endif(ENABLE_SERVER)
+endif(ENABLE_CPP_CLI)

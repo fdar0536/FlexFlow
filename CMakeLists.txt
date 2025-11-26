@@ -46,7 +46,11 @@ if((CLIENT_TIMEOUT GREATER 61) OR (CLIENT_TIMEOUT LESS 1))
     set(CLIENT_TIMEOUT 31)
 endif((CLIENT_TIMEOUT GREATER 61) OR (CLIENT_TIMEOUT LESS 1))
 
-option(ENABLE_CLI "enable CLI" on)
+option(ENABLE_CPP_CLI "enable CLI for debug CPP model" on)
+option(ENABLE_C_MODEL "enable C model for ffi" on)
+if (ENABLE_C_MODEL)
+    option(ENABLE_C_CLI "enable CLI for debug C model" on)
+endif(ENABLE_C_MODEL)
 option(ENABLE_SERVER "enable server" on)
 
 include(cmake/getGitInfo.cmake)
@@ -119,4 +123,4 @@ target_link_libraries(grpc_common
 
 include(cmake/ffmodel.cmake)
 include(cmake/flexflowserver.cmake)
-include(cmake/flexflowcli.cmake)
+include(cmake/flexflowcppcli.cmake)
