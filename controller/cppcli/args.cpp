@@ -26,7 +26,7 @@
 
 #include "spdlog/spdlog.h"
 
-#include "controller/cli/global.hpp"
+#include "controller/cppcli/global.hpp"
 #include "model/utils.hpp"
 
 #include "args.hpp"
@@ -34,7 +34,7 @@
 namespace Controller
 {
 
-namespace CLI
+namespace CppCLI
 {
 
 // public member functions
@@ -168,6 +168,6 @@ void Args::cleanArgv()
     }
 }
 
-} // end namespace CLI
+} // end namespace CppCLI
 
 } // end namespace Controller

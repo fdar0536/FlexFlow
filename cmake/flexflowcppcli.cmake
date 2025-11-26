@@ -10,17 +10,17 @@ if(ENABLE_CPP_CLI)
     )
 
     set(CPP_CLI_CONTROLLER_SRC
-        controller/cli/args.cpp
-        controller/cli/args.hpp
-        controller/cli/config.hpp
-        controller/cli/global.cpp
-        controller/cli/global.hpp
-        controller/cli/main.cpp
-        controller/cli/main.hpp
-        controller/cli/queue.cpp
-        controller/cli/queue.hpp
-        controller/cli/queuelist.cpp
-        controller/cli/queuelist.hpp
+        controller/cppcli/args.cpp
+        controller/cppcli/args.hpp
+        controller/cppcli/config.hpp
+        controller/cppcli/global.cpp
+        controller/cppcli/global.hpp
+        controller/cppcli/main.cpp
+        controller/cppcli/main.hpp
+        controller/cppcli/queue.cpp
+        controller/cppcli/queue.hpp
+        controller/cppcli/queuelist.cpp
+        controller/cppcli/queuelist.hpp
     )
 
     add_executable(FlexFlowCppCLI

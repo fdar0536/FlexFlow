@@ -21,52 +21,63 @@
  * SOFTWARE.
  */
 
-#ifndef _CONTROLLER_CLI_ARGS_HPP_
-#define _CONTROLLER_CLI_ARGS_HPP_
+#ifndef _CONTROLLER_CLI_QUEUELIST_HPP_
+#define _CONTROLLER_CLI_QUEUELIST_HPP_
 
-#include <vector>
-#include <string>
+#include <functional>
+#include <memory>
+#include <unordered_map>
+
+#include "cxxopts.hpp"
 
 #include "controller/global/defines.hpp"
+#include "model/dao/iqueuelist.hpp"
 
 namespace Controller
 {
 
-namespace CLI
+namespace CppCLI
 {
 
-class Args
+class QueueList
 {
 public:
 
-    Args();
-
-    ~Args();
+    QueueList();
 
     u8 init();
 
-    char **argv() const;
-
-    i32 argc() const;
-
-    std::vector<std::string> args() const;
-
-    u8 getArgs(const std::string &);
+    i32 run();
 
 private:
-    
-    std::vector<std::string> m_args;
 
-    char **m_argv;
+    std::string m_prefix;
 
-    size_t m_argvLen;
+    std::shared_ptr<Model::DAO::IQueueList> m_queueList;
 
-    void cleanArgv();
+    std::unordered_map<std::string, std::function<i32(void)>> m_funcs;
 
-}; // end class Args
+    cxxopts::Options m_createOpts = cxxopts::Options("create", "create new queue");
 
-} // end namespace CLI
+    i32 create();
+
+    cxxopts::Options m_deleteOpts = cxxopts::Options("delete", "delete the queue");
+
+    i32 Delete();
+
+    cxxopts::Options m_listOpts = cxxopts::Options("list", "list queue(s)");
+
+    i32 list();
+
+    cxxopts::Options m_renameOpts = cxxopts::Options("rename", "rename the queue");
+
+    i32 rename();
+
+    i32 enter();
+}; // end class QueueList
+
+} // end namespace CppCLI
 
 } // end namespace Controller
 
-#endif // _CONTROLLER_CLI_ARGS_HPP_
+#endif // _CONTROLLER_CLI_QUEUELIST_HPP_

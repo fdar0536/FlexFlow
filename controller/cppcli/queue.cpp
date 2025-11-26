@@ -38,14 +38,14 @@
 
 #include "model/utils.hpp"
 
-#include "controller/cli/global.hpp"
+#include "controller/cppcli/global.hpp"
 
 #include "queue.hpp"
 
 namespace Controller
 {
 
-namespace CLI
+namespace CppCLI
 {
 
 u8 Queue::init()
@@ -630,6 +630,6 @@ i32 Queue::output()
     return 0;
 }
 
-} // end namesapce CLI
+} // end namespace CppCLI
 
 } // end namespace Controller

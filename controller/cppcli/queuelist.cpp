@@ -24,8 +24,8 @@
 #include "spdlog/spdlog.h"
 
 #include "controller/global/global.hpp"
-#include "controller/cli/config.hpp"
-#include "controller/cli/global.hpp"
+#include "controller/cppcli/config.hpp"
+#include "controller/cppcli/global.hpp"
 
 #include "queue.hpp"
 #include "queuelist.hpp"
@@ -33,7 +33,7 @@
 namespace Controller
 {
 
-namespace CLI
+namespace CppCLI
 {
 
 QueueList::QueueList() :
@@ -358,6 +358,6 @@ i32 QueueList::enter()
     return queue.run(m_prefix + "/" + Global::args.args().at(0) + "> ", ptr);
 }
 
-} // end namesapce CLI
+} // end namespace Cpp
 
 } // end namespace Controller

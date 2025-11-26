@@ -21,53 +21,33 @@
  * SOFTWARE.
  */
 
-#ifndef _CONTROLLER_CLI_MAIN_HPP_
-#define _CONTROLLER_CLI_MAIN_HPP_
+#ifndef _CONTROLLER_CLI_GLOBAL_HPP_
+#define _CONTROLLER_CLI_GLOBAL_HPP_
 
-#include "cxxopts.hpp"
+#include <atomic>
 
-#include "controller/global/defines.hpp"
+#include "controller/cppcli/args.hpp"
+#include "controller/cppcli/config.hpp"
 
 namespace Controller
 {
 
-namespace CLI
+namespace CppCLI
 {
 
-class Main
+namespace Global
 {
-public:
 
-    Main();
+extern std::atomic<bool> keepRunning;
 
-    ~Main();
+extern Controller::CppCLI::Config config;
 
-    i32 init(int, char **);
+extern Controller::CppCLI::Args args;
 
-    i32 run();
+} // end namespace Global
 
-private:
-
-    i32 parseArgs(int, char **);
-
-    void printVersion();
-
-    u8 optsInit();
-
-    i32 print();
-
-    i32 modify();
-
-    i32 connect();
-
-    cxxopts::Options printOpts = cxxopts::Options("print", "print info");
-
-    cxxopts::Options modifyOpts = cxxopts::Options("modify", "modify connection info");
-
-}; // end class Main
-
-} // end namesapce CLI
+} // end namespace CppCLI
 
 } // end namespace Controller
 
-#endif // _CONTROLLER_CLI_MAIN_HPP_
+#endif // _CONTROLLER_CLI_GLOBAL_HPP_

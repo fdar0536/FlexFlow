@@ -21,44 +21,25 @@
  * SOFTWARE.
  */
 
-#ifndef _CONTROLLER_CLI_CONFIG_HPP_
-#define _CONTROLLER_CLI_CONFIG_HPP_
-
-#include <string>
-
-#include "spdlog/common.h"
-
-#include "controller/global/defines.hpp"
-
-#define BACKEND_GRPC   0
-#define BACKEND_SQLITE 1
+#include "global.hpp"
 
 namespace Controller
 {
 
-namespace CLI
+namespace CppCLI
 {
 
-class Config
+namespace Global
 {
-public:
 
-    u8 backend = BACKEND_GRPC;
+std::atomic<bool> keepRunning;
 
-    std::string logFile = "";
+Controller::CppCLI::Config config;
 
-    std::string address = "127.0.0.1";
+Controller::CppCLI::Args args;
 
-    u16 port = 12345;
+} // end namespace Global
 
-    bool autoConnect = true;
-
-    i32 logLevel = static_cast<i32>(spdlog::level::level_enum::info);
-
-}; // end class Config
-
-} // end namesapce CLI
+} // end namespace CppCLI
 
 } // end namespace Controller
-
-#endif // _CONTROLLER_CLI_MAIN_HPP_

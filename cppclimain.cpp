@@ -23,11 +23,11 @@
 
 #include "spdlog/spdlog.h"
 
-#include "controller/cli/main.hpp"
+#include "controller/cppcli/main.hpp"
 
 int main(int argc, char **argv)
 {
-    Controller::CLI::Main mainObj;
+    Controller::CppCLI::Main mainObj;
     i32 ret = mainObj.init(argc, argv);
     if (ret)
     {

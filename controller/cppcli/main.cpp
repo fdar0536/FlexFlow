@@ -25,7 +25,7 @@
 
 #include <csignal>
 
-#include "controller/cli/config.hpp"
+#include "controller/cppcli/config.hpp"
 #include "spdlog/spdlog.h"
 
 
@@ -43,7 +43,7 @@
 namespace Controller
 {
 
-namespace CLI
+namespace CppCLI
 {
 
 static void sighandler(int signum);
@@ -364,6 +364,6 @@ static BOOL eventHandler(DWORD dwCtrlType)
 }
 #endif
 
-} // end namesapce CLI
+} // end namespace CppCLI
 
 } // end namespace Controller

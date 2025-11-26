@@ -36,7 +36,7 @@
 namespace Controller
 {
 
-namespace CLI
+namespace CppCLI
 {
 
 class Queue
@@ -97,7 +97,7 @@ private:
 
 }; // end class Queue
 
-} // end namesapce CLI
+} // end namespace CppCLI
 
 } // end namespace Controller
 
