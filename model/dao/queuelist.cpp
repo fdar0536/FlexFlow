@@ -202,7 +202,35 @@ u8 queuelist_getQueue(Handle h, const char *name, Handle *out)
     IQueue queue = list->getQueue(name);
     if (!queue) return 1;
 
+    Type parentType(hm.type(h));
+    Type type;
+    switch (parentType)
+    {
+    case Type::GRPCQueueList:
+    {
+        type = Type::GRPCQueue;
+        break;
+    }
+    case Type::SQLiteQueueList:
+    {
+        type = Type::SQLiteQueue;
+        break;
+    }
+    default:
+    {
+        return 1;
+    }
+    }; // switch (parentType)
 
+    if (hm.create(out, queue, Parent::IQueue, type))
+    {
+        if (parentType == Type::GRPCQueueList)
+        {
+            delete queue;
+        }
+
+        return 1;
+    }
 
     return 0;
 }
