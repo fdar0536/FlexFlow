@@ -47,6 +47,12 @@ u8 connect_init(Handle *out, u8 backend)
 {
     if (!out) return 1;
 
+    if (!hm.isNotValid(*out))
+    {
+        // valid handle
+        return 1;
+    }
+
     if (backend > 1) return 1;
 
     Type type;
@@ -88,6 +94,15 @@ u8 connect_init(Handle *out, u8 backend)
     return 0;
 }
 
+u8 connect_destroy(Handle h)
+{
+    Parent parent = hm.parent(h);
+    if (parent != Parent::IConnect) return 1;
+
+    hm.remove(h);
+    return 0;
+}
+
 u8 connect_startConnect(Handle h, const char *target, const i32 port)
 {
     IConnect *conn = getConn(h);
@@ -99,7 +114,7 @@ u8 connect_startConnect(Handle h, const char *target, const i32 port)
 void *connect_connectToken(Handle h)
 {
     IConnect *conn = getConn(h);
-    if (!conn) return nullptr;
+    if (!conn) return NULL;
 
     return conn->connectToken();
 }
@@ -116,7 +131,7 @@ u8 connect_targetPath(Handle h, char *buf, size_t *bufSize)
         return 0;
     }
 
-    if (*bufSize < conn->targetPath().size()) return 1;
+    if (*bufSize <= conn->targetPath().size()) return 1;
 
     // *bufSize >= conn->targetPath().size()
     memcpy(buf, conn->targetPath().c_str(),

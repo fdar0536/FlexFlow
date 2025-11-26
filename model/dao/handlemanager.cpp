@@ -54,7 +54,7 @@ bool HandleManager::isNotValid(Handle h)
     return false;
 }
 
-u8 HandleManager::removeOwned(Handle h)
+u8 HandleManager::takeOwned(Handle h)
 {
     if (isNotValid(h))
     {

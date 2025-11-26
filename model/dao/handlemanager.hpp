@@ -101,7 +101,7 @@ public:
 
     bool isNotValid(Handle h);
 
-    u8 removeOwned(Handle h);
+    u8 takeOwned(Handle h);
 
     Parent parent(Handle h);
 

@@ -21,8 +21,8 @@
  * SOFTWARE.
  */
 
-#ifndef _MODEL_DAO_CONNECT_H_
-#define _MODEL_DAO_CONNECT_H_
+#ifndef _MODEL_DAO_QUEUELIST_H_
+#define _MODEL_DAO_QUEUELIST_H_
 
 #include "handle.h"
 
@@ -31,18 +31,23 @@ extern "C"
 {
 #endif
 
-u8 connect_init(Handle *out, u8 backend);
+u8 queuelist_init(Handle connect, Handle *out);
 
-u8 connect_destroy(Handle h);
+u8 queuelist_destroy(Handle h);
 
-u8 connect_startConnect(Handle h, const char *target, const i32 port);
+u8 queuelist_createQueue(Handle h, const char *name);
 
-void *connect_onnectToken(Handle h);
+u8 queuelist_listQueue(Handle h, char **out, size_t *outSize);
 
-u8 connect_targetPath(Handle h, char *buf, size_t *bufSize);
+u8 queuelist_deleteQueue(Handle h, const char *name);
+
+u8 queuelist_renameQueue(Handle h, const char *oldName,
+                       const char *newName);
+
+u8 queuelist_getQueue(Handle h, const char *name, Handle *out);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _MODEL_DAO_CONNECT_H_
+#endif // _MODEL_DAO_QUEUELIST_H_
