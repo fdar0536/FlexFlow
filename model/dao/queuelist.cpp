@@ -199,7 +199,7 @@ u8 queuelist_getQueue(Handle h, const char *name, Handle *out)
         return 1;
     }
 
-    IQueue queue = list->getQueue(name);
+    IQueue *queue = list->getQueue(name);
     if (!queue) return 1;
 
     Type parentType(hm.type(h));

@@ -116,7 +116,7 @@ public:
         }
 
         const Entry &e = m_entries.at(h.index);
-        return e.ptr;
+        return static_cast<T *>(e.ptr);
     }
 
     void remove(Handle h);

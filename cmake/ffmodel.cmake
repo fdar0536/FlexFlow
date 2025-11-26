@@ -75,7 +75,7 @@ if (ENABLE_C_MODEL)
         model/dao/handlemanager.cpp
         model/dao/handlemanager.hpp
         model/dao/queuelist.cpp
-        model/dao/queuelist.hpp
+        model/dao/queuelist.h
     )
 endif(ENABLE_C_MODEL)
 
