@@ -24,18 +24,80 @@
 #ifndef _MODEL_DAO_HANDLEMANAGER_HPP_
 #define _MODEL_DAO_HANDLEMANAGER_HPP_
 
+#include <vector>
+
+#include "handle.h"
+
 namespace Model
 {
 
 namespace DAO
 {
 
-typedef enum class HandleType
+typedef struct Entry
 {
-    connect,
-    queueList,
-    queue
-} HandleType;
+    void *ptr = nullptr;
+    u16 generation = 0;
+    void (*deleter)(void *) = nullptr;
+    bool alive = false;
+} Entry;
+
+class HandleManager
+{
+
+public:
+
+    ~HandleManager();
+
+    template<class T>
+    u8 create(Handle &h, T *obj)
+    {
+        if (!obj) return 1;
+
+        u32 idx;
+        if (!m_free_indices.empty())
+        {
+            idx = m_free_indices.back();
+            m_free_indices.pop_back();
+        }
+        else
+        {
+            idx = (u32)m_entries.size();
+            m_entries.emplace_back();
+        }
+
+        h.index      = idx;
+        h.generation = m_entries[idx].generation;
+
+        m_entries[idx].ptr   = obj;
+        m_entries[idx].alive = true;
+        m_entries[idx].deleter = [](void* p) { delete static_cast<T *>(p); };
+
+        return 0;
+    }
+
+    template<class T>
+    T *get(Handle h)
+    {
+        if (h.index >= m_entries.size()) return nullptr;
+
+        const Entry &e = m_entries[h.index];
+
+        if (!e.alive || e.generation != h.generation)
+            return nullptr;
+
+        return e.ptr;
+    }
+
+    void remove(Handle h);
+
+private:
+
+    std::vector<Entry> m_entries;
+
+    std::vector<u32> m_free_indices;
+
+}; // class HandleManager
 
 } // namespace DAO
 

@@ -21,7 +21,7 @@ set(MODEL_SRC
     model/utils.hpp
 
     # global
-    controller/global/defines.hpp
+    controller/global/defines.h
     controller/global/global.cpp
     controller/global/global.hpp
 
@@ -67,7 +67,9 @@ endif (WIN32)
 
 if (ENABLE_C_MODEL)
     list(APPEND MODEL_SRC
-
+        model/dao/handle.h
+        model/dao/handlemanager.cpp
+        model/dao/handlemanager.hpp
     )
 endif(ENABLE_C_MODEL)
 

@@ -25,7 +25,7 @@
 #include "model/dao/grpcconnect.hpp"
 #include "spdlog/spdlog.h"
 
-#include "controller/global/defines.hpp"
+#include "controller/global/defines.h"
 #include "grpcutils.hpp"
 #include "grpcqueue.hpp"
 

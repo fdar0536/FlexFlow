@@ -27,7 +27,7 @@
 #include <inttypes.h>
 
 #include "config.hpp"
-#include "controller/global/defines.hpp"
+#include "controller/global/defines.h"
 
 #include "controller/grpcserver/server.hpp"
 #include "model/dao/sqlitequeuelist.hpp"

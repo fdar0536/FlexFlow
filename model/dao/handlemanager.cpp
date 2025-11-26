@@ -1,6 +1,6 @@
 /*
  * Simple Task Queue
- * Copyright (c) 2023-2024 fdar0536
+ * Copyright (c) 2025-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,25 +21,41 @@
  * SOFTWARE.
  */
 
-#ifndef _CONTROLLER_GLOBAL_DEFINES_HPP_
-#define _CONTROLLER_GLOBAL_DEFINES_HPP_
+#include "handlemanager.hpp"
 
-#include <cinttypes>
+namespace Model
+{
 
-#include "config.h"
+namespace DAO
+{
 
-#define UNUSED(x) static_cast<void>(x)
+HandleManager::~HandleManager()
+{
+    for (size_t i = 0; i < m_entries.size(); ++i)
+    {
+        Entry &e = m_entries.at(i);
+        if (e.ptr) e.deleter(e.ptr);
+    } // for (size_t i = 0; i < m_entries.size(); ++i)
+}
 
-typedef uint_fast8_t  u8;
-typedef uint_fast16_t u16;
-typedef uint_fast32_t u32;
-typedef uint_fast64_t u64;
+void HandleManager::remove(Handle h)
+{
+    if (h.index >= m_entries.size()) return;
 
-typedef int_fast8_t  i8;
-typedef int_fast16_t i16;
-typedef int_fast32_t i32;
-typedef int_fast64_t i64;
+    Entry &e = m_entries[h.index];
+    if (!e.alive || e.generation != h.generation) return;
 
-typedef float  f32;
-typedef double f64;
-#endif // _CONTROLLER_GLOBAL_DEFINES_HPP_
+    e.deleter(e.ptr);
+    e.ptr   = nullptr;
+    e.alive = false;
+    e.generation++;
+
+    // to avoid overflow
+    if (e.generation == 0) e.generation = 1;
+
+    m_free_indices.push_back(h.index);
+}
+
+} // namespace DAO
+
+} // namespace Model

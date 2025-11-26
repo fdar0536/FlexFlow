@@ -30,7 +30,7 @@
 
 #include "cxxopts.hpp"
 
-#include "controller/global/defines.hpp"
+#include "controller/global/defines.h"
 #include "model/dao/iqueuelist.hpp"
 
 namespace Controller

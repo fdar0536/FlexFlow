@@ -23,7 +23,7 @@
 
 #include "spdlog/spdlog.h"
 
-#include "controller/global/defines.hpp"
+#include "controller/global/defines.h"
 #include "model/errmsg.hpp"
 #include "init.hpp"
 

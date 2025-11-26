@@ -30,7 +30,7 @@
 
 #include "grpcpp/server.h"
 
-#include "controller/global/defines.hpp"
+#include "controller/global/defines.h"
 #include "accessimpl.hpp"
 #include "queueimpl.hpp"
 #include "queuelistimpl.hpp"

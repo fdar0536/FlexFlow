@@ -26,7 +26,7 @@
 
 #include "cxxopts.hpp"
 
-#include "controller/global/defines.hpp"
+#include "controller/global/defines.h"
 
 namespace Controller
 {

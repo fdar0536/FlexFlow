@@ -28,7 +28,7 @@
 
 #include "spdlog/common.h"
 
-#include "controller/global/defines.hpp"
+#include "controller/global/defines.h"
 
 namespace Controller
 {

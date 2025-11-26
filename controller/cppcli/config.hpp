@@ -28,7 +28,7 @@
 
 #include "spdlog/common.h"
 
-#include "controller/global/defines.hpp"
+#include "controller/global/defines.h"
 
 #define BACKEND_GRPC   0
 #define BACKEND_SQLITE 1

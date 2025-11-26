@@ -1,6 +1,6 @@
 /*
  * Simple Task Queue
- * Copyright (c) 2024 fdar0536
+ * Copyright (c) 2023-2024 fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,52 +21,25 @@
  * SOFTWARE.
  */
 
-#ifndef _CONTROLLER_CLI_ARGS_HPP_
-#define _CONTROLLER_CLI_ARGS_HPP_
+#ifndef _CONTROLLER_GLOBAL_DEFINES_H_
+#define _CONTROLLER_GLOBAL_DEFINES_H_
 
-#include <vector>
-#include <string>
+#include <inttypes.h>
 
-#include "controller/global/defines.h"
+#include "config.h"
 
-namespace Controller
-{
+#define UNUSED(x) (void)x
 
-namespace CppCLI
-{
+typedef uint_fast8_t  u8;
+typedef uint_fast16_t u16;
+typedef uint_fast32_t u32;
+typedef uint_fast64_t u64;
 
-class Args
-{
-public:
+typedef int_fast8_t  i8;
+typedef int_fast16_t i16;
+typedef int_fast32_t i32;
+typedef int_fast64_t i64;
 
-    Args();
-
-    ~Args();
-
-    u8 init();
-
-    char **argv() const;
-
-    i32 argc() const;
-
-    std::vector<std::string> args() const;
-
-    u8 getArgs(const std::string &);
-
-private:
-
-    std::vector<std::string> m_args;
-
-    char **m_argv;
-
-    size_t m_argvLen;
-
-    void cleanArgv();
-
-}; // end class Args
-
-} // end namespace CppCLI
-
-} // end namespace Controller
-
-#endif // _CONTROLLER_CLI_ARGS_HPP_
+typedef float  f32;
+typedef double f64;
+#endif // _CONTROLLER_GLOBAL_DEFINES_H_
