@@ -46,6 +46,8 @@ u8 queuelist_renameQueue(Handle h, const char *oldName,
 
 u8 queuelist_getQueue(Handle h, const char *name, Handle *out);
 
+u8 queuelist_returnQueue(Handle h, Handle queue);
+
 #ifdef __cplusplus
 }
 #endif

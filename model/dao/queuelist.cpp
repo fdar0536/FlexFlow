@@ -218,20 +218,42 @@ u8 queuelist_getQueue(Handle h, const char *name, Handle *out)
     }
     default:
     {
+        list->returnQueue(queue);
         return 1;
     }
     }; // switch (parentType)
 
     if (hm.create(out, queue, Parent::IQueue, type))
     {
-        if (parentType == Type::GRPCQueueList)
-        {
-            delete queue;
-        }
-
+        list->returnQueue(queue);
         return 1;
     }
 
+    hm.takeOwned(*out);
+    return 0;
+}
+
+u8 queuelist_returnQueue(Handle h, Handle queue)
+{
+    IQueueList *list(getList(h));
+    if (!list)
+    {
+        return 1;
+    }
+
+    if (hm.parent(queue) != Parent::IQueue)
+    {
+        return 1;
+    }
+
+    IQueue *ptr = hm.get<IQueue>(queue);
+    if (!ptr)
+    {
+        return 1;
+    }
+
+    hm.remove(queue);
+    list->returnQueue(ptr);
     return 0;
 }
 
