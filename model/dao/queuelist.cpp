@@ -126,43 +126,53 @@ u8 queuelist_createQueue(Handle h, const char *name)
     return list->createQueue(name);
 }
 
-u8 queuelist_listQueue(Handle h, char **out, size_t *outSize)
+u8 queuelist_listQueue(Handle h, char ***out, size_t *outSize)
 {
-    IQueueList *list(getList(h));
-    if (!list)
+    if (!out || !outSize)
     {
         return 1;
     }
 
-    if (!outSize) return 1;
+    IQueueList *list(getList(h));
+    if (!list)
+    {
+        return NULL;
+    }
 
     std::vector<std::string> output;
     if (list->listQueue(output))
     {
-        return 1;
+        return NULL;
+    }
+
+    if (!output.size())
+    {
+        *outSize = 0;
+        return 0;
     }
 
     *outSize = output.size();
-    out = (char **)malloc(output.size() * sizeof(char *));
-    if (!out) return 1;
+    *out = (char **)malloc((*outSize) * sizeof(char *));
+    if (!out) return NULL;
 
     for (size_t i = 0; i < output.size(); ++i) {
         const char *str = output.at(i).c_str();
 
-        out[i] = (char *)malloc((strlen(str) + 1) * sizeof(char));
+        *out[i] = (char *)calloc((strlen(str) + 1), sizeof(char));
         if (!out[i])
         {
-            for (size_t j = 0; i <= i; ++j)
+            for (size_t j = 1; j <= i; ++j)
             {
                 free(out[j]);
             }
 
+            if (i != 0) free(out[0]);
+
             free(out);
-            out = NULL;
-            return 1;
+            return NULL;
         }
 
-        strcpy(out[i], str);
+        snprintf(*out[i], strlen(str) + 1, "%s", str);
     }
 
     return 0;
@@ -257,4 +267,4 @@ u8 queuelist_returnQueue(Handle h, Handle queue)
     return 0;
 }
 
-}
+} // extern "C"

@@ -139,4 +139,4 @@ u8 connect_targetPath(Handle h, char *buf, size_t *bufSize)
     return 0;
 }
 
-}
+} // extern "C"

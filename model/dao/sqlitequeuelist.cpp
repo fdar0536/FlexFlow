@@ -167,12 +167,6 @@ u8 SQLiteQueueList::listQueue(std::vector<std::string> &out)
         out.push_back(it->first);
     }
 
-    if (!out.size())
-    {
-        spdlog::error("{}:{} queue list is empty", __FILE__, __LINE__);
-        return ErrCode_NOT_FOUND;
-    }
-
     return ErrCode_OK;
 }
 
