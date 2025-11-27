@@ -55,6 +55,8 @@ public:
 
     virtual IQueue *getQueue(const std::string &name) = 0;
 
+    virtual void returnQueue(IQueue *) = 0;
+
 protected:
 
     IConnect *m_conn;

@@ -350,7 +350,7 @@ i32 QueueList::rename()
 i32 QueueList::enter()
 {
     auto ptr = m_queueList->getQueue(Global::args.args().at(0));
-    if (ptr == nullptr)
+    if (!ptr)
     {
         fmt::println("Fail to enter the queue");
         return 1;
@@ -363,7 +363,9 @@ i32 QueueList::enter()
         return 1;
     }
 
-    return queue.run(m_prefix + "/" + Global::args.args().at(0) + "> ", ptr);
+    i32 ret = queue.run(m_prefix + "/" + Global::args.args().at(0) + "> ", ptr);
+    m_queueList->returnQueue(ptr);
+    return ret;
 }
 
 } // end namespace Cpp

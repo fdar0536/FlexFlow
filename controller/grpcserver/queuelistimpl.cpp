@@ -185,6 +185,7 @@ QueueListImpl::GetQueue(grpc::ServerContext *ctx,
                             "No such queue");
     }
 
+    sqliteQueueList->returnQueue(queue);
     return grpc::Status::OK;
 }
 

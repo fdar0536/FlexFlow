@@ -48,7 +48,7 @@ QueueImpl::ListPending(grpc::ServerContext *ctx,
     }
 
     auto queue = sqliteQueueList->getQueue(req->name());
-    if (queue == nullptr)
+    if (!queue)
     {
         spdlog::debug("{}:{} trace", __FILE__, __LINE__);
         return grpc::Status(grpc::StatusCode::NOT_FOUND, "Fail to get queue");
@@ -59,6 +59,7 @@ QueueImpl::ListPending(grpc::ServerContext *ctx,
     if (code)
     {
         spdlog::debug("{}:{} trace", __FILE__, __LINE__);
+        sqliteQueueList->returnQueue(queue);
         return Model::ErrMsg::toGRPCStatus(code, "Fail to list pending");
     }
 
@@ -69,6 +70,7 @@ QueueImpl::ListPending(grpc::ServerContext *ctx,
         writer->Write(res);
     }
 
+    sqliteQueueList->returnQueue(queue);
     return grpc::Status::OK;
 }
 
@@ -85,7 +87,7 @@ QueueImpl::ListFinished(grpc::ServerContext *ctx,
     }
 
     auto queue = sqliteQueueList->getQueue(req->name());
-    if (queue == nullptr)
+    if (!queue)
     {
         spdlog::debug("{}:{} trace", __FILE__, __LINE__);
         return grpc::Status(grpc::StatusCode::NOT_FOUND, "Fail to get queue");
@@ -96,6 +98,7 @@ QueueImpl::ListFinished(grpc::ServerContext *ctx,
     if (code)
     {
         spdlog::debug("{}:{} trace", __FILE__, __LINE__);
+        sqliteQueueList->returnQueue(queue);
         return Model::ErrMsg::toGRPCStatus(code, "Fail to list finished");
     }
 
@@ -106,6 +109,7 @@ QueueImpl::ListFinished(grpc::ServerContext *ctx,
         writer->Write(res);
     }
 
+    sqliteQueueList->returnQueue(queue);
     return grpc::Status::OK;
 }
 
@@ -142,7 +146,7 @@ QueueImpl::PendingDetails(grpc::ServerContext *ctx,
     }
 
     auto queue = sqliteQueueList->getQueue(req->name());
-    if (queue == nullptr)
+    if (!queue)
     {
         spdlog::debug("{}:{} trace", __FILE__, __LINE__);
         return grpc::Status(grpc::StatusCode::NOT_FOUND, "Fail to get queue");
@@ -153,10 +157,12 @@ QueueImpl::PendingDetails(grpc::ServerContext *ctx,
     if (code)
     {
         spdlog::debug("{}:{} trace", __FILE__, __LINE__);
+        sqliteQueueList->returnQueue(queue);
         return Model::ErrMsg::toGRPCStatus(code, "Fail to get pending detailes");
     }
 
     buildTaskDetailsRes(out, res);
+    sqliteQueueList->returnQueue(queue);
     return grpc::Status::OK;
 }
 
@@ -173,7 +179,7 @@ QueueImpl::FinishedDetails(grpc::ServerContext *ctx,
     }
 
     auto queue = sqliteQueueList->getQueue(req->name());
-    if (queue == nullptr)
+    if (!queue)
     {
         spdlog::debug("{}:{} trace", __FILE__, __LINE__);
         return grpc::Status(grpc::StatusCode::NOT_FOUND, "Fail to get queue");
@@ -184,10 +190,12 @@ QueueImpl::FinishedDetails(grpc::ServerContext *ctx,
     if (code)
     {
         spdlog::debug("{}:{} trace", __FILE__, __LINE__);
+        sqliteQueueList->returnQueue(queue);
         return Model::ErrMsg::toGRPCStatus(code, "Fail to get pending detailes");
     }
 
     buildTaskDetailsRes(out, res);
+    sqliteQueueList->returnQueue(queue);
     return grpc::Status::OK;
 }
 
@@ -205,7 +213,7 @@ QueueImpl::ClearPending(grpc::ServerContext *ctx,
     }
 
     auto queue = sqliteQueueList->getQueue(req->name());
-    if (queue == nullptr)
+    if (!queue)
     {
         spdlog::debug("{}:{} trace", __FILE__, __LINE__);
         return grpc::Status(grpc::StatusCode::NOT_FOUND, "Fail to get queue");
@@ -215,9 +223,11 @@ QueueImpl::ClearPending(grpc::ServerContext *ctx,
     if (code)
     {
         spdlog::debug("{}:{} trace", __FILE__, __LINE__);
+        sqliteQueueList->returnQueue(queue);
         return Model::ErrMsg::toGRPCStatus(code, "Fail to clean pending");
     }
 
+    sqliteQueueList->returnQueue(queue);
     return grpc::Status::OK;
 }
 
@@ -235,7 +245,7 @@ QueueImpl::ClearFinished(grpc::ServerContext *ctx,
     }
 
     auto queue = sqliteQueueList->getQueue(req->name());
-    if (queue == nullptr)
+    if (!queue)
     {
         spdlog::debug("{}:{} trace", __FILE__, __LINE__);
         return grpc::Status(grpc::StatusCode::NOT_FOUND, "Fail to get queue");
@@ -245,9 +255,11 @@ QueueImpl::ClearFinished(grpc::ServerContext *ctx,
     if (code)
     {
         spdlog::debug("{}:{} trace", __FILE__, __LINE__);
+        sqliteQueueList->returnQueue(queue);
         return Model::ErrMsg::toGRPCStatus(code, "Fail to clean finished");
     }
 
+    sqliteQueueList->returnQueue(queue);
     return grpc::Status::OK;
 }
 
@@ -264,7 +276,7 @@ QueueImpl::CurrentTask(grpc::ServerContext *ctx,
     }
 
     auto queue = sqliteQueueList->getQueue(req->name());
-    if (queue == nullptr)
+    if (!queue)
     {
         spdlog::debug("{}:{} trace", __FILE__, __LINE__);
         return grpc::Status(grpc::StatusCode::NOT_FOUND, "Fail to get queue");
@@ -275,10 +287,12 @@ QueueImpl::CurrentTask(grpc::ServerContext *ctx,
     if (code)
     {
         spdlog::debug("{}:{} trace", __FILE__, __LINE__);
+        sqliteQueueList->returnQueue(queue);
         return Model::ErrMsg::toGRPCStatus(code, "Fail to get current task");
     }
 
     buildTaskDetailsRes(out, res);
+    sqliteQueueList->returnQueue(queue);
     return grpc::Status::OK;
 }
 
@@ -295,7 +309,7 @@ QueueImpl::AddTask(grpc::ServerContext *ctx,
     }
 
     auto queue = sqliteQueueList->getQueue(req->name());
-    if (queue == nullptr)
+    if (!queue)
     {
         spdlog::debug("{}:{} trace", __FILE__, __LINE__);
         return grpc::Status(grpc::StatusCode::NOT_FOUND, "Fail to get queue");
@@ -314,10 +328,12 @@ QueueImpl::AddTask(grpc::ServerContext *ctx,
     if (code)
     {
         spdlog::debug("{}:{} trace", __FILE__, __LINE__);
+        sqliteQueueList->returnQueue(queue);
         return Model::ErrMsg::toGRPCStatus(code, "Fail to add task");
     }
 
     res->set_id(in.ID);
+    sqliteQueueList->returnQueue(queue);
     return grpc::Status::OK;
 }
 
@@ -335,7 +351,7 @@ QueueImpl::RemoveTask(grpc::ServerContext *ctx,
     }
 
     auto queue = sqliteQueueList->getQueue(req->name());
-    if (queue == nullptr)
+    if (!queue)
     {
         spdlog::debug("{}:{} trace", __FILE__, __LINE__);
         return grpc::Status(grpc::StatusCode::NOT_FOUND, "Fail to get queue");
@@ -345,9 +361,11 @@ QueueImpl::RemoveTask(grpc::ServerContext *ctx,
     if (code)
     {
         spdlog::debug("{}:{} trace", __FILE__, __LINE__);
+        sqliteQueueList->returnQueue(queue);
         return Model::ErrMsg::toGRPCStatus(code, "Fail to remove task");
     }
 
+    sqliteQueueList->returnQueue(queue);
     return grpc::Status::OK;
 }
 
@@ -364,13 +382,14 @@ QueueImpl::IsRunning(grpc::ServerContext *ctx,
     }
 
     auto queue = sqliteQueueList->getQueue(req->name());
-    if (queue == nullptr)
+    if (!queue)
     {
         spdlog::debug("{}:{} trace", __FILE__, __LINE__);
         return grpc::Status(grpc::StatusCode::NOT_FOUND, "Fail to get queue");
     }
 
     res->set_isrunning(queue->isRunning());
+    sqliteQueueList->returnQueue(queue);
     return grpc::Status::OK;
 }
 
@@ -387,7 +406,7 @@ QueueImpl::ReadCurrentOutput(grpc::ServerContext *ctx,
     }
 
     auto queue = sqliteQueueList->getQueue(req->name());
-    if (queue == nullptr)
+    if (!queue)
     {
         spdlog::debug("{}:{} trace", __FILE__, __LINE__);
         return grpc::Status(grpc::StatusCode::NOT_FOUND, "Fail to get queue");
@@ -403,6 +422,7 @@ QueueImpl::ReadCurrentOutput(grpc::ServerContext *ctx,
         writer->Write(res);
     }
 
+    sqliteQueueList->returnQueue(queue);
     return grpc::Status::OK;
 }
 
@@ -420,7 +440,7 @@ QueueImpl::Start(grpc::ServerContext *ctx,
     }
 
     auto queue = sqliteQueueList->getQueue(req->name());
-    if (queue == nullptr)
+    if (!queue)
     {
         spdlog::debug("{}:{} trace", __FILE__, __LINE__);
         return grpc::Status(grpc::StatusCode::NOT_FOUND, "Fail to get queue");
@@ -430,9 +450,11 @@ QueueImpl::Start(grpc::ServerContext *ctx,
     if (code)
     {
         spdlog::debug("{}:{} trace", __FILE__, __LINE__);
+        sqliteQueueList->returnQueue(queue);
         return Model::ErrMsg::toGRPCStatus(code, "Fail to start queue");
     }
 
+    sqliteQueueList->returnQueue(queue);
     return grpc::Status::OK;
 }
 
@@ -450,13 +472,14 @@ QueueImpl::Stop(grpc::ServerContext *ctx,
     }
 
     auto queue = sqliteQueueList->getQueue(req->name());
-    if (queue == nullptr)
+    if (!queue)
     {
         spdlog::debug("{}:{} trace", __FILE__, __LINE__);
         return grpc::Status(grpc::StatusCode::NOT_FOUND, "Fail to get queue");
     }
 
     queue->stop();
+    sqliteQueueList->returnQueue(queue);
     return grpc::Status::OK;
 }
 

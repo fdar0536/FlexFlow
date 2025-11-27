@@ -55,6 +55,8 @@ public:
 
     IQueue *getQueue(const std::string &name) override;
 
+    void returnQueue(IQueue *) override;
+
 private:
 
     std::unordered_map<std::string,

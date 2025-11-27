@@ -203,6 +203,14 @@ IQueue *GRPCQueueList::getQueue(const std::string &name)
     return nullptr;
 }
 
+void GRPCQueueList::returnQueue(IQueue *queue)
+{
+    if (!queue) return;
+
+    delete queue;
+    queue = nullptr;
+}
+
 } // end namespace DAO
 
 } // end namespace Model

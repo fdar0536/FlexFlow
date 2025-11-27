@@ -56,6 +56,8 @@ public:
 
     IQueue *getQueue(const std::string &name) override;
 
+    void returnQueue(IQueue *) override;
+
 private:
 
     std::unique_ptr<ff::QueueList::Stub> m_stub;

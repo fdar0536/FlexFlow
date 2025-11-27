@@ -214,6 +214,9 @@ IQueue *SQLiteQueueList::getQueue(const std::string &name)
     return it->second.get();
 }
 
+void SQLiteQueueList::returnQueue(IQueue *)
+{}
+
 } // end namespace DAO
 
 } // end namespace Model
