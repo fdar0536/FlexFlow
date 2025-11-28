@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.20)
 project(FlexFlow LANGUAGES C CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 if (UNIX)
     add_compile_options(-Wall -Werror -Wextra -fvisibility=hidden)
@@ -25,18 +29,13 @@ else () # Windows
     endif (MINGW)
 endif (UNIX) # end if (UNIX)
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
+# options
+option(ENABLE_SERVER "enable server" on)
+option(ENABLE_C_MODEL "enable C model for ffi" on)
 
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# variables
 set(FF_VERSION r12)
 set(FF_NAME FlexFlow)
-
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 if(NOT DEFINED CLIENT_TIMEOUT)
     set(CLIENT_TIMEOUT 31)
@@ -46,20 +45,13 @@ if((CLIENT_TIMEOUT GREATER 61) OR (CLIENT_TIMEOUT LESS 1))
     set(CLIENT_TIMEOUT 31)
 endif((CLIENT_TIMEOUT GREATER 61) OR (CLIENT_TIMEOUT LESS 1))
 
-option(ENABLE_CPP_CLI "enable CLI for debug CPP model" on)
-option(ENABLE_C_MODEL "enable C model for ffi" on)
-if (ENABLE_C_MODEL)
-    option(ENABLE_C_CLI "enable CLI for debug C model" on)
-endif(ENABLE_C_MODEL)
-option(ENABLE_SERVER "enable server" on)
-
 include(cmake/getGitInfo.cmake)
 
 set(FF_COMMIT "")
 get_git_hash(FF_COMMIT)
 message(STATUS "Git hash is ${FF_COMMIT}")
 
-# git_BRANCh
+# git_BRANCH
 set(FF_BRANCH "")
 get_git_branch(FF_BRANCH)
 message(STATUS "Git branch is ${FF_BRANCH}")
@@ -90,10 +82,6 @@ find_package(cxxopts REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(SQLite3 REQUIRED)
 find_package(yaml-cpp REQUIRED)
-
-if (ENABLE_GUI)
-    find_package(Qt6 6.5 COMPONENTS Widgets REQUIRED)
-endif (ENABLE_GUI)
 
 set(PROTOC_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/protos)
 include(cmake/protoc.cmake)
