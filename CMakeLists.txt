@@ -111,4 +111,3 @@ target_link_libraries(grpc_common
 
 include(cmake/ffmodel.cmake)
 include(cmake/flexflowserver.cmake)
-include(cmake/flexflowcppcli.cmake)
