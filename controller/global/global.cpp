@@ -52,7 +52,7 @@ static UINT consoleCP(0);
 static UINT consoleOutputCP(0);
 #endif
 
-u8 consoleInit()
+FF_MODEL_API u8 consoleInit()
 {
     fflush(stdout);
 
@@ -110,7 +110,7 @@ u8 consoleInit()
     return 0;
 }
 
-void consoleFin()
+FF_MODEL_API void consoleFin()
 {
 #ifdef _WIN32
     SetConsoleCP(consoleCP);
@@ -118,7 +118,7 @@ void consoleFin()
 #endif
 }
 
-bool isAdmin()
+FF_MODEL_API bool isAdmin()
 {
 #ifdef _WIN32
     PSID sid;
@@ -152,7 +152,7 @@ bool isAdmin()
 #endif
 }
 
-u8 spdlogInit(const std::string &path)
+FF_MODEL_API u8 spdlogInit(const std::string &path)
 {
     if (path.empty())
     {
@@ -175,7 +175,7 @@ u8 spdlogInit(const std::string &path)
     return 0;
 }
 
-u8 sqliteInit(Model::DAO::IQueueList *out, const std::string &target)
+FF_MODEL_API u8 sqliteInit(Model::DAO::IQueueList *out, const std::string &target)
 {
     Model::DAO::SQLiteConnect *conn(nullptr);
     try
@@ -223,7 +223,7 @@ u8 sqliteInit(Model::DAO::IQueueList *out, const std::string &target)
     return 0;
 }
 
-u8 grpcInit(Model::DAO::IQueueList *out, const std::string &target, const i32 port)
+FF_MODEL_API u8 grpcInit(Model::DAO::IQueueList *out, const std::string &target, const i32 port)
 {
     Model::DAO::GRPCConnect *conn = new (std::nothrow) Model::DAO::GRPCConnect;
     if (!conn)

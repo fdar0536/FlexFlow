@@ -34,7 +34,7 @@ namespace Model
 namespace DAO
 {
 
-class GRPCToken
+class FF_MODEL_API GRPCToken
 {
 public:
 
@@ -45,7 +45,7 @@ public:
     std::shared_ptr<grpc::ChannelInterface> channel;
 };
 
-class GRPCConnect : public IConnect
+class FF_MODEL_API GRPCConnect : public IConnect
 {
 
 public:

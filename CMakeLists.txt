@@ -4,7 +4,7 @@ project(FlexFlow LANGUAGES C CXX)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if (UNIX)
-    add_compile_options(-Wall -Werror -Wextra)
+    add_compile_options(-Wall -Werror -Wextra -fvisibility=hidden)
 
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         add_compile_options(-Weffc++)
@@ -13,7 +13,7 @@ if (UNIX)
     add_link_options(-Wl,--unresolved-symbols=report-all)
 else () # Windows
     if (MINGW)
-        add_compile_options(-Wall -Werror -Wextra)
+        add_compile_options(-Wall -Werror -Wextra -fvisibility=hidden)
 
         if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
             add_compile_options(-Weffc++)

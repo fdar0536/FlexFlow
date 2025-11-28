@@ -36,17 +36,17 @@ namespace Controller
 namespace Global
 {
 
-u8 consoleInit();
+FF_MODEL_API u8 consoleInit();
 
-void consoleFin();
+FF_MODEL_API void consoleFin();
 
-bool isAdmin();
+FF_MODEL_API bool isAdmin();
 
-u8 spdlogInit(const std::string &);
+FF_MODEL_API u8 spdlogInit(const std::string &);
 
-u8 sqliteInit(Model::DAO::IQueueList *out, const std::string &target);
+FF_MODEL_API u8 sqliteInit(Model::DAO::IQueueList *out, const std::string &target);
 
-u8 grpcInit(Model::DAO::IQueueList *out, const std::string &target, const i32 port);
+FF_MODEL_API u8 grpcInit(Model::DAO::IQueueList *out, const std::string &target, const i32 port);
 
 } // end namesapce Global
 

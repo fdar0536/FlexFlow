@@ -81,7 +81,7 @@ if (ENABLE_C_MODEL)
     )
 endif(ENABLE_C_MODEL)
 
-add_library(ffmodel STATIC
+add_library(ffmodel SHARED
     ${MODEL_SRC}
 )
 

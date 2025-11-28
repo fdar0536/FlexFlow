@@ -34,7 +34,7 @@ namespace Model
 namespace DAO
 {
 
-class SQLiteQueueList: public IQueueList
+class FF_MODEL_API SQLiteQueueList: public IQueueList
 {
 public:
 

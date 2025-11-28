@@ -37,13 +37,13 @@ namespace DAO
 namespace DirUtils
 {
 
-u8 verifyDir(const std::string &path);
+FF_MODEL_API u8 verifyDir(const std::string &path);
 
-u8 verifyFile(const std::string &path);
+FF_MODEL_API u8 verifyFile(const std::string &path);
 
-void deleteDirectoryContents(const std::string& dir_path);
+FF_MODEL_API void deleteDirectoryContents(const std::string& dir_path);
 
-void convertPath(std::string &toConvert);
+FF_MODEL_API void convertPath(std::string &toConvert);
 
 } // end namespace DirUtils
 

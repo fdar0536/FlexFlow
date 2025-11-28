@@ -34,7 +34,7 @@ namespace Model
 namespace DAO
 {
 
-class GRPCQueueList : public IQueueList
+class FF_MODEL_API GRPCQueueList : public IQueueList
 {
 
 public:

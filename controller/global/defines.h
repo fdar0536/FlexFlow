@@ -45,4 +45,15 @@ typedef int_fast64_t i64;
 
 typedef float  f32;
 typedef double f64;
+
+#if defined _WIN32 || defined __CYGWIN__
+#ifdef __MINGW32__
+#define FF_MODEL_API __attribute__((dllexport))
+#else
+#define FF_MODEL_API __declspec(dllexport)
+#endif // __MINGW32__
+#else
+#define FF_MODEL_API __attribute__((visibility("default")))
+#endif
+
 #endif // _CONTROLLER_GLOBAL_DEFINES_H_

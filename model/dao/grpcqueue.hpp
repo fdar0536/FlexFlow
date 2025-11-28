@@ -35,7 +35,7 @@ namespace Model
 namespace DAO
 {
 
-class GRPCQueue : public IQueue
+class FF_MODEL_API GRPCQueue : public IQueue
 {
 
 public:

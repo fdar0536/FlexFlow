@@ -36,7 +36,7 @@ namespace DAO
 namespace DirUtils
 {
 
-u8 verifyDir(const std::string &in)
+FF_MODEL_API u8 verifyDir(const std::string &in)
 {
     if (in.empty())
     {
@@ -67,7 +67,7 @@ u8 verifyDir(const std::string &in)
     return 0;
 }
 
-u8 verifyFile(const std::string &in)
+FF_MODEL_API u8 verifyFile(const std::string &in)
 {
     if (in.empty())
     {
@@ -92,14 +92,14 @@ u8 verifyFile(const std::string &in)
     return 0;
 }
 
-void deleteDirectoryContents(const std::string& dir_path)
+FF_MODEL_API void deleteDirectoryContents(const std::string& dir_path)
 {
     std::error_code ec;
     for (const auto& entry : std::filesystem::directory_iterator(dir_path))
         std::filesystem::remove_all(entry.path(), ec);
 }
 
-void convertPath(std::string &toConvert)
+FF_MODEL_API void convertPath(std::string &toConvert)
 {
 #ifdef _WIN32
     std::string from = "\\";

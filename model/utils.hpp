@@ -34,9 +34,11 @@ namespace Model
 namespace Utils
 {
 
-void writeLastError(const char *file, int line);
+FF_MODEL_API void writeLastError(const char *file, int line);
 
-u8 verifyIP(const std::string &);
+FF_MODEL_API void writeConsole(const std::string &in);
+
+FF_MODEL_API u8 verifyIP(const std::string &);
 
 } // end namespace Utils
 

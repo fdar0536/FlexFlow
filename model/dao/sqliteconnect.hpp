@@ -36,7 +36,7 @@ namespace Model
 namespace DAO
 {
 
-class SQLiteToken
+class FF_MODEL_API SQLiteToken
 {
 public:
 
@@ -50,7 +50,7 @@ public:
 
 }; // end class SQLiteToken
 
-class SQLiteConnect: public IConnect
+class FF_MODEL_API SQLiteConnect: public IConnect
 {
 public:
 

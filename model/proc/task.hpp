@@ -35,7 +35,7 @@ namespace Model
 namespace Proc
 {
 
-class Task
+class FF_MODEL_API Task
 {
 public:
 

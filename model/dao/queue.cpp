@@ -98,7 +98,7 @@ extern "C"
 
 // note that this function only destroy the content of ProcTask
 // does not free ProcTask
-void queue_destroyProcTask(ProcTask *in)
+FF_MODEL_API void queue_destroyProcTask(ProcTask *in)
 {
     if (in->execName)
     {
@@ -127,7 +127,7 @@ void queue_destroyProcTask(ProcTask *in)
     memset(in, 0, sizeof(ProcTask));
 }
 
-u8 queue_listPending(Handle h, int **out, size_t *outSize)
+FF_MODEL_API u8 queue_listPending(Handle h, int **out, size_t *outSize)
 {
     if (!out || !outSize)
     {
@@ -163,7 +163,7 @@ u8 queue_listPending(Handle h, int **out, size_t *outSize)
     return 0;
 }
 
-u8 queue_listFinished(Handle h, int **out, size_t *outSize)
+FF_MODEL_API u8 queue_listFinished(Handle h, int **out, size_t *outSize)
 {
     if (!out || !outSize)
     {
@@ -199,7 +199,7 @@ u8 queue_listFinished(Handle h, int **out, size_t *outSize)
     return 0;
 }
 
-u8 queue_pendingDetails(Handle h, const int id, ProcTask *out)
+FF_MODEL_API u8 queue_pendingDetails(Handle h, const int id, ProcTask *out)
 {
     if (!out) return 1;
     IQueue *queue = getQueue(h);
@@ -222,7 +222,7 @@ u8 queue_pendingDetails(Handle h, const int id, ProcTask *out)
     return 0;
 }
 
-u8 queue_finishedDetails(Handle h, const int id, ProcTask *out)
+FF_MODEL_API u8 queue_finishedDetails(Handle h, const int id, ProcTask *out)
 {
     if (!out) return 1;
     IQueue *queue = getQueue(h);
@@ -245,7 +245,7 @@ u8 queue_finishedDetails(Handle h, const int id, ProcTask *out)
     return 0;
 }
 
-u8 queue_clearPending(Handle h)
+FF_MODEL_API u8 queue_clearPending(Handle h)
 {
     IQueue *queue = getQueue(h);
     if (!queue)
@@ -256,7 +256,7 @@ u8 queue_clearPending(Handle h)
     return queue->clearPending();
 }
 
-u8 queue_clearFinished(Handle h)
+FF_MODEL_API u8 queue_clearFinished(Handle h)
 {
     IQueue *queue = getQueue(h);
     if (!queue)
@@ -267,7 +267,7 @@ u8 queue_clearFinished(Handle h)
     return queue->clearFinished();
 }
 
-u8 queue_currentTask(Handle h, ProcTask *out)
+FF_MODEL_API u8 queue_currentTask(Handle h, ProcTask *out)
 {
     if (!out) return 1;
     IQueue *queue = getQueue(h);
@@ -290,7 +290,7 @@ u8 queue_currentTask(Handle h, ProcTask *out)
     return 0;
 }
 
-u8 queue_addTask(Handle h, const ProcTask *in)
+FF_MODEL_API u8 queue_addTask(Handle h, const ProcTask *in)
 {
     if (!in) return 1;
     IQueue *queue = getQueue(h);
@@ -328,7 +328,7 @@ u8 queue_addTask(Handle h, const ProcTask *in)
     return queue->addTask(task);
 }
 
-u8 queue_removeTask(Handle h, const i32 in)
+FF_MODEL_API u8 queue_removeTask(Handle h, const i32 in)
 {
     IQueue *queue = getQueue(h);
     if (!queue)
@@ -339,7 +339,7 @@ u8 queue_removeTask(Handle h, const i32 in)
     return queue->removeTask(in);
 }
 
-u8 queue_isRunning(Handle h)
+FF_MODEL_API u8 queue_isRunning(Handle h)
 {
     IQueue *queue = getQueue(h);
     if (!queue)
@@ -350,7 +350,7 @@ u8 queue_isRunning(Handle h)
     return static_cast<u8>(queue->isRunning());
 }
 
-u8 queue_readCurrentOutput(Handle h, char ***out, size_t *outSize)
+FF_MODEL_API u8 queue_readCurrentOutput(Handle h, char ***out, size_t *outSize)
 {
     if (!out || !outSize) return 1;
     IQueue *queue = getQueue(h);
@@ -396,7 +396,7 @@ u8 queue_readCurrentOutput(Handle h, char ***out, size_t *outSize)
     return 0;
 }
 
-u8 queue_start(Handle h)
+FF_MODEL_API u8 queue_start(Handle h)
 {
     IQueue *queue = getQueue(h);
     if (!queue)
@@ -407,7 +407,7 @@ u8 queue_start(Handle h)
     return queue->start();
 }
 
-u8 queue_stop(Handle h)
+FF_MODEL_API u8 queue_stop(Handle h)
 {
     IQueue *queue = getQueue(h);
     if (!queue)
