@@ -6,6 +6,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+enable_testing()
 
 if (UNIX)
     add_compile_options(-Wall -Werror -Wextra -fvisibility=hidden)
@@ -82,6 +83,7 @@ find_package(cxxopts REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(SQLite3 REQUIRED)
 find_package(yaml-cpp REQUIRED)
+find_package(GTest REQUIRED)
 
 set(PROTOC_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/protos)
 include(cmake/protoc.cmake)
@@ -110,4 +112,5 @@ target_link_libraries(grpc_common
 )
 
 include(cmake/ffmodel.cmake)
+include(cmake/testffmodel.cmake)
 include(cmake/flexflowserver.cmake)
