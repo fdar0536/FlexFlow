@@ -112,5 +112,5 @@ target_link_libraries(grpc_common
 )
 
 include(cmake/ffmodel.cmake)
-include(cmake/testffmodel.cmake)
+include(cmake/ffmodel_unittest.cmake)
 include(cmake/flexflowserver.cmake)

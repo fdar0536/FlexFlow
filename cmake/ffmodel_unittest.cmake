@@ -1,5 +1,23 @@
+# the program for testing
+
+add_executable(testproc
+    controller/global/defines.h
+    model/test/testproc.cpp
+)
+
+add_dependencies(testproc ffmodel)
+
+target_link_libraries(testproc
+    PRIVATE
+
+    cxxopts::cxxopts
+    ffmodel
+)
+
 set(TEST_FFMODEL_SRC
-    testffmodelmain.cpp
+    ffmodel_unittest_main.cpp
+
+    model/test/grpcmodel_unittest.cpp
 )
 
 add_executable(TestFFModel
