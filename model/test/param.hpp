@@ -1,5 +1,5 @@
 /*
- * Flex Flow
+ * Simple Task Queue
  * Copyright (c) 2025-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,15 +21,48 @@
  * SOFTWARE.
  */
 
-#include "gtest/gtest.h"
+#ifndef _MODEL_TEST_PARAM_HPP_
+#define _MODEL_TEST_PARAM_HPP_
 
-#include "model/dao/grpcqueue.hpp"
-#include "param.hpp"
+#ifdef _WIN32
+#include "model/proc/winproc.hpp"
+#else
+#include "model/proc/linuxproc.hpp"
+#endif
 
-TEST(TestModel, GRPCModel)
+#include "model/dao/iqueuelist.hpp"
+
+namespace Model
 {
-    Model::Test::Param param;
 
-    EXPECT_EQ(param.setupGRPC(), 0);
-    EXPECT_EQ(param.mainTest(), 0);
-}
+namespace Test
+{
+
+class Param
+{
+
+public:
+
+    ~Param();
+
+    u8 setupGRPC();
+
+    u8 mainTest();
+
+private:
+
+    Proc::IProc *m_proc = nullptr;
+
+    Model::DAO::IQueueList *m_list = nullptr;
+
+    void printLog(const char *file, int line, const char *log);
+
+    void cleanUp();
+
+}; // class Param
+
+} // namespace Test
+
+} // namespace Model
+
+#endif // _MODEL_TEST_PARAM_HPP_

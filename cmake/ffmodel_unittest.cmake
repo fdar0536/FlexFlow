@@ -11,11 +11,13 @@ target_link_libraries(testproc
     PRIVATE
 
     cxxopts::cxxopts
-    ffmodel
 )
 
 set(TEST_FFMODEL_SRC
     ffmodel_unittest_main.cpp
+
+    model/test/param.cpp
+    model/test/param.hpp
 
     model/test/grpcmodel_unittest.cpp
 )
