@@ -34,7 +34,6 @@
 #endif
 
 #include "controller/global/defines.h"
-#include "controller/global/global.hpp"
 
 typedef struct Params
 {
@@ -73,8 +72,8 @@ int main(int argc, char **argv)
         cxxopts::Options options("FFSERVER", "FF Server");
         options.add_options()
             ("e,exitcode", "the exit code for this program", cxxopts::value<int>(params.exitCode)->default_value("0"))
-            ("l,loop-times", "what times will the program loop, negative means forever", cxxopts::value<i32>(params.loopTimes)->default_value("5"))
-            ("s,sleep-time", "time for sleep in seconds", cxxopts::value<int>(params.sleepTime)->default_value("2"))
+            ("l,loop-times", "what times will the program loop, zero or negative means loop forever", cxxopts::value<i32>(params.loopTimes)->default_value("5"))
+            ("s,sleep-time", "time for sleep in seconds", cxxopts::value<int>(params.sleepTime)->default_value("1"))
             ("h,help", "print help")
             ;
 
@@ -91,7 +90,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    if (params.loopTimes < 0)
+    if (params.loopTimes <= 0)
     {
         loopForever();
     }
