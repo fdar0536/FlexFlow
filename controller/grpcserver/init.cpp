@@ -62,7 +62,7 @@ u8 init(int argc, char **argv)
         return 1;
     }
 
-    if (Controller::Global::sqliteInit(sqliteQueueList, config.dbPath))
+    if (Controller::Global::sqliteInit(&sqliteQueueList, config.dbPath))
     {
         spdlog::error("{}:{} Fail to initialize sqlite queue list", __FILE__, __LINE__);
         return 1;

@@ -44,9 +44,9 @@ FF_MODEL_API bool isAdmin();
 
 FF_MODEL_API u8 spdlogInit(const std::string &);
 
-FF_MODEL_API u8 sqliteInit(Model::DAO::IQueueList *out, const std::string &target);
+FF_MODEL_API u8 sqliteInit(Model::DAO::IQueueList **out, const std::string &target);
 
-FF_MODEL_API u8 grpcInit(Model::DAO::IQueueList *out, const std::string &target, const i32 port);
+FF_MODEL_API u8 grpcInit(Model::DAO::IQueueList **out, const std::string &target, const i32 port);
 
 } // end namesapce Global
 

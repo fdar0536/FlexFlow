@@ -119,6 +119,12 @@ SQLiteQueueList::init(IConnect *connect)
 
 u8 SQLiteQueueList::createQueue(const std::string &name)
 {
+    if (m_queueList.find(name) != m_queueList.end())
+    {
+        spdlog::error("{}:{} {} is already exists", __FILE__, __LINE__, name);
+        return ErrCode_ALREADY_EXISTS;
+    }
+
 #ifdef _WIN32
     Proc::WinProc *proc = new (std::nothrow) Proc::WinProc();
 #else

@@ -45,11 +45,11 @@ public:
 
     ~Param();
 
-    u8 setupGRPC();
+    virtual u8 setupConn() = 0;
 
-    u8 mainTest();
+    u8 createQueue(const std::string &name);
 
-private:
+protected:
 
     Proc::IProc *m_proc = nullptr;
 

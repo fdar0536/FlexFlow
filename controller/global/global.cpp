@@ -175,7 +175,7 @@ FF_MODEL_API u8 spdlogInit(const std::string &path)
     return 0;
 }
 
-FF_MODEL_API u8 sqliteInit(Model::DAO::IQueueList *out, const std::string &target)
+FF_MODEL_API u8 sqliteInit(Model::DAO::IQueueList **out, const std::string &target)
 {
     Model::DAO::SQLiteConnect *conn(nullptr);
     try
@@ -219,11 +219,11 @@ FF_MODEL_API u8 sqliteInit(Model::DAO::IQueueList *out, const std::string &targe
         return 1;
     }
 
-    out = sqlPtr;
+    *out = sqlPtr;
     return 0;
 }
 
-FF_MODEL_API u8 grpcInit(Model::DAO::IQueueList *out, const std::string &target, const i32 port)
+FF_MODEL_API u8 grpcInit(Model::DAO::IQueueList **out, const std::string &target, const i32 port)
 {
     Model::DAO::GRPCConnect *conn = new (std::nothrow) Model::DAO::GRPCConnect;
     if (!conn)
@@ -262,7 +262,7 @@ FF_MODEL_API u8 grpcInit(Model::DAO::IQueueList *out, const std::string &target,
         return 1;
     }
 
-    out = queueList;
+    *out = queueList;
     return 0;
 }
 
