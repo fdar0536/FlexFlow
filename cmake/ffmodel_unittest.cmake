@@ -11,6 +11,7 @@ target_link_libraries(testproc
     PRIVATE
 
     cxxopts::cxxopts
+    ffmodel
 )
 
 set(TEST_FFMODEL_SRC

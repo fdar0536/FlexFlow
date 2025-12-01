@@ -34,6 +34,7 @@
 #endif
 
 #include "controller/global/defines.h"
+#include "controller/global/global.hpp"
 
 typedef struct Params
 {
