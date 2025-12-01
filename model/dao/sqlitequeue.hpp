@@ -77,6 +77,8 @@ public:
 
     virtual void stop() override;
 
+    u8 rename(const std::string &newName, const std::string &oldName);
+
 private:
 
     std::shared_ptr<SQLiteToken> m_token;
@@ -91,7 +93,9 @@ private:
 
     std::jthread m_thread;
 
-    u8 connectToDB(const std::string &);
+    std::string m_targetPath;
+
+    u8 connectToDB(const std::string &, const std::string & = "");
 
     u8 createTable(const std::string &);
 

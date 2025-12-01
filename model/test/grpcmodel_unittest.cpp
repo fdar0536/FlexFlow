@@ -145,6 +145,15 @@ private:
     {
         m_keepRunning.store(false, std::memory_order_relaxed);
         cleanUp();
+
+        try
+        {
+            std::filesystem::remove("test.db");
+        }
+        catch (...)
+        {
+            // do nothing
+        }
     }
 };
 
@@ -153,7 +162,33 @@ TEST(GRPCModel, Testing)
     GRPCModelTesting param;
     EXPECT_EQ(param.setupConn(), 0);
 
-    EXPECT_EQ(param.createQueue("Test1"), 0);
-    EXPECT_EQ(param.createQueue("Test1"), 1);
-    EXPECT_EQ(param.createQueue("Test2"), 0);
+    auto list = param.list();
+    EXPECT_NE(list, nullptr);
+
+    std::vector<std::string> out;
+    EXPECT_EQ(list->listQueue(out), 0);
+    EXPECT_EQ(out.size(), 0);
+
+    EXPECT_EQ(list->createQueue("Test1"), 0);
+    EXPECT_EQ(list->createQueue("Test1"), 5);
+    EXPECT_EQ(list->createQueue("Test2"), 0);
+
+    EXPECT_EQ(list->listQueue(out), 0);
+    EXPECT_EQ(out.size(), 2);
+
+    EXPECT_EQ(list->deleteQueue("Test3"), 5);
+    EXPECT_EQ(list->deleteQueue("Test2"), 0);
+
+    EXPECT_EQ(list->listQueue(out), 0);
+    EXPECT_EQ(out.size(), 1);
+
+    EXPECT_STREQ(out.at(0).c_str(), "Test1");
+
+    EXPECT_EQ(list->renameQueue("Test3", "test3"), 5);
+    EXPECT_EQ(list->renameQueue("Test1", "test"), 0);
+
+    EXPECT_EQ(list->listQueue(out), 0);
+    EXPECT_EQ(out.size(), 1);
+
+    EXPECT_STREQ(out.at(0).c_str(), "test");
 }

@@ -38,9 +38,9 @@ Param::~Param()
 }
 
 // public member functions
-u8 Param::createQueue(const std::string &name)
+Model::DAO::IQueueList *Param::list() const
 {
-    return m_list->createQueue(name);
+    return m_list;
 }
 
 // protected member functions

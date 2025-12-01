@@ -111,6 +111,7 @@ SQLiteQueue::init(IConnect *connect,
     m_proc = process;
     m_isRunning.store(false, std::memory_order_relaxed);
     m_start.store(false, std::memory_order_relaxed);
+    m_targetPath = connect->targetPath();
     return ErrCode_OK;
 }
 
@@ -218,10 +219,39 @@ void SQLiteQueue::stop()
     stopImpl();
 }
 
+u8 SQLiteQueue::rename(const std::string &newName, const std::string &oldName)
+{
+    std::string newPath = m_targetPath + "/" + newName + ".db";
+    std::string oldPath = m_targetPath + "/" + oldName + ".db";
+
+    return connectToDB(newPath, oldPath);
+}
+
 // private member functions
-u8 SQLiteQueue::connectToDB(const std::string &path)
+u8 SQLiteQueue::connectToDB(const std::string &path, const std::string &oldPath)
 {
     std::unique_lock<std::mutex> lock(m_token->mutex);
+    if (!oldPath.empty())
+    {
+        if (m_token->stmt)
+        {
+            static_cast<void>(sqlite3_finalize(m_token->stmt));
+            m_token->stmt = nullptr;
+        }
+
+        if (m_token->db)
+        {
+            static_cast<void>(sqlite3_close(m_token->db));
+            m_token->db = nullptr;
+        }
+
+        if (std::rename(oldPath.c_str(), path.c_str()))
+        {
+            spdlog::error("{}:{} Fail to rename db", __FILE__, __LINE__);
+            return 1;
+        }
+    }
+
     u8 rcPending(0), rcDone(0), rcID(0);
 
     if (sqlite3_open(path.c_str(), &m_token->db))

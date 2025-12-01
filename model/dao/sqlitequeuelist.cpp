@@ -185,6 +185,7 @@ u8 SQLiteQueueList::deleteQueue(const std::string &name)
         return ErrCode_NOT_FOUND;
     }
 
+    std::remove((m_conn->targetPath() + "/" + name + ".db").c_str());
     return ErrCode_OK;
 }
 
@@ -196,6 +197,13 @@ SQLiteQueueList::renameQueue(const std::string &oldName,
     {
         if (it.first == oldName)
         {
+            SQLiteQueue *queue = static_cast<SQLiteQueue *>(it.second.get());
+            if (queue->rename(newName, oldName))
+            {
+                spdlog::error("{}:{} Fail to rename", __FILE__, __LINE__);
+                return ErrCode_OS_ERROR;
+            }
+
             m_queueList[newName] = it.second;
             m_queueList.erase(oldName);
             return ErrCode_OK;

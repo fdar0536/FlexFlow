@@ -47,7 +47,7 @@ public:
 
     virtual u8 setupConn() = 0;
 
-    u8 createQueue(const std::string &name);
+    Model::DAO::IQueueList *list() const;
 
 protected:
 
