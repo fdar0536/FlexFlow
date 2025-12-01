@@ -157,14 +157,8 @@ private:
     }
 };
 
-TEST(GRPCModel, Testing)
+static void testQueueList(Model::DAO::IQueueList *list)
 {
-    GRPCModelTesting param;
-    EXPECT_EQ(param.setupConn(), 0);
-
-    auto list = param.list();
-    EXPECT_NE(list, nullptr);
-
     std::vector<std::string> out;
     EXPECT_EQ(list->listQueue(out), 0);
     EXPECT_EQ(out.size(), 0);
@@ -191,4 +185,31 @@ TEST(GRPCModel, Testing)
     EXPECT_EQ(out.size(), 1);
 
     EXPECT_STREQ(out.at(0).c_str(), "test");
+}
+
+static void testQueue(Model::DAO::IQueue *queue)
+{
+    std::vector<int> out;
+
+    EXPECT_EQ(queue->listPending(out), 0);
+    EXPECT_EQ(out.size(), 0);
+    EXPECT_EQ(queue->listFinished(out), 0);
+    EXPECT_EQ(out.size(), 0);
+}
+
+TEST(GRPCModel, Testing)
+{
+    GRPCModelTesting param;
+    EXPECT_EQ(param.setupConn(), 0);
+
+    auto list = param.list();
+    EXPECT_NE(list, nullptr);
+
+    testQueueList(list);
+
+    auto queue = list->getQueue("test");
+    EXPECT_NE(queue, nullptr);
+
+    testQueue(queue);
+    list->returnQueue(queue);
 }
