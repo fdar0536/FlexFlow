@@ -38,7 +38,7 @@ namespace Model
 namespace Proc
 {
 
-class FF_MODEL_API LinuxProc : public IProc
+class LinuxProc : public IProc
 {
 public:
 

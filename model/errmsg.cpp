@@ -33,7 +33,7 @@ namespace ErrMsg
 
 static std::unordered_map<u8, grpc::StatusCode> table;
 
-FF_MODEL_API void init()
+void init()
 {
     table[ErrCode_OK] = grpc::StatusCode::OK;
     table[ErrCode_INVALID_ARGUMENT] = grpc::StatusCode::INVALID_ARGUMENT;
@@ -43,7 +43,7 @@ FF_MODEL_API void init()
     table[ErrCode_OS_ERROR] = grpc::StatusCode::INTERNAL;
 }
 
-FF_MODEL_API grpc::Status toGRPCStatus(u8 code, const std::string &msg)
+grpc::Status toGRPCStatus(u8 code, const std::string &msg)
 {
     return grpc::Status(table[code], msg);
 }

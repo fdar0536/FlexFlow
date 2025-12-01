@@ -43,7 +43,7 @@ namespace Model
 namespace Proc
 {
 
-class FF_MODEL_API WinProc : public IProc
+class WinProc : public IProc
 {
 public:
 

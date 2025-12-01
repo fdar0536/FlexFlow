@@ -44,33 +44,33 @@ typedef struct ProcTask
 
 // note that this function only destroy the content of ProcTask
 // does not free ProcTask
-FF_MODEL_API void queue_destroyProcTask(ProcTask *);
+void queue_destroyProcTask(ProcTask *);
 
-FF_MODEL_API u8 queue_listPending(Handle h, int **out, size_t *outSize);
+u8 queue_listPending(Handle h, int **out, size_t *outSize);
 
-FF_MODEL_API u8 queue_listFinished(Handle h, int **out, size_t *outSize);
+u8 queue_listFinished(Handle h, int **out, size_t *outSize);
 
-FF_MODEL_API u8 queue_pendingDetails(Handle h, const int id, ProcTask *out);
+u8 queue_pendingDetails(Handle h, const int id, ProcTask *out);
 
-FF_MODEL_API u8 queue_finishedDetails(Handle h, const int id, ProcTask *out);
+u8 queue_finishedDetails(Handle h, const int id, ProcTask *out);
 
-FF_MODEL_API u8 queue_clearPending(Handle h);
+u8 queue_clearPending(Handle h);
 
-FF_MODEL_API u8 queue_clearFinished(Handle h);
+u8 queue_clearFinished(Handle h);
 
-FF_MODEL_API u8 queue_currentTask(Handle h, ProcTask *out);
+u8 queue_currentTask(Handle h, ProcTask *out);
 
-FF_MODEL_API u8 queue_addTask(Handle h, const ProcTask *in);
+u8 queue_addTask(Handle h, const ProcTask *in);
 
-FF_MODEL_API u8 queue_removeTask(Handle h, const i32 in);
+u8 queue_removeTask(Handle h, const i32 in);
 
-FF_MODEL_API u8 queue_isRunning(Handle h);
+u8 queue_isRunning(Handle h);
 
-FF_MODEL_API u8 queue_readCurrentOutput(Handle h, char ***out, size_t *outSize);
+u8 queue_readCurrentOutput(Handle h, char ***out, size_t *outSize);
 
-FF_MODEL_API u8 queue_start(Handle h);
+u8 queue_start(Handle h);
 
-FF_MODEL_API u8 queue_stop(Handle h);
+u8 queue_stop(Handle h);
 
 #ifdef __cplusplus
 }

@@ -43,7 +43,7 @@ static IConnect *getConn(Handle h)
 extern "C"
 {
 
-FF_MODEL_API u8 connect_init(Handle *out, u8 backend)
+u8 connect_init(Handle *out, u8 backend)
 {
     if (!out) return 1;
 
@@ -94,7 +94,7 @@ FF_MODEL_API u8 connect_init(Handle *out, u8 backend)
     return 0;
 }
 
-FF_MODEL_API u8 connect_destroy(Handle h)
+u8 connect_destroy(Handle h)
 {
     Parent parent = hm.parent(h);
     if (parent != Parent::IConnect) return 1;
@@ -103,7 +103,7 @@ FF_MODEL_API u8 connect_destroy(Handle h)
     return 0;
 }
 
-FF_MODEL_API u8 connect_startConnect(Handle h, const char *target, const i32 port)
+u8 connect_startConnect(Handle h, const char *target, const i32 port)
 {
     IConnect *conn = getConn(h);
     if (!conn) return 1;
@@ -111,7 +111,7 @@ FF_MODEL_API u8 connect_startConnect(Handle h, const char *target, const i32 por
     return conn->startConnect(target, port);;
 }
 
-FF_MODEL_API void *connect_connectToken(Handle h)
+void *connect_connectToken(Handle h)
 {
     IConnect *conn = getConn(h);
     if (!conn) return NULL;
@@ -119,7 +119,7 @@ FF_MODEL_API void *connect_connectToken(Handle h)
     return conn->connectToken();
 }
 
-FF_MODEL_API u8 connect_targetPath(Handle h, char *buf, size_t *bufSize)
+u8 connect_targetPath(Handle h, char *buf, size_t *bufSize)
 {
     if (!buf && !bufSize) return 1;
     IConnect *conn = getConn(h);

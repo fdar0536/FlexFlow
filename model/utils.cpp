@@ -43,7 +43,7 @@ static std::regex ipRegex = std::regex("^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)
 
 static std::mutex consoleMutex;
 
-FF_MODEL_API void writeLastError(const char *file, int line)
+void writeLastError(const char *file, int line)
 {
 #ifdef _WIN32
     if (!file)
@@ -75,13 +75,13 @@ FF_MODEL_API void writeLastError(const char *file, int line)
 #endif
 }
 
-FF_MODEL_API void writeConsole(const std::string &in)
+void writeConsole(const std::string &in)
 {
     std::unique_lock<std::mutex> lock(consoleMutex);
     fmt::print("{}", in.c_str());
 }
 
-FF_MODEL_API u8 verifyIP(const std::string &in)
+u8 verifyIP(const std::string &in)
 {
     if (!std::regex_match(in, ipRegex))
     {

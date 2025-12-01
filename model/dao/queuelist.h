@@ -31,22 +31,22 @@ extern "C"
 {
 #endif
 
-FF_MODEL_API u8 queuelist_init(Handle connect, Handle *out);
+u8 queuelist_init(Handle connect, Handle *out);
 
-FF_MODEL_API u8 queuelist_destroy(Handle h);
+u8 queuelist_destroy(Handle h);
 
-FF_MODEL_API u8 queuelist_createQueue(Handle h, const char *name);
+u8 queuelist_createQueue(Handle h, const char *name);
 
-FF_MODEL_API u8 queuelist_listQueue(Handle h, char ***out, size_t *outSize);
+u8 queuelist_listQueue(Handle h, char ***out, size_t *outSize);
 
-FF_MODEL_API u8 queuelist_deleteQueue(Handle h, const char *name);
+u8 queuelist_deleteQueue(Handle h, const char *name);
 
-FF_MODEL_API u8 queuelist_renameQueue(Handle h, const char *oldName,
+u8 queuelist_renameQueue(Handle h, const char *oldName,
                        const char *newName);
 
-FF_MODEL_API u8 queuelist_getQueue(Handle h, const char *name, Handle *out);
+u8 queuelist_getQueue(Handle h, const char *name, Handle *out);
 
-FF_MODEL_API u8 queuelist_returnQueue(Handle h, Handle queue);
+u8 queuelist_returnQueue(Handle h, Handle queue);
 
 #ifdef __cplusplus
 }

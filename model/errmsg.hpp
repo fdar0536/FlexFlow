@@ -46,9 +46,9 @@ namespace Model
 namespace ErrMsg
 {
 
-FF_MODEL_API void init();
+void init();
 
-FF_MODEL_API grpc::Status toGRPCStatus(u8, const std::string &);
+grpc::Status toGRPCStatus(u8, const std::string &);
 
 } // end namespace ErrMsg
 

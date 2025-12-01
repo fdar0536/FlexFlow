@@ -45,7 +45,7 @@ static IQueueList *getList(Handle h)
 extern "C"
 {
 
-FF_MODEL_API u8 queuelist_init(Handle conn, Handle *out)
+u8 queuelist_init(Handle conn, Handle *out)
 {
     if (!out) return 1;
 
@@ -106,7 +106,7 @@ FF_MODEL_API u8 queuelist_init(Handle conn, Handle *out)
     return 0;
 }
 
-FF_MODEL_API u8 queuelist_destroy(Handle h)
+u8 queuelist_destroy(Handle h)
 {
     Parent parent = hm.parent(h);
     if (parent != Parent::IQueueList) return 1;
@@ -115,7 +115,7 @@ FF_MODEL_API u8 queuelist_destroy(Handle h)
     return 0;
 }
 
-FF_MODEL_API u8 queuelist_createQueue(Handle h, const char *name)
+u8 queuelist_createQueue(Handle h, const char *name)
 {
     IQueueList *list(getList(h));
     if (!list)
@@ -126,7 +126,7 @@ FF_MODEL_API u8 queuelist_createQueue(Handle h, const char *name)
     return list->createQueue(name);
 }
 
-FF_MODEL_API u8 queuelist_listQueue(Handle h, char ***out, size_t *outSize)
+u8 queuelist_listQueue(Handle h, char ***out, size_t *outSize)
 {
     if (!out || !outSize)
     {
@@ -178,7 +178,7 @@ FF_MODEL_API u8 queuelist_listQueue(Handle h, char ***out, size_t *outSize)
     return 0;
 }
 
-FF_MODEL_API u8 queuelist_deleteQueue(Handle h, const char *name)
+u8 queuelist_deleteQueue(Handle h, const char *name)
 {
     IQueueList *list(getList(h));
     if (!list)
@@ -189,7 +189,7 @@ FF_MODEL_API u8 queuelist_deleteQueue(Handle h, const char *name)
     return list->deleteQueue(name);
 }
 
-FF_MODEL_API u8 queuelist_renameQueue(Handle h, const char *oldName,
+u8 queuelist_renameQueue(Handle h, const char *oldName,
                          const char *newName)
 {
     IQueueList *list(getList(h));
@@ -201,7 +201,7 @@ FF_MODEL_API u8 queuelist_renameQueue(Handle h, const char *oldName,
     return list->renameQueue(oldName, newName);
 }
 
-FF_MODEL_API u8 queuelist_getQueue(Handle h, const char *name, Handle *out)
+u8 queuelist_getQueue(Handle h, const char *name, Handle *out)
 {
     IQueueList *list(getList(h));
     if (!list)
@@ -243,7 +243,7 @@ FF_MODEL_API u8 queuelist_getQueue(Handle h, const char *name, Handle *out)
     return 0;
 }
 
-FF_MODEL_API u8 queuelist_returnQueue(Handle h, Handle queue)
+u8 queuelist_returnQueue(Handle h, Handle queue)
 {
     IQueueList *list(getList(h));
     if (!list)

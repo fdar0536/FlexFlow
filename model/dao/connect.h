@@ -31,15 +31,15 @@ extern "C"
 {
 #endif
 
-FF_MODEL_API u8 connect_init(Handle *out, u8 backend);
+u8 connect_init(Handle *out, u8 backend);
 
-FF_MODEL_API u8 connect_destroy(Handle h);
+u8 connect_destroy(Handle h);
 
-FF_MODEL_API u8 connect_startConnect(Handle h, const char *target, const i32 port);
+u8 connect_startConnect(Handle h, const char *target, const i32 port);
 
-FF_MODEL_API void *connect_onnectToken(Handle h);
+void *connect_onnectToken(Handle h);
 
-FF_MODEL_API u8 connect_targetPath(Handle h, char *buf, size_t *bufSize);
+u8 connect_targetPath(Handle h, char *buf, size_t *bufSize);
 
 #ifdef __cplusplus
 }
