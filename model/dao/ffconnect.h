@@ -1,5 +1,5 @@
 /*
- * Simple Task Queue
+ * Flex Flow
  * Copyright (c) 2025-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,24 +21,32 @@
  * SOFTWARE.
  */
 
-#ifndef _MODEL_DAO_HANDLE_H_
-#define _MODEL_DAO_HANDLE_H_
+#include "handle.h"
 
-#include "controller/global/defines.h"
+#ifndef _MODEL_DAO_FFCONNECT_H_
+#define _MODEL_DAO_FFCONNECT_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-typedef struct Handle
+typedef struct FFConnect
 {
-    u64 index: 32;
-    u64 generation: 32;
-} Handle;
+    u8 (*init)(Handle *out, u8 backend);
+
+    u8 (*destroy)(Handle h);
+
+    u8 (*startConnect)(Handle h, const char *target, const i32 port);
+
+    void *(*connectToken)(Handle h);
+
+    u8 (*targetPath)(Handle h, char *buf, size_t *bufSize);
+
+} FFConnect;
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _MODEL_DAO_HANDLE_H_
+#endif // _MODEL_DAO_FFCONNECT_H_

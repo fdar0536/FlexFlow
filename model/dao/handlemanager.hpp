@@ -56,7 +56,7 @@ typedef enum class Type
 typedef struct Entry
 {
     void *ptr = nullptr;
-    u16 generation = 0;
+    u32 generation = 0;
     void (*deleter)(void *) = nullptr;
     bool alive = false;
     Parent parent = Parent::invaild;
