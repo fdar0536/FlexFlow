@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option go_package = "FF/protos";
+
+package ff;
+
+import "types.proto";
+
+service QueueList {
+  rpc Create(QueueReq) returns (Empty);
+  rpc Rename(RenameQueueReq) returns (Empty);
+  rpc Delete(QueueReq) returns (Empty);
+  rpc List(Empty) returns (stream ListQueueRes);
+  rpc GetQueue(QueueReq) returns (Empty);
+}
+
+message RenameQueueReq {
+  string oldname = 1;
+  string newName = 2;
+}
+
+message ListQueueRes {
+  string name = 1;
+}

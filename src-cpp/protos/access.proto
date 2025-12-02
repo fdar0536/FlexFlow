@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option go_package = "FF/protos";
+
+package ff;
+
+import "types.proto";
+
+service Access {
+  rpc Echo(Empty) returns (EchoRes);
+}
+
+message EchoRes {
+}

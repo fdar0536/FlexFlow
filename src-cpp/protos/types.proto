@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+option go_package = "FF/protos";
+
+package ff;
+
+message Empty {
+}
+
+// for task
+message QueueReq {
+  string name = 1;
+}
+
+message ListTaskRes {
+  int32 ID = 1;
+}
+
+message TaskDetailsReq {
+  string name = 1;
+  int32 ID = 2;
+}
+
+message TaskDetailsRes {
+  string workDir = 1;
+  string execName = 2;
+  repeated string args = 3;
+  int32 exitCode = 4;
+  int32 ID = 5;
+}
