@@ -109,7 +109,7 @@ void HandleManager::remove(Handle h)
     e.generation++;
 
     // to avoid overflow
-    if (e.generation > 4095) e.generation = 0;
+    if (e.generation > 0xFFF) e.generation = 0;
 
     m_free_indices.push_back(idx);
 }

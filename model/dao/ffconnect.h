@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-#include "handle.h"
+#include "controller/global/defines.h"
 
 #ifndef _MODEL_DAO_FFCONNECT_H_
 #define _MODEL_DAO_FFCONNECT_H_
