@@ -21,50 +21,31 @@
  * SOFTWARE.
  */
 
-#ifndef _MODEL_DAO_QUEUE_H_
-#define _MODEL_DAO_QUEUE_H_
-
-#include "controller/global/defines.h"
-
+#include "ffconnect.h"
+#include "ffqueuelist.h"
 #include "ffqueue.h"
+
+#ifndef _MODEL_DAO_CAPI_H_
+#define _MODEL_DAO_CAPI_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-// note that this function only destroy the content of ProcTask
-// does not free ProcTask
-void queue_destroyProcTask(ProcTask *);
+typedef struct FFModel
+{
+    FFConnect Connect;
 
-u8 queue_listPending(Handle h, int **out, size_t *outSize);
+    FFQueueList QueueList;
 
-u8 queue_listFinished(Handle h, int **out, size_t *outSize);
+    FFQueue Queue;
+} FFModel;
 
-u8 queue_pendingDetails(Handle h, const int id, ProcTask *out);
-
-u8 queue_finishedDetails(Handle h, const int id, ProcTask *out);
-
-u8 queue_clearPending(Handle h);
-
-u8 queue_clearFinished(Handle h);
-
-u8 queue_currentTask(Handle h, ProcTask *out);
-
-u8 queue_addTask(Handle h, const ProcTask *in);
-
-u8 queue_removeTask(Handle h, const i32 in);
-
-u8 queue_isRunning(Handle h);
-
-u8 queue_readCurrentOutput(Handle h, char ***out, size_t *outSize);
-
-u8 queue_start(Handle h);
-
-u8 queue_stop(Handle h);
+FF_MODEL_API u8 getFFModel(FFModel *);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _MODEL_DAO_QUEUE_H_
+#endif // _MODEL_DAO_CAPI_H_

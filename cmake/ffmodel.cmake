@@ -65,20 +65,6 @@ elseif (LINUX)
     )
 endif (WIN32)
 
-if (ENABLE_C_MODEL)
-    list(APPEND MODEL_SRC
-        model/dao/connect.cpp
-        model/dao/connect.h
-        model/dao/ffconnect.h
-        model/dao/handlemanager.cpp
-        model/dao/handlemanager.hpp
-        model/dao/queue.cpp
-        model/dao/queue.h
-        model/dao/queuelist.cpp
-        model/dao/queuelist.h
-    )
-endif(ENABLE_C_MODEL)
-
 add_library(ffmodel STATIC
     ${MODEL_SRC}
 )
@@ -90,3 +76,34 @@ target_link_libraries(ffmodel
 
     ${FF_MODEL_LIBS}
 )
+
+if (ENABLE_C_MODEL)
+    set(C_MODEL_SRC
+        model/dao/capi.cpp
+        model/dao/capi.h
+        model/dao/connect.cpp
+        model/dao/connect.h
+        model/dao/ffconnect.h
+        model/dao/ffqueue.h
+        model/dao/ffqueuelist.h
+        model/dao/handlemanager.cpp
+        model/dao/handlemanager.hpp
+        model/dao/queue.cpp
+        model/dao/queue.h
+        model/dao/queuelist.cpp
+        model/dao/queuelist.h
+    )
+
+    add_library(ffmodel-c SHARED
+        ${C_MODEL_SRC}
+    )
+
+    add_dependencies(ffmodel-c ffmodel grpc_common)
+
+    target_link_libraries(ffmodel-c
+        PRIVATE
+
+        ${FF_MODEL_LIBS}
+        ffmodel
+    )
+endif(ENABLE_C_MODEL)

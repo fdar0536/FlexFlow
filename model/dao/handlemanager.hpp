@@ -86,7 +86,7 @@ public:
     template<class T>
     u8 create(Handle *h, T *obj, Parent parent, Type type)
     {
-        if (!obj || !h) return 1;
+        if (!h || !obj) return 1;
 
         u32 idx;
         if (!m_free_indices.empty())

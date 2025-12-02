@@ -37,7 +37,7 @@ u8 connect_destroy(Handle h);
 
 u8 connect_startConnect(Handle h, const char *target, const i32 port);
 
-void *connect_onnectToken(Handle h);
+void *connect_connectToken(Handle h);
 
 u8 connect_targetPath(Handle h, char *buf, size_t *bufSize);
 

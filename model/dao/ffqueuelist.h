@@ -21,50 +21,39 @@
  * SOFTWARE.
  */
 
-#ifndef _MODEL_DAO_QUEUE_H_
-#define _MODEL_DAO_QUEUE_H_
-
 #include "controller/global/defines.h"
 
-#include "ffqueue.h"
+#ifndef _MODEL_DAO_FFQUEUELIST_H_
+#define _MODEL_DAO_FFQUEUELIST_H_
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-// note that this function only destroy the content of ProcTask
-// does not free ProcTask
-void queue_destroyProcTask(ProcTask *);
+typedef struct FFQueueList
+{
+    u8 (*init)(Handle connect, Handle *out);
 
-u8 queue_listPending(Handle h, int **out, size_t *outSize);
+    u8 (*destroy)(Handle h);
 
-u8 queue_listFinished(Handle h, int **out, size_t *outSize);
+    u8 (*createQueue)(Handle h, const char *name);
 
-u8 queue_pendingDetails(Handle h, const int id, ProcTask *out);
+    u8 (*listQueue)(Handle h, char ***out, size_t *outSize);
 
-u8 queue_finishedDetails(Handle h, const int id, ProcTask *out);
+    u8 (*deleteQueue)(Handle h, const char *name);
 
-u8 queue_clearPending(Handle h);
+    u8 (*renameQueue)(Handle h, const char *oldName,
+                             const char *newName);
 
-u8 queue_clearFinished(Handle h);
+    u8 (*getQueue)(Handle h, const char *name, Handle *out);
 
-u8 queue_currentTask(Handle h, ProcTask *out);
+    u8 (*returnQueue)(Handle h, Handle queue);
 
-u8 queue_addTask(Handle h, const ProcTask *in);
-
-u8 queue_removeTask(Handle h, const i32 in);
-
-u8 queue_isRunning(Handle h);
-
-u8 queue_readCurrentOutput(Handle h, char ***out, size_t *outSize);
-
-u8 queue_start(Handle h);
-
-u8 queue_stop(Handle h);
+} FFQueueList;
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _MODEL_DAO_QUEUE_H_
+#endif // _MODEL_DAO_FFQUEUELIST_H_
