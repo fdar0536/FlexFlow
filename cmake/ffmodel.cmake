@@ -69,8 +69,7 @@ if (ENABLE_C_MODEL)
     list(APPEND MODEL_SRC
         model/dao/connect.cpp
         model/dao/connect.h
-        ffconnect.h
-        model/dao/handle.h
+        model/dao/ffconnect.h
         model/dao/handlemanager.cpp
         model/dao/handlemanager.hpp
         model/dao/queue.cpp

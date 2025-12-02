@@ -46,11 +46,13 @@ HandleManager::~HandleManager()
 
 bool HandleManager::isNotValid(Handle h)
 {
-    if (h.index >= m_entries.size()) return true;
+    uint32_t idx = HANDLE_GET_IDX(h);
+    if (idx >= m_entries.size()) return true;
 
-    const Entry &e = m_entries.at(h.index);
+    const Entry &e = m_entries.at(idx);
 
-    if (!e.alive || e.generation != h.generation)
+    u16 gen = HANDLE_GET_GEN(h);
+    if (!e.alive || e.generation != gen)
         return true;
 
     return false;
@@ -63,7 +65,7 @@ u8 HandleManager::takeOwned(Handle h)
         return 1;
     }
 
-    Entry &e = m_entries.at(h.index);
+    Entry &e = m_entries.at(HANDLE_GET_IDX(h));
     e.deleter = nullptr;
 
     return 0;
@@ -76,7 +78,7 @@ Parent HandleManager::parent(Handle h)
         return Parent::invaild;
     }
 
-    const Entry &e = m_entries.at(h.index);
+    const Entry &e = m_entries.at(HANDLE_GET_IDX(h));
     return e.parent;
 }
 
@@ -87,7 +89,7 @@ Type HandleManager::type(Handle h)
         return Type::invaild;
     }
 
-    const Entry &e = m_entries.at(h.index);
+    const Entry &e = m_entries.at(HANDLE_GET_IDX(h));
     return e.type;
 }
 
@@ -98,7 +100,8 @@ void HandleManager::remove(Handle h)
         return;
     }
 
-    Entry &e = m_entries.at(h.index);
+    uint32_t idx = HANDLE_GET_IDX(h);
+    Entry &e = m_entries.at(idx);
 
     if (e.deleter) e.deleter(e.ptr);
     e.ptr   = nullptr;
@@ -106,9 +109,9 @@ void HandleManager::remove(Handle h)
     e.generation++;
 
     // to avoid overflow
-    if (e.generation == 0) e.generation = 1;
+    if (e.generation > 4095) e.generation = 0;
 
-    m_free_indices.push_back(h.index);
+    m_free_indices.push_back(idx);
 }
 
 } // namespace DAO

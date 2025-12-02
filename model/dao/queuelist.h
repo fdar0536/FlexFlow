@@ -24,7 +24,7 @@
 #ifndef _MODEL_DAO_QUEUELIST_H_
 #define _MODEL_DAO_QUEUELIST_H_
 
-#include "handle.h"
+#include "controller/global/defines.h"
 
 #ifdef __cplusplus
 extern "C"

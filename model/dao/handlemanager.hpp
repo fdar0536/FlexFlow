@@ -26,7 +26,7 @@
 
 #include <vector>
 
-#include "handle.h"
+#include "controller/global/defines.h"
 
 namespace Model
 {
@@ -56,7 +56,7 @@ typedef enum class Type
 typedef struct Entry
 {
     void *ptr = nullptr;
-    u32 generation = 0;
+    u16 generation = 0;
     void (*deleter)(void *) = nullptr;
     bool alive = false;
     Parent parent = Parent::invaild;
@@ -66,6 +66,13 @@ typedef struct Entry
 class HandleManager;
 
 extern HandleManager hm;
+
+#define IDX_SHIFT 20
+#define IDX_MASK  0x000FFFFF // 20 bits
+
+#define HANDLE_GET_IDX(handle)   ((handle) & IDX_MASK)
+#define HANDLE_GET_GEN(handle)   ((handle) >> IDX_SHIFT)
+#define HANDLE_CREATE(idx, gen)  ((idx) | ((gen) << IDX_SHIFT))
 
 class HandleManager
 {
@@ -91,8 +98,7 @@ public:
             m_entries.emplace_back();
         }
 
-        h->index      = idx;
-        h->generation = m_entries[idx].generation;
+        *h = HANDLE_CREATE(idx, m_entries[idx].generation);
 
         m_entries.at(idx).ptr   = obj;
         m_entries.at(idx).alive = true;
@@ -119,7 +125,7 @@ public:
             return nullptr;
         }
 
-        const Entry &e = m_entries.at(h.index);
+        const Entry &e = m_entries.at(HANDLE_GET_IDX(h));
         return static_cast<T *>(e.ptr);
     }
 
