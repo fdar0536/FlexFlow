@@ -22,7 +22,7 @@
  */
 
 #include <new>
-#include "capi.hpp"
+#include "handlemanager.hpp"
 #include "grpcconnect.hpp"
 #include "sqliteconnect.hpp"
 #include "connect.h"

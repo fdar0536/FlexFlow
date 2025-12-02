@@ -67,8 +67,6 @@ endif (WIN32)
 
 if (ENABLE_C_MODEL)
     list(APPEND MODEL_SRC
-        model/dao/capi.cpp
-        model/dao/capi.hpp
         model/dao/connect.cpp
         model/dao/connect.h
         model/dao/handle.h

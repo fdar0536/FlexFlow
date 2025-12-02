@@ -29,6 +29,8 @@ namespace Model
 namespace DAO
 {
 
+HandleManager hm;
+
 HandleManager::~HandleManager()
 {
     for (size_t i = 0; i < m_entries.size(); ++i)

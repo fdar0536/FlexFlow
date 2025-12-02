@@ -63,6 +63,10 @@ typedef struct Entry
     Type type = Type::invaild;
 } Entry;
 
+class HandleManager;
+
+extern HandleManager hm;
+
 class HandleManager
 {
 

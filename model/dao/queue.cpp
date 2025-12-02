@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-#include "capi.hpp"
+#include "handlemanager.hpp"
 #include "iqueue.hpp"
 
 #include "queue.h"
