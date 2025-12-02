@@ -71,7 +71,6 @@ extern HandleManager hm;
 
 #define IDX_SHIFT 20
 #define IDX_MASK  0x000FFFFF // 20 bits
-#define MAX_IDX 0x00100000
 
 #define HANDLE_GET_IDX(handle)   ((handle) & IDX_MASK)
 #define HANDLE_GET_GEN(handle)   ((handle) >> IDX_SHIFT)
@@ -103,7 +102,7 @@ public:
         else
         {
             idx = static_cast<u32>(m_entries.size());
-            if (idx > MAX_IDX)
+            if (idx > IDX_MASK)
             {
                 spdlog::error("{}:{} idx is full", __FILE__, __LINE__);
                 return 1;
