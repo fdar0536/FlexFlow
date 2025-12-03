@@ -937,6 +937,7 @@ version = "2.0.0"
 dependencies = [
  "anyhow",
  "cmake",
+ "libc",
  "libloading 0.9.0",
  "once_cell",
  "serde",

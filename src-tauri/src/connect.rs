@@ -21,14 +21,14 @@
  * SOFTWARE.
  */
 
- use crate::loadlib as lib;
+ use crate::loadlib::api;
  use crate::ffmodeldef as def;
 
 #[tauri::command]
-pub fn ffconnect_init(backend: u8) -> Result<def::Handle, u8>
+pub fn connect_init(backend: u8) -> Result<def::Handle, u8>
 {
     let mut handle: def::Handle = 0;
-    let ret = (lib::api().connect.init)(&mut handle, backend);
+    let ret = (api().connect.init)(&mut handle, backend);
     if ret == 0
     {
         Ok(handle)
@@ -40,28 +40,28 @@ pub fn ffconnect_init(backend: u8) -> Result<def::Handle, u8>
 }
 
 #[tauri::command]
-pub fn ffconnect_destroy(h: def::Handle) -> Result<(), u8>
+pub fn connect_destroy(h: def::Handle) -> Result<(), u8>
 {
-    let ret = (lib::api().connect.destroy)(h);
+    let ret = (api().connect.destroy)(h);
     if ret == 0 { Ok(()) } else { Err(ret) }
 }
 
 #[tauri::command]
-pub fn ffconnect_start_connect(h: def::Handle, target: &str, port: i32)
+pub fn connect_start_connect(h: def::Handle, target: &str, port: i32)
 -> Result<(), u8>
 {
     let c_target = std::ffi::CString::new(target).unwrap();
-    let ret = (lib::api().connect.start_connect)(h,
+    let ret = (api().connect.start_connect)(h,
         c_target.as_ptr(), port);
     if ret == 0 { Ok(()) } else { Err(ret) }
 }
 
 #[tauri::command]
-pub fn ffconnect_target_path(h: def::Handle, buf_size: usize) -> Result<String, u8>
+pub fn connect_target_path(h: def::Handle, buf_size: usize) -> Result<String, u8>
 {
     let mut buffer = vec![0i8; buf_size];
     let mut size = buf_size;
-    let ret = (lib::api().connect.target_path)(h,
+    let ret = (api().connect.target_path)(h,
         buffer.as_mut_ptr(), &mut size as *mut usize);
 
     if ret != 0

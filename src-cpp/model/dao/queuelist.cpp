@@ -169,7 +169,7 @@ u8 queuelist_listQueue(Handle h, char ***out, size_t *outSize)
             if (i != 0) free(out[0]);
 
             free(out);
-            return NULL;
+            return 1;
         }
 
         snprintf(*out[i], strlen(str) + 1, "%s", str);

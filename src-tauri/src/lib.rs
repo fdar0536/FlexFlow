@@ -23,7 +23,9 @@
 
 pub mod loadlib;
 pub mod ffmodeldef;
-pub mod ffconnect;
+pub mod connect;
+pub mod queue_list;
+pub mod queue;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
@@ -47,11 +49,36 @@ pub fn run()
         .invoke_handler(tauri::generate_handler![
             greet,
 
-            // ffconnect
-            ffconnect::ffconnect_init,
-            ffconnect::ffconnect_destroy,
-            ffconnect::ffconnect_start_connect,
-            ffconnect::ffconnect_target_path
+            // connect
+            connect::connect_init,
+            connect::connect_destroy,
+            connect::connect_start_connect,
+            connect::connect_target_path,
+
+            // queue list
+            queue_list::queue_list_init,
+            queue_list::queue_list_destroy,
+            queue_list::queue_list_create_queue,
+            queue_list::queue_list_list_queue,
+            queue_list::queue_list_delete_queue,
+            queue_list::queue_list_rename_queue,
+            queue_list::queue_list_get_queue,
+            queue_list::queue_list_return_queue,
+
+            // queue
+            queue::queue_list_pending,
+            queue::queue_list_finished,
+            queue::queue_pending_details,
+            queue::queue_finished_details,
+            queue::queue_clear_pending,
+            queue::queue_clear_finished,
+            queue::queue_current_task,
+            queue::queue_add_task,
+            queue::queue_remove_task,
+            queue::queue_is_running,
+            queue::queue_read_current_output,
+            queue::queue_start,
+            queue::queue_stop
 
         ])
         .run(tauri::generate_context!())
