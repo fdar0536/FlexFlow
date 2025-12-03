@@ -23,18 +23,18 @@
 
 export interface IConnect
 {
-    async startConnect(target: string, port: number): number;
+    startConnect(target: string, port: number): Promise<number>;
     targetPath(): string;
 }
 
 export interface IQueueList
 {
-    async createQueue(name: string): number;
-    async listQueue(): [string[], number];
-    async deleteQueue(name: string): number;
-    async renameQueue(old_name: string, new_name: string): number;
-    async get_queue(name: string): [number, number];
-    async return_queue(queue: number): number;
+    createQueue(name: string): Promise<number>;
+    listQueue(): [Promise<string[]>, Promise<number>];
+    deleteQueue(name: string): Promise<number>;
+    renameQueue(old_name: string, new_name: string): Promise<number>;
+    get_queue(name: string): [Promise<number>, Promise<number>];
+    return_queue(queue: number): Promise<number>;
 }
 
 export interface ProcTask
@@ -49,10 +49,10 @@ export interface ProcTask
 
 export interface IQueue
 {
-    listPending(): [number[], number];
-    listFinished(): [number[], number];
-    pendingDetails(id: number): [ProcTask, number];
-    finishedDetails(id: number): [ProcTask, number];
-    currentTask(): [ProcTask, number];
-    add_task(task: ProcTask): number;
+    listPending(): [Promise<number[]>, Promise<number>];
+    listFinished(): [Promise<number[]>, Promise<number>];
+    pendingDetails(id: number): [Promise<ProcTask>, Promise<number>];
+    finishedDetails(id: number): [Promise<ProcTask>, Promise<number>];
+    currentTask(): [Promise<ProcTask>, Promise<number>];
+    add_task(task: ProcTask): Promise<number>;
 }
