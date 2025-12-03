@@ -53,17 +53,17 @@ export interface ProcTask
 
 export interface IQueue
 {
-    listPending(): [Promise<number[]>, Promise<number>];
-    listFinished(): [Promise<number[]>, Promise<number>];
-    pendingDetails(id: number): [Promise<ProcTask>, Promise<number>];
-    finishedDetails(id: number): [Promise<ProcTask>, Promise<number>];
-    currentTask(): [Promise<ProcTask>, Promise<number>];
-    addTask(task: ProcTask): Promise<number>;
-    readCurrentOutput(): [Promise<String[]>, Promise<number>];
-    start(): Promise<number>;
-    stop(): Promise<number>;
+    listPending(): Promise<number[]>;
+    listFinished(): Promise<number[]>;
+    pendingDetails(id: number): Promise<ProcTask>;
+    finishedDetails(id: number): Promise<ProcTask>;
+    currentTask(): Promise<ProcTask>;
+    addTask(task: ProcTask): Promise<void>;
+    readCurrentOutput(): Promise<string[]>;
+    start(): Promise<void>;
+    stop(): Promise<void>;
     isRunning(): Promise<boolean>;
-    clearPending(): Promise<number>;
-    clearFinished(): Promise<number>;
-    removeTask(id: number): Promise<number>;
+    clearPending(): Promise<void>;
+    clearFinished(): Promise<void>;
+    removeTask(id: number): Promise<void>;
 }
