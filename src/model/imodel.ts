@@ -38,7 +38,7 @@ export interface IQueueList
     deleteQueue(name: string): Promise<void>;
     renameQueue(old_name: string, new_name: string): Promise<void>;
     getQueue(name: string): Promise<Handle>;
-    returnQueue(queue: number): Promise<void>;
+    returnQueue(queue: Handle): Promise<void>;
 }
 
 export interface ProcTask

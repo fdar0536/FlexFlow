@@ -27,13 +27,6 @@ import { IQueueList, Handle } from "./imodel";
 
 export class TauriQueueList implements IQueueList
 {
-    /*
-    deleteQueue(name: string): Promise<void>;
-    renameQueue(old_name: string, new_name: string): Promise<void>;
-    getQueue(name: string): Promise<Handle>;
-    returnQueue(queue: number): Promise<void>;
-    */
-
     public static create = async(conn: Handle): Promise<TauriQueueList> =>
     {
         var list: Handle =
@@ -56,6 +49,31 @@ export class TauriQueueList implements IQueueList
     {
         return await invoke<string[]>
         ("queue_list_list_queue", { h: this.list });
+    }
+
+    public deleteQueue = async(name: string): Promise<void> =>
+    {
+        return await invoke<void>
+        ("queue_list_delete_queue", { h: this.list, name });
+    }
+
+    public renameQueue =
+    async(old_name: string, new_name: string): Promise<void> =>
+    {
+        return await invoke<void>
+        ("queue_list_rename_queue", { h: this.list, old_name, new_name });
+    }
+
+    public getQueue = async(name: string): Promise<Handle> =>
+    {
+        return await invoke<Handle>
+        ("queue_list_get_queue", { h: this.list, name});
+    }
+
+    public returnQueue = async(queue: Handle): Promise<void> =>
+    {
+        return await invoke<void>
+        ("queue_list_return_queue", { h: this.list, queue});
     }
 
     private constructor(list: Handle)
