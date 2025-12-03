@@ -57,8 +57,9 @@ pub fn connect_start_connect(h: def::Handle, target: &str, port: i32)
 }
 
 #[tauri::command]
-pub fn connect_target_path(h: def::Handle, buf_size: usize) -> Result<String, u8>
+pub fn connect_target_path(h: def::Handle) -> Result<String, u8>
 {
+    let buf_size: usize = 4096;
     let mut buffer = vec![0i8; buf_size];
     let mut size = buf_size;
     let ret = (api().connect.target_path)(h,
