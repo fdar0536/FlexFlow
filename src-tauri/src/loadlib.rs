@@ -22,25 +22,32 @@
  */
 
 use libloading::{Library, Symbol};
-use once_cell::sync::Lazy;
-use std::sync::RwLock;
+use std::sync::{Arc, OnceLock};
 
 use crate::ffmodeldef::FFModel;
 
-pub static MY_API: Lazy<RwLock<Option<FFModel>>> = Lazy::new(|| RwLock::new(None));
+pub static GLOBAL_API: OnceLock<Arc<FFModel>> = OnceLock::new();
 
-fn find_lib() -> anyhow::Result<Library> {
+fn find_lib() -> anyhow::Result<Library>
+{
 
-    let path = if cfg!(target_os = "windows") {
-            "ffmodel-c.dll"
-    } else if cfg!(target_os = "macos") {
-            "libffmodel-c.dylib"
-    } else {
+    let path = if cfg!(target_os = "windows")
+    {
+        "ffmodel-c.dll"
+    }
+    else if cfg!(target_os = "macos")
+    {
+        "libffmodel-c.dylib"
+    }
+    else
+    {
         "libffmodel-c.so"
     };
 
-    match unsafe { Library::new(path) } {
-        Ok(lib) => {
+    match unsafe { Library::new(path) }
+    {
+        Ok(lib) =>
+        {
             println!("loaded native library: {}", path);
             return Ok(lib);
         }
@@ -49,11 +56,12 @@ fn find_lib() -> anyhow::Result<Library> {
     }
 
     return Err(anyhow::anyhow!("Cannot find native library"));
-}
+} // fn find_lib() -> anyhow::Result<Library>
 
-pub fn load_api_once() -> anyhow::Result<FFModel> {
-    let mut guard = MY_API.write().unwrap();
-    if guard.is_none() {
+pub fn load_api() -> anyhow::Result<()>
+{
+    if GLOBAL_API.get().is_none()
+    {
         let lib = find_lib()?;
         let lib = Box::leak(Box::new(lib));
 
@@ -63,13 +71,21 @@ pub fn load_api_once() -> anyhow::Result<FFModel> {
 
         let mut api = std::mem::MaybeUninit::<FFModel>::uninit();
 
-        if (unsafe { get_api(api.as_mut_ptr()) } != 0) {
+        if (unsafe { get_api(api.as_mut_ptr()) } != 0)
+        {
             return Err(anyhow::anyhow!("Fail to load lib"));
         }
 
-        let api = unsafe { api.assume_init() };
-        *guard = Some(api);
+        if GLOBAL_API.set(Arc::new(unsafe { api.assume_init() })).is_err()
+        {
+            return Err(anyhow::anyhow!("Cannot get native library"));
+        }
     }
 
-    Ok(guard.unwrap())
+    return Ok(());
+} // pub fn load_api() -> anyhow::Result<()>
+
+pub fn api() -> &'static FFModel
+{
+    return GLOBAL_API.get().expect("API is not ready");
 }

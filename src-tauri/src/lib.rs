@@ -24,30 +24,26 @@
 pub mod loadlib;
 pub mod ffmodeldef;
 
-pub struct AppState {
-    pub api: ffmodeldef::FFModel,
-}
-
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
-fn greet(name: &str) -> String {
+fn greet(name: &str) -> String
+{
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
-pub fn run() {
-    let res = loadlib::load_api_once();
-    if res.is_err() {
+pub fn run()
+{
+    let res = loadlib::load_api();
+    if res.is_err()
+    {
         println!("Fail to load FFModel");
         return;
     }
 
-    let api = res.unwrap();
-
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .manage(AppState { api })
         .invoke_handler(tauri::generate_handler![greet])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
-}
+} // pub fn run()

@@ -60,7 +60,8 @@ pub struct FFQueueList {
 
 #[repr(C)]
 #[derive(Debug, Clone)]
-pub struct ProcTask {
+pub struct ProcTask
+{
     pub exec_name: *mut i8,      // char*
     pub argc: usize,             // size_t
     pub argv: *mut *mut i8,      // char**
@@ -72,7 +73,8 @@ pub struct ProcTask {
 
 #[repr(C)]
 #[derive(Copy, Clone)]
-pub struct FFQueue {
+pub struct FFQueue
+{
     pub destroy_proc_task: extern "C" fn(task: *mut ProcTask),
 
     pub list_pending: extern "C" fn(h: Handle, out: *mut *mut i32, out_size: *mut usize) -> u8,
@@ -100,7 +102,8 @@ pub struct FFQueue {
 
 #[repr(C)]
 #[derive(Copy, Clone)]
-pub struct FFModel {
+pub struct FFModel
+{
     pub connect:     FFConnect,
     pub queue_list:  FFQueueList,
     pub queue:       FFQueue,
