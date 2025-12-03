@@ -23,6 +23,7 @@
 
 pub mod loadlib;
 pub mod ffmodeldef;
+pub mod ffconnect;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
@@ -43,7 +44,16 @@ pub fn run()
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![
+            greet,
+
+            // ffconnect
+            ffconnect::ffconnect_init,
+            ffconnect::ffconnect_destroy,
+            ffconnect::ffconnect_start_connect,
+            ffconnect::ffconnect_target_path
+
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 } // pub fn run()
