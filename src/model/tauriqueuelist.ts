@@ -21,49 +21,47 @@
  * SOFTWARE.
  */
 
-export type Handle = number;
+import { invoke } from "@tauri-apps/api/core";
 
-export interface IConnect
-{
-    destroy(): Promise<void>;
-    startConnect(target: string, port: number): Promise<void>;
-    targetPath(): Promise<string>;
-}
+import { IQueueList, Handle } from "./imodel";
 
-export interface IQueueList
+export class TauriQueueList implements IQueueList
 {
-    destroy(): Promise<void>;
-    createQueue(name: string): Promise<void>;
-    listQueue(): Promise<string[]>;
+    /*
     deleteQueue(name: string): Promise<void>;
     renameQueue(old_name: string, new_name: string): Promise<void>;
     getQueue(name: string): Promise<Handle>;
     returnQueue(queue: number): Promise<void>;
-}
+    */
 
-export interface ProcTask
-{
-    execName: string;
-    args: string[];
-    workDir: string | null;
-    id: number;
-    exitCode: number;
-    isSuccess: boolean;
-}
+    public static create = async(conn: Handle): Promise<TauriQueueList> =>
+    {
+        var list: Handle =
+        await invoke<Handle>("queue_list_init", {connect_handle: conn});
+        return new TauriQueueList(list);
+    }
 
-export interface IQueue
-{
-    listPending(): [Promise<number[]>, Promise<number>];
-    listFinished(): [Promise<number[]>, Promise<number>];
-    pendingDetails(id: number): [Promise<ProcTask>, Promise<number>];
-    finishedDetails(id: number): [Promise<ProcTask>, Promise<number>];
-    currentTask(): [Promise<ProcTask>, Promise<number>];
-    addTask(task: ProcTask): Promise<number>;
-    readCurrentOutput(): [Promise<String[]>, Promise<number>];
-    start(): Promise<number>;
-    stop(): Promise<number>;
-    isRunning(): Promise<boolean>;
-    clearPending(): Promise<number>;
-    clearFinished(): Promise<number>;
-    removeTask(id: number): Promise<number>;
+    public destroy = async(): Promise<void> =>
+    {
+        return await invoke<void>("queue_list_destroy", { h: this.list });
+    }
+
+    public createQueue = async(name: string): Promise<void> =>
+    {
+        return await invoke<void>("queue_list_create_queue",
+            { h: this.list, name });
+    }
+
+    public listQueue = async(): Promise<string[]> =>
+    {
+        return await invoke<string[]>
+        ("queue_list_list_queue", { h: this.list });
+    }
+
+    private constructor(list: Handle)
+    {
+        this.list = list;
+    }
+
+    private list: Handle = 0
 }
