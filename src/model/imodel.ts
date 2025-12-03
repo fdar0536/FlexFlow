@@ -47,10 +47,12 @@ export interface ProcTask
     isSuccess: boolean;
 }
 
-export interface IQueueList
+export interface IQueue
 {
     listPending(): [number[], number];
     listFinished(): [number[], number];
     pendingDetails(id: number): [ProcTask, number];
-    
+    finishedDetails(id: number): [ProcTask, number];
+    currentTask(): [ProcTask, number];
+    add_task(task: ProcTask): number;
 }

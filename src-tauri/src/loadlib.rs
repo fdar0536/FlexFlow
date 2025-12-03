@@ -62,12 +62,14 @@ pub fn load_api() -> anyhow::Result<()>
 {
     if GLOBAL_API.get().is_none()
     {
-        let lib = find_lib()?;
+        let lib = find_lib().expect("Fail to find library");
         let lib = Box::leak(Box::new(lib));
 
         type GetApiFn = unsafe extern "C" fn(*mut FFModel) -> u8;
 
-        let get_api: Symbol<GetApiFn> = unsafe { lib.get(b"getFFModel\0") }?;
+        let get_api: Symbol<GetApiFn> =
+        unsafe { lib.get(b"getFFModel\0") }
+        .expect("Fail to find symbol getFFModel");
 
         let mut api = std::mem::MaybeUninit::<FFModel>::uninit();
 

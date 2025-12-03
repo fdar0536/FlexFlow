@@ -47,13 +47,19 @@ pub fn connect_destroy(h: def::Handle) -> Result<(), u8>
 }
 
 #[tauri::command]
-pub fn connect_start_connect(h: def::Handle, target: &str, port: i32)
+pub async fn connect_start_connect(h: def::Handle, target: &str, port: i32)
 -> Result<(), u8>
 {
-    let c_target = std::ffi::CString::new(target).unwrap();
-    let ret = (api().connect.start_connect)(h,
-        c_target.as_ptr(), port);
-    if ret == 0 { Ok(()) } else { Err(ret) }
+    let target = target.to_owned();
+    return tokio::task::spawn_blocking(move ||
+    {
+        let c_target = std::ffi::CString::new(target).unwrap();
+        let ret = (api().connect.start_connect)(h,
+            c_target.as_ptr(), port);
+        if ret == 0 { Ok(()) } else { Err(ret) }
+    })
+    .await
+    .unwrap_or(Err(255));
 }
 
 #[tauri::command]
