@@ -25,12 +25,12 @@ import { invoke } from "@tauri-apps/api/core";
 
 import { IConnect, Handle } from "./imodel";
 
-export class TauriConect implements IConnect
+export class TauriConnect implements IConnect
 {
-    public static create = async(backend: number): Promise<TauriConect> =>
+    public static create = async(backend: number): Promise<TauriConnect> =>
     {
         var h: Handle = await invoke<Handle>("connect_init", { backend });
-        return new TauriConect(h);
+        return new TauriConnect(h);
     }
 
     public destroy = async(): Promise<void> =>
@@ -41,13 +41,13 @@ export class TauriConect implements IConnect
     public startConnect =
     async(target: string, port: number): Promise<void> =>
     {
-        return await invoke("connect_start_connect",
+        return await invoke<void>("connect_start_connect",
             {h: this.conn, target, port});
     }
 
     public targetPath = async(): Promise<string> =>
     {
-        return await invoke("connect_target_path", { h: this.conn });
+        return await invoke<string>("connect_target_path", { h: this.conn });
     }
 
     private constructor(conn: Handle)
