@@ -60,10 +60,4 @@ fn main()
             }
         }
     }
-
-    // copy compile_commands.json
-    let src_path = dst.join("build").join("compile_commands.json");
-    let target_path = PathBuf::from("../src-cpp").join("compile_commands.json");
-    std::fs::copy(&src_path, &target_path).unwrap();
-    println!("cargo:warning=Copied {} → {}", src_path.display(), target_path.display());
 } // fn main()
