@@ -21,18 +21,44 @@
  * SOFTWARE.
  */
 
+import React from "react";
+
+// ui
 import Box from '@mui/material/Box';
 import BottomNavigation from '@mui/material/BottomNavigation';
 import BottomNavigationAction from '@mui/material/BottomNavigationAction';
-import List from '@mui/icons-material/List';
-import History from '@mui/icons-material/History';
 
+// icon
+import { AddLink, History, Info, List, Settings } from '@mui/icons-material';
+import useGlobal from "../model/store";
+import { pages } from "../model/pages";
 
-import React from "react";
-import { AddLink, Info, Settings } from '@mui/icons-material';
-
-class Header extends React.Component
+interface HeaderProps
 {
+    page: pages;
+    setPage: (page: pages) => void;
+}
+
+class HeaderBase extends React.Component<HeaderProps>
+{
+    onSettingsClick = (e: React.MouseEvent<HTMLButtonElement>): void =>
+    {
+        e.preventDefault();
+        this.props.setPage(pages.settings);
+    }
+
+    onConnectClick = (e: React.MouseEvent<HTMLButtonElement>): void =>
+    {
+        e.preventDefault();
+        this.props.setPage(pages.connect);
+    }
+
+    onAboutClick = (e: React.MouseEvent<HTMLButtonElement>): void =>
+    {
+        e.preventDefault();
+        this.props.setPage(pages.about);
+    }
+
     render = (): React.ReactNode =>
     {
         return (
@@ -42,9 +68,11 @@ class Header extends React.Component
                 >
                     <BottomNavigationAction label="Setings"
                         icon={<Settings />}
+                        onClick={ this.onSettingsClick }
                     />
-                    <BottomNavigationAction label="Conenct"
+                    <BottomNavigationAction label="Connect"
                         icon={<AddLink />}
+                        onClick={ this.onConnectClick }
                     />
                     <BottomNavigationAction label="Queue List"
                         icon={<List />}
@@ -57,11 +85,23 @@ class Header extends React.Component
                     />
                     <BottomNavigationAction label="About"
                         icon={<Info />}
+                        onClick={ this.onAboutClick }
                     />
                 </BottomNavigation>
             </Box>
         )    
     }
+}
+
+function Header() {
+    const { page, setPage } = useGlobal();
+
+    return (
+        <HeaderBase
+            page = { page }
+            setPage = { setPage }
+        />
+    );
 }
 
 export default Header;

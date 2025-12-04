@@ -21,34 +21,16 @@
  * SOFTWARE.
  */
 
-import Header from './view/header';
-import Settings from './view/settings';
-import Connect from './view/connect';
-import About from './view/about'
-import useGlobal from './model/store'
-import { pages } from './model/pages'
+import React from "react";
 
-function App() {
-
-  const { page } = useGlobal();
-
-  return (
-    <main className="container">
-      <Header />
-      
-      <div style={{ display: page === pages.settings ? 'block' : 'none' }}>
-        <Settings />
-      </div>
-
-      <div style={{ display: page === pages.connect ? 'block' : 'none' }} >
-        <Connect />
-      </div>
-
-      <div style={{ display: page === pages.about ? 'block' : 'none' }} >
-        <About />
-      </div>
-    </main>
-  );
+class Connect extends React.Component
+{
+    render = (): React.ReactNode =>
+    {
+        return(
+            <p>Connect place holder</p>
+        )    
+    }
 }
 
-export default App;
+export default Connect;
