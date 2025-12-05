@@ -27,6 +27,15 @@ pub mod connect;
 pub mod queue_list;
 pub mod queue;
 
+use tauri::{
+    CustomMenuItem,
+    SystemTray,
+    SystemTrayMenu,
+    SystemTrayMenuItem,
+    SystemTrayEvent,
+    Manager,
+};
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run()
 {
@@ -36,6 +45,11 @@ pub fn run()
         println!("Fail to load FFModel");
         return;
     }
+
+    // create menu
+    let quit = CustomMenuItem::new("Quit".to_string(), "quit");
+    let hide = CustomMenuItem::new("Hide".to_string(), "Hide the window");
+    let show = CustomMenuItem::new("Show".to_string(), "顯示視窗");
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
