@@ -43,14 +43,9 @@ static std::regex ipRegex = std::regex("^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)
 
 static std::mutex consoleMutex;
 
-void writeLastError(const char *file, int line)
+void writeLastError(const std::string_view &file, int line)
 {
 #ifdef _WIN32
-    if (!file)
-    {
-        return;
-    }
-
     LPSTR msgBuf = nullptr;
     DWORD errID = GetLastError();
     if (!errID)

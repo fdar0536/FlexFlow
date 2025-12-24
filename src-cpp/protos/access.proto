@@ -5,9 +5,15 @@ option go_package = "FF/protos";
 package ff;
 
 import "types.proto";
+import "google/api/annotations.proto";
 
 service Access {
-  rpc Echo(Empty) returns (EchoRes);
+  rpc Echo(Empty) returns (EchoRes) {
+    option (google.api.http) = {
+      get: "/echo"
+      body: "*"
+    };
+  }
 }
 
 message EchoRes {

@@ -25,6 +25,7 @@
 
 #include "spdlog/spdlog.h"
 
+#include "controller/global/global.hpp"
 #include "dirutils.hpp"
 
 namespace Model
@@ -40,7 +41,7 @@ u8 verifyDir(const std::string &in)
 {
     if (in.empty())
     {
-        spdlog::error("{}:{} \"in\" is empty.", __FILE__, __LINE__);
+        spdlog::error("{}:{} \"in\" is empty.", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -50,7 +51,7 @@ u8 verifyDir(const std::string &in)
         if (!std::filesystem::create_directory(in, ec))
         {
             spdlog::error("{}:{} Fail to create directory {}.",
-                          __FILE__, __LINE__, in);
+                          LOG_FILE_PATH(__FILE__), __LINE__, in);
             return 1;
         }
 
@@ -60,7 +61,7 @@ u8 verifyDir(const std::string &in)
     if (!std::filesystem::is_directory(in, ec))
     {
         spdlog::error("{}:{} {} is not directory.",
-                      __FILE__, __LINE__, in);
+                      LOG_FILE_PATH(__FILE__), __LINE__, in);
         return 1;
     }
 
@@ -71,21 +72,21 @@ u8 verifyFile(const std::string &in)
 {
     if (in.empty())
     {
-        spdlog::error("{}:{} \"in\" is empty.", __FILE__, __LINE__);
+        spdlog::error("{}:{} \"in\" is empty.", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     std::error_code ec;
     if (!std::filesystem::exists(in, ec))
     {
-        spdlog::error("{}:{} {} is not exist.", __FILE__, __LINE__, in);
+        spdlog::error("{}:{} {} is not exist.", LOG_FILE_PATH(__FILE__), __LINE__, in);
         return 1;
     }
 
     if (!std::filesystem::is_regular_file(in, ec))
     {
         spdlog::error("{}:{} {} is not regular file.",
-                      __FILE__, __LINE__, in);
+                      LOG_FILE_PATH(__FILE__), __LINE__, in);
         return 1;
     }
 

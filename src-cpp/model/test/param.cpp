@@ -44,9 +44,9 @@ Model::DAO::IQueueList *Param::list() const
 }
 
 // protected member functions
-void Param::printLog(const char *file, int line, const char *log)
+void Param::printLog(const std::string_view &file, int line, const char *log)
 {
-    if (!file || !log)
+    if (!log)
     {
         return;
     }

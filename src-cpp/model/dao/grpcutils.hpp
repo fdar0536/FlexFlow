@@ -39,7 +39,7 @@ namespace GRPCUtils
 
 void setupCtx(grpc::ClientContext &ctx);
 
-void buildErrMsg(const char *, i32, grpc::Status &);
+void buildErrMsg(const std::string_view &, i32, grpc::Status &);
 
 } // end namespace GRPCUtils
 

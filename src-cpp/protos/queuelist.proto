@@ -5,13 +5,42 @@ option go_package = "FF/protos";
 package ff;
 
 import "types.proto";
+import "google/api/annotations.proto";
 
 service QueueList {
-  rpc Create(QueueReq) returns (Empty);
-  rpc Rename(RenameQueueReq) returns (Empty);
-  rpc Delete(QueueReq) returns (Empty);
-  rpc List(Empty) returns (stream ListQueueRes);
-  rpc GetQueue(QueueReq) returns (Empty);
+  rpc Create(QueueReq) returns (Empty) {
+    option (google.api.http) = {
+      post: "/queuelist/create"
+      body: "*"
+    };
+  }
+
+  rpc Rename(RenameQueueReq) returns (Empty) {
+    option (google.api.http) = {
+      post: "/queuelist/rename"
+      body: "*"
+    };
+  }
+
+  rpc Delete(QueueReq) returns (Empty) {
+    option (google.api.http) = {
+      delete: "/queuelist/delete"
+      body: "*"
+    };
+  }
+
+  rpc List(Empty) returns (stream ListQueueRes) {
+    option (google.api.http) = {
+      get: "/queuelist/list"
+    };
+  }
+
+  rpc GetQueue(QueueReq) returns (Empty) {
+    option (google.api.http) = {
+      get: "/queuelist/getqueue"
+      body: "*"
+    };
+  }
 }
 
 message RenameQueueReq {

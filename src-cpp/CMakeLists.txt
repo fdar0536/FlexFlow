@@ -65,6 +65,11 @@ if(NOT DEFINED MAX_READ_QUEUE_SIZE)
     set(MAX_READ_QUEUE_SIZE 1024)
 endif(NOT DEFINED MAX_READ_QUEUE_SIZE)
 
+set(PROJECT_ROOT_DIR ${CMAKE_SOURCE_DIR})
+if (WIN32)
+    string(REPLACE "/" "\\\\" PROJECT_ROOT_DIR ${CMAKE_SOURCE_DIR})
+ENDIF (WIN32)
+
 configure_file(config.h.in config.h @ONLY)
 include_directories(After SYSTEM ${CMAKE_CURRENT_BINARY_DIR})
 include(GNUInstallDirs)
@@ -110,6 +115,8 @@ target_link_libraries(grpc_common
     protobuf::libprotobuf
     gRPC::grpc++
 )
+
+set_property(TARGET grpc_common PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 include(cmake/ffmodel.cmake)
 include(cmake/ffmodel_unittest.cmake)

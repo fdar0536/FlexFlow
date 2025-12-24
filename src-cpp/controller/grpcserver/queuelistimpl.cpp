@@ -23,7 +23,7 @@
 
 #include "spdlog/spdlog.h"
 
-#include "controller/global/defines.h"
+#include "controller/global/global.hpp"
 #include "model/errmsg.hpp"
 #include "init.hpp"
 
@@ -45,14 +45,14 @@ QueueListImpl::Create(grpc::ServerContext *ctx,
 
     if (!req)
     {
-        spdlog::critical("{}:{} invalid input", __FILE__, __LINE__);
+        spdlog::critical("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
         return grpc::Status(grpc::StatusCode::INTERNAL,
                             "Internal server error");
     }
 
     if (req->name().empty())
     {
-        spdlog::debug("{}:{} trace", __FILE__, __LINE__);
+        spdlog::debug("{}:{} trace", LOG_FILE_PATH(__FILE__), __LINE__);
         return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT,
                             "\"name\" is empty string");
     }
@@ -60,7 +60,7 @@ QueueListImpl::Create(grpc::ServerContext *ctx,
     u8 code = sqliteQueueList->createQueue(req->name());
     if (code)
     {
-        spdlog::debug("{}:{} trace", __FILE__, __LINE__);
+        spdlog::debug("{}:{} trace", LOG_FILE_PATH(__FILE__), __LINE__);
         return Model::ErrMsg::toGRPCStatus(code, "Fail to create queue");
     }
 
@@ -77,14 +77,14 @@ QueueListImpl::Rename(grpc::ServerContext *ctx,
 
     if (!req)
     {
-        spdlog::critical("{}:{} invalid input", __FILE__, __LINE__);
+        spdlog::critical("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
         return grpc::Status(grpc::StatusCode::INTERNAL,
                             "Internal server error");
     }
 
     if (req->oldname().empty() || req->newname().empty())
     {
-        spdlog::debug("{}:{} trace", __FILE__, __LINE__);
+        spdlog::debug("{}:{} trace", LOG_FILE_PATH(__FILE__), __LINE__);
         return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT,
                             "\"oldName\" or \"newName\" is empty string");
     }
@@ -92,7 +92,7 @@ QueueListImpl::Rename(grpc::ServerContext *ctx,
     u8 code = sqliteQueueList->renameQueue(req->oldname(), req->newname());
     if (code)
     {
-        spdlog::debug("{}:{} trace", __FILE__, __LINE__);
+        spdlog::debug("{}:{} trace", LOG_FILE_PATH(__FILE__), __LINE__);
         return Model::ErrMsg::toGRPCStatus(code, "Fail to rename");
     }
 
@@ -109,14 +109,14 @@ QueueListImpl::Delete(grpc::ServerContext *ctx,
 
     if (!req)
     {
-        spdlog::critical("{}:{} invalid input", __FILE__, __LINE__);
+        spdlog::critical("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
         return grpc::Status(grpc::StatusCode::INTERNAL,
                             "Internal server error");
     }
 
     if (req->name().empty())
     {
-        spdlog::debug("{}:{} trace", __FILE__, __LINE__);
+        spdlog::debug("{}:{} trace", LOG_FILE_PATH(__FILE__), __LINE__);
         return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT,
                             "\"name\" is empty string");
     }
@@ -124,7 +124,7 @@ QueueListImpl::Delete(grpc::ServerContext *ctx,
     u8 code = sqliteQueueList->deleteQueue(req->name());
     if (code)
     {
-        spdlog::debug("{}:{} trace", __FILE__, __LINE__);
+        spdlog::debug("{}:{} trace", LOG_FILE_PATH(__FILE__), __LINE__);
         return Model::ErrMsg::toGRPCStatus(code, "Fail to delete");
     }
 
@@ -141,7 +141,7 @@ QueueListImpl::List(grpc::ServerContext *ctx,
 
     if (!writer)
     {
-        spdlog::critical("{}:{} invalid input", __FILE__, __LINE__);
+        spdlog::critical("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
         return grpc::Status(grpc::StatusCode::INTERNAL,
                             "Internal server error");
     }
@@ -150,7 +150,7 @@ QueueListImpl::List(grpc::ServerContext *ctx,
     u8 code = sqliteQueueList->listQueue(out);
     if (code)
     {
-        spdlog::debug("{}:{} trace", __FILE__, __LINE__);
+        spdlog::debug("{}:{} trace", LOG_FILE_PATH(__FILE__), __LINE__);
         return Model::ErrMsg::toGRPCStatus(code, "Fail to list queue");
     }
 
@@ -173,7 +173,7 @@ QueueListImpl::GetQueue(grpc::ServerContext *ctx,
     UNUSED(res);
     if (!req)
     {
-        spdlog::critical("{}:{} invalid input", __FILE__, __LINE__);
+        spdlog::critical("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
         return grpc::Status(grpc::StatusCode::INTERNAL,
                             "Internal server error");
     }

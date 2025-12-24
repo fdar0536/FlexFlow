@@ -23,6 +23,7 @@
 
 #include "spdlog/spdlog.h"
 
+#include "controller/global/global.hpp"
 #include "model/errmsg.hpp"
 
 #include "grpcconnect.hpp"
@@ -49,13 +50,13 @@ u8 GRPCQueueList::init(IConnect *connect)
 {
     if (!connect)
     {
-        spdlog::error("{}:{} connect is nullptr", __FILE__, __LINE__);
+        spdlog::error("{}:{} connect is nullptr", LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_INVALID_ARGUMENT;
     }
 
     if (!connect->connectToken())
     {
-        spdlog::error("{}:{} connect token is nullptr", __FILE__, __LINE__);
+        spdlog::error("{}:{} connect token is nullptr", LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_INVALID_ARGUMENT;
     }
 
@@ -65,13 +66,13 @@ u8 GRPCQueueList::init(IConnect *connect)
         m_stub = ff::QueueList::NewStub(token->channel);
         if (m_stub == nullptr)
         {
-            spdlog::error("{}:{} Fail to get stub", __FILE__, __LINE__);
+            spdlog::error("{}:{} Fail to get stub", LOG_FILE_PATH(__FILE__), __LINE__);
             return ErrCode_OS_ERROR;
         }
     }
     catch (...)
     {
-        spdlog::error("{}:{} Fail to get stub", __FILE__, __LINE__);
+        spdlog::error("{}:{} Fail to get stub", LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_OS_ERROR;
     }
 
@@ -94,7 +95,7 @@ u8 GRPCQueueList::createQueue(const std::string &name)
         return ErrCode_OK;
     }
 
-    GRPCUtils::buildErrMsg(__FILE__, __LINE__, status);
+    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
     return ErrCode_OS_ERROR;
 }
 
@@ -111,7 +112,7 @@ u8 GRPCQueueList::listQueue(std::vector<std::string> &out)
     auto reader = m_stub->List(&ctx, req);
     if (reader == nullptr)
     {
-        spdlog::error("{}:{} reader is nullptr", __FILE__, __LINE__);
+        spdlog::error("{}:{} reader is nullptr", LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_OS_ERROR;
     }
 
@@ -126,7 +127,7 @@ u8 GRPCQueueList::listQueue(std::vector<std::string> &out)
         return ErrCode_OK;
     }
 
-    GRPCUtils::buildErrMsg(__FILE__, __LINE__, status);
+    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
     return ErrCode_OS_ERROR;
 }
 
@@ -145,7 +146,7 @@ u8 GRPCQueueList::deleteQueue(const std::string &name)
         return ErrCode_OK;
     }
 
-    GRPCUtils::buildErrMsg(__FILE__, __LINE__, status);
+    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
     return ErrCode_OS_ERROR;
 }
 
@@ -166,7 +167,7 @@ u8 GRPCQueueList::renameQueue(const std::string &oldName,
         return ErrCode_OK;
     }
 
-    GRPCUtils::buildErrMsg(__FILE__, __LINE__, status);
+    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
     return ErrCode_OS_ERROR;
 }
 
@@ -185,13 +186,13 @@ IQueue *GRPCQueueList::getQueue(const std::string &name)
         GRPCQueue *queue = new (std::nothrow) GRPCQueue;
         if (!queue)
         {
-            spdlog::error("{}:{} Fail to allocate memory", __FILE__, __LINE__);
+            spdlog::error("{}:{} Fail to allocate memory", LOG_FILE_PATH(__FILE__), __LINE__);
             return nullptr;
         }
 
         if (queue->init(m_conn, nullptr, name))
         {
-            spdlog::error("{}:{} Fail to initialize queue", __FILE__, __LINE__);
+            spdlog::error("{}:{} Fail to initialize queue", LOG_FILE_PATH(__FILE__), __LINE__);
             delete queue;
             return nullptr;
         }
@@ -199,7 +200,7 @@ IQueue *GRPCQueueList::getQueue(const std::string &name)
         return queue;
     }
 
-    GRPCUtils::buildErrMsg(__FILE__, __LINE__, status);
+    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
     return nullptr;
 }
 

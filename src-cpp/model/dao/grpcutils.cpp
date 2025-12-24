@@ -42,7 +42,7 @@ void setupCtx(grpc::ClientContext &ctx)
                      std::chrono::milliseconds(FF_CLIENT_TIMEOUT * 1000));
 }
 
-void buildErrMsg(const char *file, i32 line, grpc::Status &status)
+void buildErrMsg(const std::string_view &file, i32 line, grpc::Status &status)
 {
     spdlog::error("{}:{} gRPC error code {}: {}", file, line,
                   static_cast<i32>(status.error_code()), status.error_message());

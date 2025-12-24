@@ -41,12 +41,6 @@ interface HeaderProps
 
 class HeaderBase extends React.Component<HeaderProps>
 {
-    onSettingsClick = (e: React.MouseEvent<HTMLButtonElement>): void =>
-    {
-        e.preventDefault();
-        this.props.setPage(pages.settings);
-    }
-
     onConnectClick = (e: React.MouseEvent<HTMLButtonElement>): void =>
     {
         e.preventDefault();
@@ -66,10 +60,6 @@ class HeaderBase extends React.Component<HeaderProps>
                 <BottomNavigation
                     showLabels
                 >
-                    <BottomNavigationAction label="Setings"
-                        icon={<Settings />}
-                        onClick={ this.onSettingsClick }
-                    />
                     <BottomNavigationAction label="Connect"
                         icon={<AddLink />}
                         onClick={ this.onConnectClick }

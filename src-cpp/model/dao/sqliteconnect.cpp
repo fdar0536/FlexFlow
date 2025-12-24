@@ -23,6 +23,7 @@
 
 #include "spdlog/spdlog.h"
 
+#include "controller/global/global.hpp"
 #include "model/errmsg.hpp"
 
 #include "sqliteconnect.hpp"
@@ -72,7 +73,7 @@ SQLiteConnect::startConnect(const std::string &target,
     static_cast<void>(port);
     if (target.empty())
     {
-        spdlog::error("{}:{} target is empty.", __FILE__, __LINE__);
+        spdlog::error("{}:{} target is empty.", LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_INVALID_ARGUMENT;
     }
 
@@ -85,7 +86,7 @@ SQLiteConnect::startConnect(const std::string &target,
 
     if (DirUtils::verifyDir(basePath))
     {
-        spdlog::error("{}:{} Fail to verify basePath.", __FILE__, __LINE__);
+        spdlog::error("{}:{} Fail to verify basePath.", LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_INVALID_ARGUMENT;
     }
 

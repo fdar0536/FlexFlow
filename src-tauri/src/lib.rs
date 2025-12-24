@@ -27,6 +27,11 @@ pub mod connect;
 pub mod queue_list;
 pub mod queue;
 
+use tauri::{
+    menu::{Menu, MenuItem},
+    tray::TrayIconBuilder,
+};
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run()
 {
@@ -37,7 +42,34 @@ pub fn run()
         return;
     }
 
+    // create menu
+    
+
     tauri::Builder::default()
+        .setup(|app| {
+            let tray = TrayIconBuilder::new().build(app)?;
+            let quit_i =
+            MenuItem::with_id(app, "quit",
+            "Quit", true, None::<&str>)?;
+            let show_i = MenuItem::with_id(app, "",
+            "Show", true, None::<&str>)?;
+
+            let menu =
+            Menu::with_items(app, &[&quit_i, &show_i])?;
+            let tray = TrayIconBuilder::new()
+            .menu(&menu)
+            .on_menu_event(|app, event| match event.id.as_ref() {
+                "Quit" => {
+                  
+                  app.exit(0);
+                }
+                _ => {
+                  println!("menu item {:?} not handled", event.id);
+                }
+              })
+            .build(app)?;
+            Ok(())
+        })
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             // connect

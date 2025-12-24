@@ -136,13 +136,13 @@ u8 queuelist_listQueue(Handle h, char ***out, size_t *outSize)
     IQueueList *list(getList(h));
     if (!list)
     {
-        return NULL;
+        return 1;
     }
 
     std::vector<std::string> output;
     if (list->listQueue(output))
     {
-        return NULL;
+        return 1;
     }
 
     if (!output.size())
@@ -153,7 +153,7 @@ u8 queuelist_listQueue(Handle h, char ***out, size_t *outSize)
 
     *outSize = output.size();
     *out = (char **)malloc((*outSize) * sizeof(char *));
-    if (!out) return NULL;
+    if (!out) return 1;
 
     for (size_t i = 0; i < output.size(); ++i) {
         const char *str = output.at(i).c_str();

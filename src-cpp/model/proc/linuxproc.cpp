@@ -61,13 +61,13 @@ u8 LinuxProc::start(const Task &task)
 {
     if (isRunning())
     {
-        spdlog::error("{}:{} Process is running", __FILE__, __LINE__);
+        spdlog::error("{}:{} Process is running", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     if (Controller::Global::isAdmin())
     {
-        spdlog::error("{}:{} Refuse to run as super user", __FILE__, __LINE__);
+        spdlog::error("{}:{} Refuse to run as super user", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -78,7 +78,7 @@ u8 LinuxProc::start(const Task &task)
     if (m_pid == -1)
     {
         // parent process
-        spdlog::error("{}:{} {}", __FILE__, __LINE__, strerror(errno));
+        spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
         return 1;
     }
 
@@ -91,21 +91,21 @@ u8 LinuxProc::start(const Task &task)
     int fileFlag(fcntl(m_masterFD, F_GETFL));
     if (fileFlag == -1)
     {
-        spdlog::error("{}:{} {}", __FILE__, __LINE__, strerror(errno));
+        spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
         kill(m_pid, SIGKILL);
         return 1;
     }
 
     if (fcntl(m_masterFD, F_SETFL, fileFlag | O_NONBLOCK) == -1)
     {
-        spdlog::error("{}:{} {}", __FILE__, __LINE__, strerror(errno));
+        spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
         kill(m_pid, SIGKILL);
         return 1;
     }
 
     if (epollInit())
     {
-        spdlog::error("{}:{} {}", __FILE__, __LINE__, strerror(errno));
+        spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
         kill(m_pid, SIGKILL);
         epollFin();
         return 1;
@@ -126,7 +126,7 @@ bool LinuxProc::isRunning()
     pid_t ret = waitpid(m_pid, &status, WNOHANG);
     if (ret == -1)
     {
-        spdlog::debug("{}:{} {}", __FILE__, __LINE__, strerror(errno));
+        spdlog::debug("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
         epollFin();
         return false;
     }
@@ -155,7 +155,7 @@ void LinuxProc::readCurrentOutput(std::vector<std::string> &out)
 
         if (m_deque.empty())
         {
-            spdlog::debug("{}:{} nothing to read", __FILE__, __LINE__);
+            spdlog::debug("{}:{} nothing to read", LOG_FILE_PATH(__FILE__), __LINE__);
             return;
         }
 
@@ -172,7 +172,7 @@ u8 LinuxProc::exitCode(i32 &out)
 {
     if (isRunning())
     {
-        spdlog::error("{}:{} Process is running", __FILE__, __LINE__);
+        spdlog::error("{}:{} Process is running", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -267,7 +267,7 @@ void LinuxProc::stopImpl()
 {
     if (kill(m_pid, SIGKILL) == -1)
     {
-        spdlog::error("{}:{} {}", __FILE__, __LINE__, strerror(errno));
+        spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
         return;
     }
 
@@ -279,7 +279,7 @@ u8 LinuxProc::epollInit()
     m_epoll_fd = epoll_create1(0);
     if (m_epoll_fd == -1)
     {
-        spdlog::error("{}:{} {}", __FILE__, __LINE__, strerror(errno));
+        spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
         return 1;
     }
 
@@ -287,7 +287,7 @@ u8 LinuxProc::epollInit()
     m_event.data.fd = m_masterFD;
     if (epoll_ctl(m_epoll_fd, EPOLL_CTL_ADD, m_masterFD, &m_event))
     {
-        spdlog::error("{}:{} {}", __FILE__, __LINE__, strerror(errno));
+        spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
         return 1;
     }
 
@@ -319,7 +319,7 @@ void LinuxProc::readOutputLoop()
         {
             // epoll failed
             spdlog::error("{}:{} epoll_wait failed: {}",
-                __FILE__, __LINE__, strerror(errno));
+                LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
             break;
         }
 
@@ -329,7 +329,7 @@ void LinuxProc::readOutputLoop()
                 (m_events[i].events & EPOLLIN))
             {
                 std::string buf;
-                buf.resize(STQ_READ_BUFFER_SIZE);
+                buf.resize(FF_READ_BUFFER_SIZE);
                 while (1)
                 {
                     count = read(m_events[i].data.fd, buf.data(), buf.size());
@@ -337,19 +337,19 @@ void LinuxProc::readOutputLoop()
                     {
                         if (errno == EINTR || errno == EAGAIN || errno == EIO)
                         {
-                            spdlog::debug("{}:{} {}", __FILE__, __LINE__, strerror(errno));
+                            spdlog::debug("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
                             continue;
                         }
                         else
                         {
-                            spdlog::error("{}:{} {}", __FILE__, __LINE__, strerror(errno));
+                            spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
                             return;
                         }
                     }
                     else if (count == 0)
                     {
                         // pipe is closed or child process is exited
-                        spdlog::debug("{}:{} {}", __FILE__, __LINE__, "Nothing to read");
+                        spdlog::debug("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, "Nothing to read");
                         return;
                     }
                     else // count != 0
@@ -359,7 +359,7 @@ void LinuxProc::readOutputLoop()
                         {
                             std::unique_lock<std::mutex> lock(m_mutex);
 
-                            if (m_deque.size() == STQ_MAX_READ_QUEUE_SIZE)
+                            if (m_deque.size() == FF_MAX_READ_QUEUE_SIZE)
                             {
                                 m_deque.pop_front();
                             }

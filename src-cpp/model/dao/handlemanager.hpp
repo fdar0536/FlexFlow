@@ -28,7 +28,7 @@
 
 #include "spdlog/spdlog.h"
 
-#include "controller/global/defines.h"
+#include "controller/global/global.hpp"
 
 namespace Model
 {
@@ -95,7 +95,7 @@ public:
             m_free_indices.pop_back();
             if (idx > IDX_MASK)
             {
-                spdlog::error("{}:{} idx is full", __FILE__, __LINE__);
+                spdlog::error("{}:{} idx is full", LOG_FILE_PATH(__FILE__), __LINE__);
                 return 1;
             }
         }
@@ -104,7 +104,7 @@ public:
             idx = static_cast<u32>(m_entries.size());
             if (idx > IDX_MASK)
             {
-                spdlog::error("{}:{} idx is full", __FILE__, __LINE__);
+                spdlog::error("{}:{} idx is full", LOG_FILE_PATH(__FILE__), __LINE__);
                 return 1;
             }
 

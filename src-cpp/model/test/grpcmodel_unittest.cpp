@@ -26,6 +26,7 @@
 
 #include "gtest/gtest.h"
 
+#include "controller/global/global.hpp"
 #include "model/dao/grpcconnect.hpp"
 #include "model/dao/grpcqueuelist.hpp"
 
@@ -50,14 +51,14 @@ public:
 
         if (!m_proc)
         {
-            printLog(__FILE__, __LINE__, "Fail to allocate memory");
+            printLog(LOG_FILE_PATH(__FILE__), __LINE__, "Fail to allocate memory");
             stop();
             return 1;
         }
 
         if (m_proc->init())
         {
-            printLog(__FILE__, __LINE__, "proc init failed");
+            printLog(LOG_FILE_PATH(__FILE__), __LINE__, "proc init failed");
             stop();
             return 1;
         }
@@ -69,7 +70,7 @@ public:
 
         if (m_proc->start(task))
         {
-            printLog(__FILE__, __LINE__, "Fail to start Flex Flow server");
+            printLog(LOG_FILE_PATH(__FILE__), __LINE__, "Fail to start Flex Flow server");
             stop();
             return 1;
         }
@@ -80,14 +81,14 @@ public:
         Model::DAO::GRPCConnect *conn = new (std::nothrow) Model::DAO::GRPCConnect;
         if (!conn)
         {
-            printLog(__FILE__, __LINE__, "Fail to allocate memory");
+            printLog(LOG_FILE_PATH(__FILE__), __LINE__, "Fail to allocate memory");
             stop();
             return 1;
         }
 
         if (conn->init())
         {
-            printLog(__FILE__, __LINE__, "Conn init failed");
+            printLog(LOG_FILE_PATH(__FILE__), __LINE__, "Conn init failed");
             stop();
             delete conn;
             return 1;
@@ -95,7 +96,7 @@ public:
 
         if (conn->startConnect("127.0.0.1", 12345))
         {
-            printLog(__FILE__, __LINE__, "Fail to connect to Flex Flow server");
+            printLog(LOG_FILE_PATH(__FILE__), __LINE__, "Fail to connect to Flex Flow server");
             stop();
             delete conn;
             return 1;
@@ -104,7 +105,7 @@ public:
         auto list = new (std::nothrow) Model::DAO::GRPCQueueList;
         if (!list)
         {
-            printLog(__FILE__, __LINE__, "Fail to allocate memory");
+            printLog(LOG_FILE_PATH(__FILE__), __LINE__, "Fail to allocate memory");
             stop();
             delete conn;
             return 1;
@@ -113,7 +114,7 @@ public:
         m_list = list;
         if (m_list->init(conn))
         {
-            printLog(__FILE__, __LINE__, "Fail to allocate memory");
+            printLog(LOG_FILE_PATH(__FILE__), __LINE__, "Fail to allocate memory");
             stop();
             delete conn;
             return 1;

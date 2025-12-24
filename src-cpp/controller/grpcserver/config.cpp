@@ -31,6 +31,7 @@
 #include "cxxopts.hpp"
 #include "yaml-cpp/yaml.h"
 
+#include "controller/global/global.hpp"
 #include "model/dao/dirutils.hpp"
 #include "model/utils.hpp"
 #include "config.hpp"
@@ -51,13 +52,13 @@ u8 Config::parse(Config *in, int argc, char **argv)
 {
     if (!in)
     {
-        spdlog::warn("{}:{} input is nullptr", __FILE__, __LINE__);
+        spdlog::warn("{}:{} input is nullptr", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     if (!argv)
     {
-        spdlog::error("{}:{} you should never see this line", __FILE__, __LINE__);
+        spdlog::error("{}:{} you should never see this line", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -69,13 +70,13 @@ u8 Config::parse(Config *in, int argc, char **argv)
     if (!getcwd(buf, len))
 #endif
     {
-        spdlog::error("{}:{} Fail to get current path", __FILE__, __LINE__);
+        spdlog::error("{}:{} Fail to get current path", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     if (argc == 1 || !argv)
     {
-        spdlog::warn("{}:{} use default config", __FILE__, __LINE__);
+        spdlog::warn("{}:{} use default config", LOG_FILE_PATH(__FILE__), __LINE__);
         in->dbPath = std::string(buf);
         in->logPath = std::string(buf);
         return 0;
@@ -114,7 +115,7 @@ u8 Config::parse(Config *in, int argc, char **argv)
         {
             if (Model::DAO::DirUtils::verifyFile(configFile))
             {
-                spdlog::error("{}:{} Fail to verify config file", __FILE__, __LINE__);
+                spdlog::error("{}:{} Fail to verify config file", LOG_FILE_PATH(__FILE__), __LINE__);
                 return 1;
             }
         }
@@ -124,38 +125,32 @@ u8 Config::parse(Config *in, int argc, char **argv)
             Model::DAO::DirUtils::convertPath(in->logPath);
             if (Model::DAO::DirUtils::verifyDir(in->logPath))
             {
-                spdlog::error("{}:{} fail to verify log path", __FILE__, __LINE__);
+                spdlog::error("{}:{} fail to verify log path", LOG_FILE_PATH(__FILE__), __LINE__);
                 return 1;
             }
         }
 
-        if (in->listenPort > 65535)
-        {
-            spdlog::error("{}:{} Invalid port", __FILE__, __LINE__);
-            return 1;
-        }
-
         if (Model::Utils::verifyIP(in->listenIP))
         {
-            spdlog::error("{}:{} Invalid ip", __FILE__, __LINE__);
+            spdlog::error("{}:{} Invalid ip", LOG_FILE_PATH(__FILE__), __LINE__);
             return 1;
         }
     }
     catch(const cxxopts::exceptions::exception &e)
     {
-        spdlog::error("{}:{} {}", __FILE__, __LINE__, e.what());
+        spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, e.what());
         return 1;
     }
 
     if (configFile.empty())
     {
-        spdlog::warn("{}:{} no config file", __FILE__, __LINE__);
+        spdlog::warn("{}:{} no config file", LOG_FILE_PATH(__FILE__), __LINE__);
         return 0;
     }
 
     if (parse(in, configFile))
     {
-        spdlog::error("{}:{} fail to parse config file", __FILE__, __LINE__);
+        spdlog::error("{}:{} fail to parse config file", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -166,7 +161,7 @@ uint_fast8_t Config::parse(Config *obj, const std::string &path)
 {
     if (!obj)
     {
-        spdlog::warn("{}:{} input is nullptr", __FILE__, __LINE__);
+        spdlog::warn("{}:{} input is nullptr", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -180,7 +175,7 @@ uint_fast8_t Config::parse(Config *obj, const std::string &path)
         Model::DAO::DirUtils::convertPath(obj->logPath);
         if (Model::DAO::DirUtils::verifyDir(obj->logPath))
         {
-            spdlog::error("{}:{} fail to verify log path", __FILE__, __LINE__);
+            spdlog::error("{}:{} fail to verify log path", LOG_FILE_PATH(__FILE__), __LINE__);
             return 1;
         }
 
@@ -189,7 +184,7 @@ uint_fast8_t Config::parse(Config *obj, const std::string &path)
 
         if (Model::Utils::verifyIP(obj->listenIP))
         {
-            spdlog::error("{}:{} Invalid ip", __FILE__, __LINE__);
+            spdlog::error("{}:{} Invalid ip", LOG_FILE_PATH(__FILE__), __LINE__);
             return 1;
         }
 
@@ -199,7 +194,7 @@ uint_fast8_t Config::parse(Config *obj, const std::string &path)
     }
     catch (...)
     {
-        spdlog::error("{}:{} error caught", __FILE__, __LINE__);
+        spdlog::error("{}:{} error caught", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 

@@ -77,6 +77,8 @@ target_link_libraries(ffmodel
     ${FF_MODEL_LIBS}
 )
 
+set_property(TARGET ffmodel PROPERTY POSITION_INDEPENDENT_CODE ON)
+
 if (ENABLE_C_MODEL)
     set(C_MODEL_SRC
         model/dao/capi.cpp

@@ -39,9 +39,9 @@ int main(int argc, char **argv)
     if (Controller::Global::isAdmin())
     {
 #ifdef _WIN32
-        spdlog::error("{}:{} Refuse to run as administrator", __FILE__, __LINE__);
+        spdlog::error("{}:{} Refuse to run as administrator", LOG_FILE_PATH(__FILE__), __LINE__);
 #else
-        spdlog::error("{}:{} Refuse to run as super user", __FILE__, __LINE__);
+        spdlog::error("{}:{} Refuse to run as super user", LOG_FILE_PATH(__FILE__), __LINE__);
 #endif
         return 1;
     }
@@ -54,7 +54,7 @@ int main(int argc, char **argv)
             return 0;
         }
 
-        spdlog::error("{}:{} Fail to initialize", __FILE__, __LINE__);
+        spdlog::error("{}:{} Fail to initialize", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -73,7 +73,7 @@ int main(int argc, char **argv)
 
     if (Controller::GRPCServer::server.start())
     {
-        spdlog::error("{}:{} Fail to start server", __FILE__, __LINE__);
+        spdlog::error("{}:{} Fail to start server", LOG_FILE_PATH(__FILE__), __LINE__);
         ret = 1;
     }
 
@@ -83,8 +83,8 @@ int main(int argc, char **argv)
 
 static void sighandler(int signum)
 {
-    spdlog::info("{}:{} Signaled: {}", __FILE__, __LINE__, signum);
-    spdlog::info("{}:{} Good Bye!", __FILE__, __LINE__);
+    spdlog::info("{}:{} Signaled: {}", LOG_FILE_PATH(__FILE__), __LINE__, signum);
+    spdlog::info("{}:{} Good Bye!", LOG_FILE_PATH(__FILE__), __LINE__);
     Controller::GRPCServer::server.stop();
 }
 

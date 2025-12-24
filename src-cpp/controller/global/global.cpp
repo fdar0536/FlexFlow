@@ -64,7 +64,7 @@ u8 consoleInit()
     // change code page to UTF-8 UNICODE
     if (!IsValidCodePage(CP_UTF8))
     {
-        Model::Utils::writeLastError(__FILE__, __LINE__);
+        Model::Utils::writeLastError(LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -73,31 +73,31 @@ u8 consoleInit()
 
     if (!SetConsoleCP(CP_UTF8))
     {
-        Model::Utils::writeLastError(__FILE__, __LINE__);
+        Model::Utils::writeLastError(LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
     if (!SetConsoleOutputCP(CP_UTF8))
     {
-        Model::Utils::writeLastError(__FILE__, __LINE__);
+        Model::Utils::writeLastError(LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     // change file stream translation mode
     if (_setmode(_fileno(stdout), _O_U8TEXT) == -1)
     {
-        Model::Utils::writeLastError(__FILE__, __LINE__);
+        Model::Utils::writeLastError(LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     if (_setmode(_fileno(stderr), _O_U8TEXT) == -1)
     {
-        Model::Utils::writeLastError(__FILE__, __LINE__);
+        Model::Utils::writeLastError(LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     if (_setmode(_fileno(stdin), _O_U16TEXT) == -1)
     {
-        Model::Utils::writeLastError(__FILE__, __LINE__);
+        Model::Utils::writeLastError(LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 #endif
@@ -167,8 +167,8 @@ u8 spdlogInit(const std::string &path)
     }
     catch (...)
     {
-        spdlog::error("{}:{} Fail to initialize spdlog, path is: {}", __FILE__, __LINE__,
-        path);
+        spdlog::error("{}:{} Fail to initialize spdlog, path is: {}",
+                      LOG_FILE_PATH(__FILE__), __LINE__, path);
         return 1;
     }
 
@@ -178,25 +178,19 @@ u8 spdlogInit(const std::string &path)
 u8 sqliteInit(Model::DAO::IQueueList **out, const std::string &target)
 {
     Model::DAO::SQLiteConnect *conn(nullptr);
-    try
+    conn = new (std::nothrow) Model::DAO::SQLiteConnect();
+    if (!conn)
     {
-        conn = new Model::DAO::SQLiteConnect();
-        if (!conn)
-        {
-            spdlog::error("{}:{} Fail to allocate memory", __FILE__, __LINE__);
-            return 1;
-        }
-    }
-    catch(...)
-    {
-        spdlog::error("{}:{} Fail to allocate memory", __FILE__, __LINE__);
+        spdlog::error("{}:{} Fail to allocate memory",
+                      LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     if (conn->startConnect(target))
     {
         delete conn;
-        spdlog::error("{}:{} Fail to initialize sqlite", __FILE__, __LINE__);
+        spdlog::error("{}:{} Fail to connect to {}",
+                      LOG_FILE_PATH(__FILE__), __LINE__, target);
         return 1;
     }
 
@@ -207,13 +201,15 @@ u8 sqliteInit(Model::DAO::IQueueList **out, const std::string &target)
     }
     catch (...)
     {
-        spdlog::error("{}:{} Fail to allocate memory", __FILE__, __LINE__);
+        spdlog::error("{}:{} Fail to allocate memory",
+                      LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     if (sqlPtr->init(conn))
     {
-        spdlog::error("{}:{} Fail to initialize sqlite queue list", __FILE__, __LINE__);
+        spdlog::error("{}:{} Fail to initialize sqlite queue list",
+                      LOG_FILE_PATH(__FILE__), __LINE__);
         delete sqlPtr;
         delete conn;
         return 1;
@@ -228,21 +224,23 @@ u8 grpcInit(Model::DAO::IQueueList **out, const std::string &target, const i32 p
     Model::DAO::GRPCConnect *conn = new (std::nothrow) Model::DAO::GRPCConnect;
     if (!conn)
     {
-        spdlog::error("{}:{} Fail to allocate memory", __FILE__, __LINE__);
+        spdlog::error("{}:{} Fail to allocate memory",
+                      LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     if (conn->init())
     {
         delete conn;
-        spdlog::error("{}:{} Fail to initialize conn", __FILE__, __LINE__);
+        spdlog::error("{}:{} Fail to initialize conn",
+                      LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     if (conn->startConnect(target, port))
     {
         delete conn;
-        spdlog::error("{}:{} Fail to connect to server", __FILE__, __LINE__);
+        spdlog::error("{}:{} Fail to connect to server", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -250,14 +248,14 @@ u8 grpcInit(Model::DAO::IQueueList **out, const std::string &target, const i32 p
     if (!queueList)
     {
         delete conn;
-        spdlog::error("{}:{} Fail to allocate memory", __FILE__, __LINE__);
+        spdlog::error("{}:{} Fail to allocate memory", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     if (queueList->init(conn))
     {
         delete queueList;
-        spdlog::error("{}:{} Fail to initialize queue list", __FILE__, __LINE__);
+        spdlog::error("{}:{} Fail to initialize queue list", LOG_FILE_PATH(__FILE__), __LINE__);
         delete conn;
         return 1;
     }

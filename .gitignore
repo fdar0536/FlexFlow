@@ -40,3 +40,7 @@ src-cpp/.cache/*
 src-cpp/.vscode
 src-cpp/.qtcreator
 src-cpp/.qtcreator/*
+src-cpp/.qmlls.ini
+.qmlls.ini
+
+build/*

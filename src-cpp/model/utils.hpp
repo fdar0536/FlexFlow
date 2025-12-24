@@ -34,7 +34,7 @@ namespace Model
 namespace Utils
 {
 
-void writeLastError(const char *file, int line);
+void writeLastError(const std::string_view &file, int line);
 
 void writeConsole(const std::string &in);
 

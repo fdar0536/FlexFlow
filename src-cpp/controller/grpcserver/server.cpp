@@ -26,6 +26,7 @@
 
 #include "server.hpp"
 
+#include "controller/global/global.hpp"
 #include "controller/grpcserver/init.hpp"
 
 namespace Controller
@@ -58,7 +59,7 @@ uint_fast8_t Server::start()
         builder.RegisterService(&m_queueImpl);
         builder.RegisterService(&m_queueListImpl);
         m_server = builder.BuildAndStart();
-        spdlog::info("{}:{} Server is listening on {}", __FILE__, __LINE__,
+        spdlog::info("{}:{} Server is listening on {}", LOG_FILE_PATH(__FILE__), __LINE__,
                      listenAddr);
 
         auto serveFn = [this]()
@@ -75,7 +76,7 @@ uint_fast8_t Server::start()
     }
     catch (...)
     {
-        spdlog::error("{}:{} Fail to start server", __FILE__, __LINE__);
+        spdlog::error("{}:{} Fail to start server", LOG_FILE_PATH(__FILE__), __LINE__);
         m_server = nullptr;
         return 1;
     }

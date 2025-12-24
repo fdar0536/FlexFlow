@@ -25,7 +25,7 @@
 #include "model/dao/grpcconnect.hpp"
 #include "spdlog/spdlog.h"
 
-#include "controller/global/defines.h"
+#include "controller/global/global.hpp"
 #include "grpcutils.hpp"
 #include "grpcqueue.hpp"
 
@@ -51,19 +51,19 @@ GRPCQueue::init(IConnect *connect,
     UNUSED(process);
     if (connect == nullptr)
     {
-        spdlog::error("{}:{} connect is nullptr", __FILE__, __LINE__);
+        spdlog::error("{}:{} connect is nullptr", LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_INVALID_ARGUMENT;
     }
 
     if (!connect->connectToken())
     {
-        spdlog::error("{}:{} connect token is nullptr", __FILE__, __LINE__);
+        spdlog::error("{}:{} connect token is nullptr", LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_INVALID_ARGUMENT;
     }
 
     if (name.empty())
     {
-        spdlog::error("{}:{} name is empty", __FILE__, __LINE__);
+        spdlog::error("{}:{} name is empty", LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_INVALID_ARGUMENT;
     }
 
@@ -74,13 +74,13 @@ GRPCQueue::init(IConnect *connect,
         m_stub = ff::Queue::NewStub(token->channel);
         if (m_stub == nullptr)
         {
-            spdlog::error("{}:{} Fail to get stub", __FILE__, __LINE__);
+            spdlog::error("{}:{} Fail to get stub", LOG_FILE_PATH(__FILE__), __LINE__);
             return ErrCode_OS_ERROR;
         }
     }
     catch (...)
     {
-        spdlog::error("{}:{} Fail to get stub", __FILE__, __LINE__);
+        spdlog::error("{}:{} Fail to get stub", LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_OS_ERROR;
     }
 
@@ -103,7 +103,7 @@ u8 GRPCQueue::listPending(std::vector<int> &out)
     auto reader = m_stub->ListPending(&ctx, req);
     if (reader == nullptr)
     {
-        spdlog::error("{}:{} reader is nullptr", __FILE__, __LINE__);
+        spdlog::error("{}:{} reader is nullptr", LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_OS_ERROR;
     }
 
@@ -131,7 +131,7 @@ u8 GRPCQueue::listFinished(std::vector<int> &out)
     auto reader = m_stub->ListFinished(&ctx, req);
     if (reader == nullptr)
     {
-        spdlog::error("{}:{} reader is nullptr", __FILE__, __LINE__);
+        spdlog::error("{}:{} reader is nullptr", LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_OS_ERROR;
     }
 
@@ -162,7 +162,7 @@ u8 GRPCQueue::pendingDetails(const int id,
         return ErrCode_OK;
     }
 
-    GRPCUtils::buildErrMsg(__FILE__, __LINE__, status);
+    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
     return ErrCode_OS_ERROR;
 }
 
@@ -184,7 +184,7 @@ u8 GRPCQueue::finishedDetails(const int id,
         return ErrCode_OK;
     }
 
-    GRPCUtils::buildErrMsg(__FILE__, __LINE__, status);
+    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
     return ErrCode_OS_ERROR;
 }
 
@@ -203,7 +203,7 @@ u8 GRPCQueue::clearPending()
         return ErrCode_OK;
     }
 
-    GRPCUtils::buildErrMsg(__FILE__, __LINE__, status);
+    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
     return ErrCode_OS_ERROR;
 }
 
@@ -222,7 +222,7 @@ u8 GRPCQueue::clearFinished()
         return ErrCode_OK;
     }
 
-    GRPCUtils::buildErrMsg(__FILE__, __LINE__, status);
+    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
     return ErrCode_OS_ERROR;
 }
 
@@ -242,7 +242,7 @@ u8 GRPCQueue::currentTask(Proc::Task &out)
         return ErrCode_OK;
     }
 
-    GRPCUtils::buildErrMsg(__FILE__, __LINE__, status);
+    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
     return ErrCode_OS_ERROR;
 }
 
@@ -270,7 +270,7 @@ u8 GRPCQueue::addTask(Proc::Task &in)
         return ErrCode_OK;
     }
 
-    GRPCUtils::buildErrMsg(__FILE__, __LINE__, status);
+    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
     return ErrCode_OS_ERROR;
 }
 
@@ -289,7 +289,7 @@ u8 GRPCQueue::removeTask(const i32 in)
     status = m_stub->RemoveTask(&ctx, req, &res);
     if (!status.ok())
     {
-        GRPCUtils::buildErrMsg(__FILE__, __LINE__, status);
+        GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
         return ErrCode_OS_ERROR;
     }
 
@@ -311,7 +311,7 @@ bool GRPCQueue::isRunning() const
         return res.isrunning();
     }
 
-    GRPCUtils::buildErrMsg(__FILE__, __LINE__, status);
+    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
     return false;
 }
 
@@ -330,7 +330,7 @@ void GRPCQueue::readCurrentOutput(std::vector<std::string> &out)
     auto reader = m_stub->ReadCurrentOutput(&ctx, req);
     if (reader == nullptr)
     {
-        spdlog::error("{}:{} reader is nullptr", __FILE__, __LINE__);
+        spdlog::error("{}:{} reader is nullptr", LOG_FILE_PATH(__FILE__), __LINE__);
         return;
     }
 
@@ -357,7 +357,7 @@ u8 GRPCQueue::start()
         return ErrCode_OK;
     }
 
-    GRPCUtils::buildErrMsg(__FILE__, __LINE__, status);
+    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
     return ErrCode_OS_ERROR;
 }
 
@@ -376,7 +376,7 @@ void GRPCQueue::stop()
         return;
     }
 
-    GRPCUtils::buildErrMsg(__FILE__, __LINE__, status);
+    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
 }
 
 // private member functions

@@ -26,6 +26,7 @@
 
 #include "spdlog/spdlog.h"
 
+#include "controller/global/global.hpp"
 #include "model/errmsg.hpp"
 
 #include "sqlitequeue.hpp"
@@ -59,13 +60,13 @@ SQLiteQueueList::init(IConnect *connect)
 {
     if (!connect)
     {
-        spdlog::error("{}:{} \"connect\" is nullptr.", __FILE__, __LINE__);
+        spdlog::error("{}:{} \"connect\" is nullptr.", LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_INVALID_ARGUMENT;
     }
 
     if (DirUtils::verifyDir(connect->targetPath()))
     {
-        spdlog::error("{}:{} Fail to verify target path.", __FILE__, __LINE__);
+        spdlog::error("{}:{} Fail to verify target path.", LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_INVALID_ARGUMENT;
     }
 
@@ -78,14 +79,14 @@ SQLiteQueueList::init(IConnect *connect)
     {
         if (std::filesystem::is_directory(entry))
         {
-            spdlog::warn("{}:{} {} is directory, ignore...", __FILE__, __LINE__,
+            spdlog::warn("{}:{} {} is directory, ignore...", LOG_FILE_PATH(__FILE__), __LINE__,
                          entry.path().string());
             continue;
         }
 
         if (!std::filesystem::is_regular_file(entry))
         {
-            spdlog::warn("{}:{} {} is not regular file, ignore...", __FILE__, __LINE__,
+            spdlog::warn("{}:{} {} is not regular file, ignore...", LOG_FILE_PATH(__FILE__), __LINE__,
                 entry.path().string());
             continue;
         }
@@ -98,7 +99,7 @@ SQLiteQueueList::init(IConnect *connect)
         index = name.find_last_of(".");
         if (name.substr(index + 1) != "db")
         {
-            spdlog::warn("{}:{} {} is not database, ignore...", __FILE__, __LINE__,
+            spdlog::warn("{}:{} {} is not database, ignore...", LOG_FILE_PATH(__FILE__), __LINE__,
                 fileName);
             continue;
         }
@@ -106,7 +107,7 @@ SQLiteQueueList::init(IConnect *connect)
         name = name.substr(0, index);
         if (createQueue(name))
         {
-            spdlog::error("{}:{} Fail to create queue: {}", __FILE__, __LINE__,
+            spdlog::error("{}:{} Fail to create queue: {}", LOG_FILE_PATH(__FILE__), __LINE__,
                           name);
             m_conn = nullptr;
             m_queueList.clear();
@@ -121,7 +122,7 @@ u8 SQLiteQueueList::createQueue(const std::string &name)
 {
     if (m_queueList.find(name) != m_queueList.end())
     {
-        spdlog::error("{}:{} {} is already exists", __FILE__, __LINE__, name);
+        spdlog::error("{}:{} {} is already exists", LOG_FILE_PATH(__FILE__), __LINE__, name);
         return ErrCode_ALREADY_EXISTS;
     }
 
@@ -132,14 +133,14 @@ u8 SQLiteQueueList::createQueue(const std::string &name)
 #endif
     if (!proc)
     {
-        spdlog::error("{}:{} Fail to allocate memory", __FILE__, __LINE__);
+        spdlog::error("{}:{} Fail to allocate memory", LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_OS_ERROR;
     }
 
     if (proc->init())
     {
         delete proc;
-        spdlog::error("{}:{} Fail to initialize process", __FILE__, __LINE__);
+        spdlog::error("{}:{} Fail to initialize process", LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_OS_ERROR;
     }
 
@@ -147,14 +148,14 @@ u8 SQLiteQueueList::createQueue(const std::string &name)
     if (!queue)
     {
         delete proc;
-        spdlog::error("{}:{} Fail to allocate memory", __FILE__, __LINE__);
+        spdlog::error("{}:{} Fail to allocate memory", LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_OS_ERROR;
     }
 
     if (queue->init(m_conn, proc, name))
     {
         delete queue;
-        spdlog::error("{}:{} Fail to initialize queue", __FILE__, __LINE__);
+        spdlog::error("{}:{} Fail to initialize queue", LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_OS_ERROR;
     }
 
@@ -180,7 +181,7 @@ u8 SQLiteQueueList::deleteQueue(const std::string &name)
 {
     if (!m_queueList.erase(name))
     {
-        spdlog::error("{}:{} No such queue: {}", __FILE__, __LINE__,
+        spdlog::error("{}:{} No such queue: {}", LOG_FILE_PATH(__FILE__), __LINE__,
             name);
         return ErrCode_NOT_FOUND;
     }
@@ -200,7 +201,7 @@ SQLiteQueueList::renameQueue(const std::string &oldName,
             SQLiteQueue *queue = static_cast<SQLiteQueue *>(it.second.get());
             if (queue->rename(newName, oldName))
             {
-                spdlog::error("{}:{} Fail to rename", __FILE__, __LINE__);
+                spdlog::error("{}:{} Fail to rename", LOG_FILE_PATH(__FILE__), __LINE__);
                 return ErrCode_OS_ERROR;
             }
 
@@ -210,7 +211,7 @@ SQLiteQueueList::renameQueue(const std::string &oldName,
         }
     }
 
-    spdlog::error("{}:{} No such queue: {}", __FILE__, __LINE__,
+    spdlog::error("{}:{} No such queue: {}", LOG_FILE_PATH(__FILE__), __LINE__,
         oldName);
     return ErrCode_NOT_FOUND;
 }

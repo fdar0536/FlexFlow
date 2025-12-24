@@ -5,21 +5,99 @@ option go_package = "FF/protos";
 package ff;
 
 import "types.proto";
+import "google/api/annotations.proto";
 
 service Queue {
-  rpc ListPending(QueueReq) returns (stream ListTaskRes);
-  rpc ListFinished(QueueReq) returns (stream ListTaskRes);
-  rpc PendingDetails(TaskDetailsReq) returns (TaskDetailsRes);
-  rpc FinishedDetails(TaskDetailsReq) returns (TaskDetailsRes);
-  rpc ClearPending(QueueReq) returns (Empty);
-  rpc ClearFinished(QueueReq) returns (Empty);
-  rpc CurrentTask(QueueReq) returns (TaskDetailsRes);
-  rpc AddTask(AddTaskReq) returns (ListTaskRes);
-  rpc RemoveTask(TaskDetailsReq) returns (Empty);
-  rpc IsRunning(QueueReq) returns (IsRunningRes);
-  rpc ReadCurrentOutput(QueueReq) returns (stream Msg);
-  rpc Start(QueueReq) returns (Empty);
-  rpc Stop(QueueReq) returns (Empty);
+  rpc ListPending(QueueReq) returns (stream ListTaskRes) {
+    option (google.api.http) = {
+      get: "/queue/listpending"
+      body: "*"
+    };
+  }
+
+  rpc ListFinished(QueueReq) returns (stream ListTaskRes) {
+    option (google.api.http) = {
+      get: "/queue/listfinished"
+      body: "*"
+    };
+  }
+
+  rpc PendingDetails(TaskDetailsReq) returns (TaskDetailsRes) {
+    option (google.api.http) = {
+      get: "/queue/pendingdetails"
+      body: "*"
+    };
+  }
+
+  rpc FinishedDetails(TaskDetailsReq) returns (TaskDetailsRes) {
+    option (google.api.http) = {
+      get: "/queue/finisheddetails"
+      body: "*"
+    };
+  }
+
+  rpc ClearPending(QueueReq) returns (Empty) {
+    option (google.api.http) = {
+      get: "/queue/clearpending"
+      body: "*"
+    };
+  }
+
+  rpc ClearFinished(QueueReq) returns (Empty) {
+    option (google.api.http) = {
+      get: "/queue/clearfinished"
+      body: "*"
+    };
+  }
+
+  rpc CurrentTask(QueueReq) returns (TaskDetailsRes) {
+    option (google.api.http) = {
+      get: "/queue/currenttask"
+      body: "*"
+    };
+  }
+  
+  rpc AddTask(AddTaskReq) returns (ListTaskRes) {
+    option (google.api.http) = {
+      post: "/queue/addtask"
+      body: "*"
+    };
+  }
+  
+  rpc RemoveTask(TaskDetailsReq) returns (Empty) {
+    option (google.api.http) = {
+      post: "/queue/removetask"
+      body: "*"
+    };
+  }
+  
+  rpc IsRunning(QueueReq) returns (IsRunningRes) {
+    option (google.api.http) = {
+      get: "/queue/isrunning"
+      body: "*"
+    };
+  }
+  
+  rpc ReadCurrentOutput(QueueReq) returns (stream Msg) {
+    option (google.api.http) = {
+      get: "/queue/readcurrentoutput"
+      body: "*"
+    };
+  }
+  
+  rpc Start(QueueReq) returns (Empty) {
+    option (google.api.http) = {
+      post: "/queue/start"
+      body: "*"
+    };
+  }
+  
+  rpc Stop(QueueReq) returns (Empty) {
+    option (google.api.http) = {
+      post: "/queue/stop"
+      body: "*"
+    };
+  }
 }
 
 message AddTaskReq {

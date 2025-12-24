@@ -23,6 +23,8 @@
 
 #include "spdlog/spdlog.h"
 
+#include "controller/global/global.hpp"
+
 #include "connect.h"
 #include "queuelist.h"
 #include "queue.h"
@@ -75,7 +77,7 @@ FF_MODEL_API u8 getFFModel(FFModel *in)
 {
     if (!in)
     {
-        spdlog::error("{}:{} invalid input", __FILE__, __LINE__);
+        spdlog::error("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 

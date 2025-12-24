@@ -55,7 +55,7 @@ protected:
 
     Model::DAO::IQueueList *m_list = nullptr;
 
-    void printLog(const char *file, int line, const char *log);
+    void printLog(const std::string_view &, int line, const char *log);
 
     void cleanUp();
 
