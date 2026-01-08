@@ -11,49 +11,42 @@ service Queue {
   rpc ListPending(QueueReq) returns (stream ListTaskRes) {
     option (google.api.http) = {
       get: "/queue/listpending"
-      body: "*"
     };
   }
 
   rpc ListFinished(QueueReq) returns (stream ListTaskRes) {
     option (google.api.http) = {
       get: "/queue/listfinished"
-      body: "*"
     };
   }
 
   rpc PendingDetails(TaskDetailsReq) returns (TaskDetailsRes) {
     option (google.api.http) = {
       get: "/queue/pendingdetails"
-      body: "*"
     };
   }
 
   rpc FinishedDetails(TaskDetailsReq) returns (TaskDetailsRes) {
     option (google.api.http) = {
       get: "/queue/finisheddetails"
-      body: "*"
     };
   }
 
   rpc ClearPending(QueueReq) returns (Empty) {
     option (google.api.http) = {
       get: "/queue/clearpending"
-      body: "*"
     };
   }
 
   rpc ClearFinished(QueueReq) returns (Empty) {
     option (google.api.http) = {
       get: "/queue/clearfinished"
-      body: "*"
     };
   }
 
   rpc CurrentTask(QueueReq) returns (TaskDetailsRes) {
     option (google.api.http) = {
       get: "/queue/currenttask"
-      body: "*"
     };
   }
   
@@ -74,14 +67,12 @@ service Queue {
   rpc IsRunning(QueueReq) returns (IsRunningRes) {
     option (google.api.http) = {
       get: "/queue/isrunning"
-      body: "*"
     };
   }
   
   rpc ReadCurrentOutput(QueueReq) returns (stream Msg) {
     option (google.api.http) = {
       get: "/queue/readcurrentoutput"
-      body: "*"
     };
   }
   

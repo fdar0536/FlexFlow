@@ -6,7 +6,6 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-enable_testing()
 
 if (UNIX)
     add_compile_options(-Wall -Werror -Wextra -fvisibility=hidden)
@@ -32,7 +31,17 @@ endif (UNIX) # end if (UNIX)
 
 # options
 option(ENABLE_SERVER "enable server" on)
-option(ENABLE_C_MODEL "enable C model for ffi" on)
+option(ENABLE_CAPI "enable model CAPI for ffi" on)
+option(ENABLE_TEST "Enable model unit test" on)
+
+if((NOT ENABLE_SERVER) AND (NOT ENABLE_CAPI))
+    set(ENABLE_SERVER on)
+endif((NOT ENABLE_SERVER) AND (NOT ENABLE_CAPI))
+
+if(ENABLE_TEST)
+    enable_testing()
+    set(ENABLE_SERVER on)
+endif(ENABLE_TEST)
 
 # variables
 set(FF_VERSION r12)
@@ -71,7 +80,10 @@ if (WIN32)
 ENDIF (WIN32)
 
 configure_file(config.h.in config.h @ONLY)
-include_directories(After SYSTEM ${CMAKE_CURRENT_BINARY_DIR})
+include_directories(After SYSTEM
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/protos
+)
 include(GNUInstallDirs)
 
 find_package(Protobuf REQUIRED)
@@ -90,24 +102,12 @@ find_package(SQLite3 REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(GTest REQUIRED)
 
-set(PROTOC_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/protos)
-include(cmake/protoc.cmake)
-
-set(PROTOS
-    ${CMAKE_CURRENT_SOURCE_DIR}/protos/access.proto
-    ${CMAKE_CURRENT_SOURCE_DIR}/protos/queue.proto
-    ${CMAKE_CURRENT_SOURCE_DIR}/protos/queuelist.proto
-    ${CMAKE_CURRENT_SOURCE_DIR}/protos/types.proto
-)
-
-protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${CMAKE_CURRENT_BINARY_DIR} ${PROTOS})
-grpc_generate_cpp(GRPC_SRCS GRPC_HDRS ${CMAKE_CURRENT_BINARY_DIR} ${PROTOS})
+file(GLOB_RECURSE PROTO_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/protos/*.cc")
+file(GLOB_RECURSE PROTO_HDRS "${CMAKE_CURRENT_SOURCE_DIR}/protos/*.h")
 
 add_library(grpc_common STATIC
     ${PROTO_HDRS}
     ${PROTO_SRCS}
-    ${GRPC_HDRS}
-    ${GRPC_SRCS}
 )
 
 target_link_libraries(grpc_common
@@ -119,5 +119,5 @@ target_link_libraries(grpc_common
 set_property(TARGET grpc_common PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 include(cmake/ffmodel.cmake)
-include(cmake/ffmodel_unittest.cmake)
+include(cmake/ffmodel_ut.cmake)
 include(cmake/flexflowserver.cmake)

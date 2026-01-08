@@ -25,7 +25,6 @@ service QueueList {
   rpc Delete(QueueReq) returns (Empty) {
     option (google.api.http) = {
       delete: "/queuelist/delete"
-      body: "*"
     };
   }
 
@@ -38,7 +37,6 @@ service QueueList {
   rpc GetQueue(QueueReq) returns (Empty) {
     option (google.api.http) = {
       get: "/queuelist/getqueue"
-      body: "*"
     };
   }
 }

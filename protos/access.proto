@@ -11,7 +11,6 @@ service Access {
   rpc Echo(Empty) returns (EchoRes) {
     option (google.api.http) = {
       get: "/echo"
-      body: "*"
     };
   }
 }

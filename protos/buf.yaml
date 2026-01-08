@@ -1,0 +1,9 @@
+version: v1
+name: github.com/fdar0536/FlexFlow
+deps: []
+lint:
+  use:
+    - DEFAULT
+breaking:
+  use:
+    - FILE

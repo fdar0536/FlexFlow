@@ -1,0 +1,63 @@
+# Taskfile.yml
+version: '3'
+
+vars:
+  TMP_DIR: '{{.TEMP | default .TMPDIR | default "/tmp" }}'
+  PROTO_VERSION: '{{.PROTO_VERSION | default .ENV_PROTO_VERSION | default "v29.5"}}'
+  CPP_BUILD_DIR: "{{.TMP_DIR}}/build-cpp"
+  CMAKE_GENERATOR: "{{if eq OS \"windows\"}}-G \"Visual Studio 18 2026\"{{else}}-G \"Ninja\"{{end}}"
+  BUILD_TYPE: "Release"
+  ENABLE_SERVER: ON
+  ENABLE_CAPI: ON
+  ENABLE_MODEL_TEST: ON
+  CMAKE_EXTRA_ARGS: ""
+  JOBS:
+    sh: '{{if eq OS "windows"}}echo %NUMBER_OF_PROCESSORS%{{else}}nproc{{end}}'
+
+tasks:
+  build-cpp:
+    cmds:
+      - task: generate-protos
+      - task: cmake-config
+      - task: cmake-build
+
+  generate-protos:
+    cmds:
+      - task: run-buf-generate
+        vars: { VERSION: "{{.PROTO_VERSION}}" }
+  
+  run-buf-generate:
+    internal: true
+    cmds:
+      - |
+        {{if eq OS "windows"}}
+        powershell -Command "(Get-Content buf.gen.yaml) -replace 'protocolbuffers/cpp:v[\d.]+', 'protocolbuffers/cpp:{{.VERSION}}' | Set-Content buf.gen.temp.yaml"
+        {{else}}
+        sed "s#protocolbuffers/cpp:v[0-9.]*#protocolbuffers/cpp:{{.VERSION}}#g" buf.gen.yaml > buf.gen.temp.yaml
+        {{end}}
+      - buf dep update protos
+      - buf generate --template buf.gen.temp.yaml protos
+      - cmake -E rm buf.gen.temp.yaml
+
+  cmake-config:
+    deps: [generate-protos]
+    cmds:
+      - cmake -E make_directory {{.CPP_BUILD_DIR}}
+      - >
+        cmake -S src-cpp -B {{.CPP_BUILD_DIR}} {{.CMAKE_GENERATOR}} 
+        -DENABLE_SERVER={{.ENABLE_SERVER}} 
+        -DENABLE_CAPI={{.ENABLE_CAPI}} 
+        -DENABLE_TEST={{.ENABLE_MODEL_TEST}} 
+        -DCMAKE_BUILD_TYPE={{.BUILD_TYPE}} 
+        {{.CMAKE_EXTRA_ARGS}}
+
+  cmake-build:
+    cmds:
+      - cmake --build {{.CPP_BUILD_DIR}} -j {{.JOBS}}
+
+  clean:
+    cmds:
+      - >
+        cmake -E rm -rf {{.CPP_BUILD_DIR}} 
+        src-cpp/protos src-go/protos src-openapi
+        

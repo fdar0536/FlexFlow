@@ -1,0 +1,9 @@
+{
+    "cmake.sourceDirectory": "${workspaceFolder}/src-cpp",
+    "cmake.configureSettings": {
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+    },
+    "cmake.buildDirectory": "$env{TEMP}/build-FlexFlow",
+    "cmake.generator": "Ninja",
+    "C_Cpp.errorSquiggles": "disabled"
+}
