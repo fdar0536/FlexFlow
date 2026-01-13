@@ -4,10 +4,9 @@
   "version": "2.0.0",
   "identifier": "com.fdar0536.flexflow",
   "build": {
-    "beforeDevCommand": "pnpm dev",
+    "beforeDevCommand": "pnpm start",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "pnpm build",
-    "frontendDist": "../out-tsc/app"
+    "frontendDist": "../dist/flexflow/browser"
   },
   "app": {
     "windows": [

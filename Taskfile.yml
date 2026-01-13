@@ -1,63 +1,164 @@
 # Taskfile.yml
 version: '3'
 
+dotenv: ['.env']
+
 vars:
+  # version info
+  FF_VERSION: "r12"
+  FF_COMMIT:
+    sh: git rev-parse --short HEAD
+  FF_BRANCH:
+    sh: git rev-parse --abbrev-ref HEAD
+
+  # global settings
   TMP_DIR: '{{.TEMP | default .TMPDIR | default "/tmp" }}'
-  PROTO_VERSION: '{{.PROTO_VERSION | default .ENV_PROTO_VERSION | default "v29.5"}}'
-  CPP_BUILD_DIR: "{{.TMP_DIR}}/build-cpp"
-  CMAKE_GENERATOR: "{{if eq OS \"windows\"}}-G \"Visual Studio 18 2026\"{{else}}-G \"Ninja\"{{end}}"
-  BUILD_TYPE: "Release"
-  ENABLE_SERVER: ON
-  ENABLE_CAPI: ON
-  ENABLE_MODEL_TEST: ON
-  CMAKE_EXTRA_ARGS: ""
-  JOBS:
-    sh: '{{if eq OS "windows"}}echo %NUMBER_OF_PROCESSORS%{{else}}nproc{{end}}'
+  BUILD_TYPE: '{{ .BUILD_TYPE | default "Release" }}'
+  PROTO_VERSION: '{{.PROTO_VERSION | default "v29.5"}}'
+
+  # for cpp
+  CPP_BUILD_DIR: '{{ .CPP_BUILD_DIR | default (printf "%s/build-cpp" .TMP_DIR) }}'
+  CMAKE_GENERATOR: '{{ .CMAKE_GENERATOR | default "Ninja" }}'
+  ENABLE_SERVER: '{{ .ENABLE_SERVER | default 1 }}'
+  ENABLE_CAPI: '{{ .ENABLE_CAPI | default 1 }}'
+  ENABLE_MODEL_TEST: '{{ .ENABLE_MODEL_TEST | default 1 }}'
+  CMAKE_EXTRA_ARGS: '{{ .CMAKE_EXTRA_ARGS | default "" }}'
+  JOBS: '{{ .JOBS | default 1 }}'
+  MODEL_CLIENT_TIMEOUT: '{{ .MODEL_CLIENT_TIMEOUT | default 31 }}'
+  MODEL_READ_BUFFER_SIZE: '{{ .MODEL_READ_BUFFER_SIZE | default 4096 }}'
+  MODEL_MAX_READ_QUEUE_SIZE: '{{ .MODEL_MAX_READ_QUEUE_SIZE | default 1024 }}'
+
+  # for webui
+  WEBUI_BUILD_DIR: '{{ .WEBUI_BUILD_DIR | default (printf "%s/build-webui" .TMP_DIR) }}'
+
+  # for tauri
+  GUI_BUILD_DIR: '{{ .GUI_BUILD_DIR | default (printf "%s/build-gui" .TMP_DIR) }}'
 
 tasks:
+  # wrapper
   build-cpp:
+    deps: [config-cmake]
     cmds:
-      - task: generate-protos
-      - task: cmake-config
-      - task: cmake-build
-
-  generate-protos:
-    cmds:
-      - task: run-buf-generate
-        vars: { VERSION: "{{.PROTO_VERSION}}" }
+      - cmake --build "{{.CPP_BUILD_DIR}}" -j {{.JOBS}}
   
-  run-buf-generate:
+  dev-gui:
+    env:
+      PROFILE: '{{.BUILD_TYPE}}'
+      CPP_BUILD_DIR: '{{.CPP_BUILD_DIR}}'
+      CARGO_TARGET_DIR: '{{.GUI_BUILD_DIR}}'
+    deps: [config-webui, build-cpp]
+    cmds:
+      - pnpm tauri dev
+  
+  build-gui:
+    env:
+      PROFILE: '{{.BUILD_TYPE}}'
+      CPP_BUILD_DIR: '{{.CPP_BUILD_DIR}}'
+      CARGO_TARGET_DIR: '{{.GUI_BUILD_DIR}}'
+    deps: [build-cpp, build-webui]
+    cmds:
+      - pnpm tauri build
+  
+  clean:
+    deps: [clean-cmake, clean-buf, clean-webui, clean-tauri]
+    cmds:
+      - echo "Clean done!"
+  
+  # prepare
+  generate-buf:
     internal: true
+    sources:
+      - protos/**/*.proto
+    generates:
+      - src-cpp/protos/**/*
+      - src-go/protos/**/*
+      - src-openapi/protos/**/*
     cmds:
       - |
         {{if eq OS "windows"}}
-        powershell -Command "(Get-Content buf.gen.yaml) -replace 'protocolbuffers/cpp:v[\d.]+', 'protocolbuffers/cpp:{{.VERSION}}' | Set-Content buf.gen.temp.yaml"
+        powershell -Command "(Get-Content buf.gen.yaml) -replace 'protocolbuffers/cpp:v[\d.]+', 'protocolbuffers/cpp:{{.PROTO_VERSION}}' | Set-Content buf.gen.temp.yaml"
         {{else}}
-        sed "s#protocolbuffers/cpp:v[0-9.]*#protocolbuffers/cpp:{{.VERSION}}#g" buf.gen.yaml > buf.gen.temp.yaml
+        sed "s#protocolbuffers/cpp:v[0-9.]*#protocolbuffers/cpp:{{.PROTO_VERSION}}#g" buf.gen.yaml > buf.gen.temp.yaml
         {{end}}
       - buf dep update protos
       - buf generate --template buf.gen.temp.yaml protos
       - cmake -E rm buf.gen.temp.yaml
 
-  cmake-config:
-    deps: [generate-protos]
+  config-cmake:
+    internal: true
+    deps: [generate-buf]
+    sources:
+      - src-cpp/**/CMakeLists.txt
+      - src-cpp/**/*.cmake
+    generates:
+      - '{{.CPP_BUILD_DIR}}/CMakeCache.txt'
     cmds:
       - cmake -E make_directory {{.CPP_BUILD_DIR}}
       - >
-        cmake -S src-cpp -B {{.CPP_BUILD_DIR}} {{.CMAKE_GENERATOR}} 
+        cmake -S src-cpp -B "{{.CPP_BUILD_DIR}}" -G "{{.CMAKE_GENERATOR}}" 
         -DENABLE_SERVER={{.ENABLE_SERVER}} 
         -DENABLE_CAPI={{.ENABLE_CAPI}} 
         -DENABLE_TEST={{.ENABLE_MODEL_TEST}} 
         -DCMAKE_BUILD_TYPE={{.BUILD_TYPE}} 
+        -DFF_VERSION={{.FF_VERSION}} 
+        -DFF_COMMIT={{.FF_COMMIT}} 
+        -DFF_BRANCH={{.FF_BRANCH}} 
+        -DCLIENT_TIMEOUT={{.MODEL_CLIENT_TIMEOUT}} 
+        -DREAD_BUFFER_SIZE={{.MODEL_READ_BUFFER_SIZE}} 
+        -DMAX_READ_QUEUE_SIZE={{.MODEL_MAX_READ_QUEUE_SIZE}}
         {{.CMAKE_EXTRA_ARGS}}
-
-  cmake-build:
+  
+  create-webui-out-dir:
+    internal: true
     cmds:
-      - cmake --build {{.CPP_BUILD_DIR}} -j {{.JOBS}}
+      - { cmd: 'cmake -E make_directory "{{.WEBUI_BUILD_DIR | replace "/" "\\" }}"', platforms: [windows] }
+      - { cmd: 'cmake -E make_directory "{{.WEBUI_BUILD_DIR}}"', platforms: [linux, darwin] }
+  
+  prepare-webui-link:
+    internal: true
+    deps: [create-webui-out-dir]
+    cmds:
+      - cmake -E rm -rf dist
+      - { cmd: "powershell -Command \"New-Item -ItemType Junction -Path dist -Target '{{.WEBUI_BUILD_DIR | replace \"/\" \"\\\\\" }}' \"", platforms: [windows] }
+      - { cmd: "ln -s {{.WEBUI_BUILD_DIR}} dist", platforms: [linux, darwin] }
 
-  clean:
+  config-webui:
+    internal: true
+    deps: [prepare-webui-link]
+    sources:
+      - package.json
+      - pnpm-lock.yaml
+    generates:
+      - node_modules/**
+    cmds:
+      - pnpm install
+  
+  # build
+  build-webui:
+    internal: true
+    deps: [config-webui]
+    cmds:
+      - npx ng build --delete-output-path=false
+
+  # clean
+  clean-buf:
+    internal: true
     cmds:
       - >
-        cmake -E rm -rf {{.CPP_BUILD_DIR}} 
+        cmake -E rm -rf 
         src-cpp/protos src-go/protos src-openapi
-        
+
+  clean-cmake:
+    internal: true
+    cmds:
+      - cmake -E rm -rf "{{.CPP_BUILD_DIR}}"
+  
+  clean-webui:
+    internal: true
+    cmds:
+      - cmake -E rm -rf node_modules "{{.WEBUI_BUILD_DIR}}" pnpm-lock.yaml
+  
+  clean-tauri:
+    internal: true
+    cmds:
+      - cmake -E rm -rf "{{.GUI_BUILD_DIR}}"

@@ -27,42 +27,16 @@ use std::path::PathBuf;
 fn main()
 {
     tauri_build::build();
+    println!("cargo:rerun-if-env-changed=CPP_BUILD_DIR");
 
-    println!("cargo:rerun-if-changed=../src-cpp");
-
-    let mut cfg = cmake::Config::new("../src-cpp");
-
-    // Windows use vcpkg
-    if cfg!(target_os = "windows")
-    {
-        let vcpkg_root = env::var("VCPKG_ROOT")
-            .unwrap_or(r"D:\libs\vcpkg".to_string());
-
-        let triplet = if cfg!(target_arch = "x86_64") {
-            "x64-windows"
-        }
-        else
-        {
-            "x86-windows"
-        };
-
-        cfg.define("CMAKE_TOOLCHAIN_FILE",
-            format!("{vcpkg_root}/scripts/buildsystems/vcpkg.cmake"))
-           .define("VCPKG_TARGET_TRIPLET", triplet);
-
-        cfg.generator("Ninja");
-    }
-
-    let dst = cfg.profile("Release").no_build_target(true).build();
-
-    let profile = env::var("PROFILE").unwrap();
-    let bundled_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap())
-    .join("target")
-    .join(profile);
+    // 使用 OUT_DIR 來定位實際的構建輸出目錄 (例如 target/debug)
+    // 結構通常為: target/debug/build/package-hash/out
+    let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
+    let bundled_dir = out_dir.ancestors().nth(3).unwrap().to_path_buf();
 
     std::fs::create_dir_all(&bundled_dir).unwrap();
 
-    let build_dir = dst.join("build");
+    let build_dir = PathBuf::from(env::var("CPP_BUILD_DIR").unwrap());
 
     // find all .dll / .dylib / .so
     if build_dir.exists()
@@ -81,17 +55,12 @@ fn main()
                     // copy the file only if modified
                     if dst.exists()
                     {
-                        let src_bak = src.clone();
-                        let src_mod = std::fs::metadata(src_bak)
-                        .unwrap().modified().unwrap();
-                        let dst_bak = dst.clone();
-                        let dst_mod = std::fs::metadata(dst_bak)
-                        .unwrap().modified().unwrap();
+                        let src_mod = std::fs::metadata(&src).unwrap().modified().unwrap();
+                        let dst_mod = std::fs::metadata(&dst).unwrap().modified().unwrap();
                         
-                        if src_mod > dst_mod
-                        {
-                            std::fs::copy(&src, &dst).unwrap();
-                            println!("cargo:warning=lib copy skipped: {} → /", file_name.to_string_lossy());
+                        if src_mod <= dst_mod {
+                            println!("cargo:warning=lib copy skipped (up-to-date): {}", file_name.to_string_lossy());
+                            continue;
                         }
                     }
 
