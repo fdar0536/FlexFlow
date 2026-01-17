@@ -21,7 +21,10 @@
           "builder": "@angular/build:application",
           "options": {
             "browser": "src-web/main.ts",
-            "polyfills": ["zone.js"],
+            "polyfills": [
+              "zone.js",
+              "@angular/localize/init"
+            ],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
@@ -31,7 +34,10 @@
                 "output": "assets"
               }
             ],
-            "styles": ["src-web/styles.css"]
+            "styles": [
+              "src-web/material-theme.scss",
+              "src-web/styles.css"
+            ]
           },
           "configurations": {
             "production": {

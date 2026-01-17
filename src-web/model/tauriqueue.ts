@@ -32,6 +32,11 @@ export class TauriQueue implements IQueue
         this.queue = queue;
     }
 
+    handle(): Handle
+    {
+        return this.queue;  
+    }
+
     listPending = async(): Promise<number[]> =>
     {
         return await invoke<number[]>("queue_list_pending", { h: this.queue });

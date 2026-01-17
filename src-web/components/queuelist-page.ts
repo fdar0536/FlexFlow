@@ -1,6 +1,6 @@
 /*
  * Flex Flow
- * Copyright (c) 2025-present fdar0536
+ * Copyright (c) 2026-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,12 +21,42 @@
  * SOFTWARE.
  */
 
-export enum pages
+import {Component, inject} from "@angular/core";
+import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+
+import {Global} from "../model/global";
+import { CommonDialog } from '../components/common-dialog';
+
+@Component
+({
+    selector: "queueList-page",
+    templateUrl: "./queuelist-page.html",
+    imports: [],
+})
+
+export class QueueListPage
 {
-    settings,
-    connect,
-    queuelist,
-    queue,
-    log,
-    about
+    private router = inject(Router);
+    private dialog = inject(MatDialog);
+    global = inject(Global);
+
+    constructor()
+    {
+        if (this.global.isConnected() === false)
+        {
+            const dialogRef = this.dialog.open(CommonDialog,
+            {
+                data:
+                {
+                    type: 'info',
+                    title: 'Oops!',
+                    message: 'Not connected.'
+                },
+            });
+
+            this.router.navigateByUrl("/", { replaceUrl: true });
+            return;
+        }
+    }
 }

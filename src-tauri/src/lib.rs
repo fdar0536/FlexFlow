@@ -29,8 +29,16 @@ pub mod queue;
 
 use tauri::{
     menu::{Menu, MenuItem},
-    tray::TrayIconBuilder,
+    tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
+    Emitter,
+    Manager,
 };
+
+#[tauri::command]
+fn quit()
+{
+    std::process::exit(0);
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run()
@@ -43,33 +51,88 @@ pub fn run()
     }
 
     // create menu
-    
-
     tauri::Builder::default()
         .setup(|app| {
-            let tray = TrayIconBuilder::new().build(app)?;
-            let quit_i =
-            MenuItem::with_id(app, "quit",
-            "Quit", true, None::<&str>)?;
-            let show_i = MenuItem::with_id(app, "",
-            "Show", true, None::<&str>)?;
+            // menu items
+            let exit_i = MenuItem::with_id(app, "exit", "Exit", true, None::<&str>)?;
+            let show_i = MenuItem::with_id(app, "show", "Show", true, None::<&str>)?;
 
-            let menu =
-            Menu::with_items(app, &[&quit_i, &show_i])?;
+            // menu
+            let menu = Menu::with_items(app, &[&show_i, &exit_i])?;
+
             let tray = TrayIconBuilder::new()
+            // menu
             .menu(&menu)
+            .show_menu_on_left_click(false)
             .on_menu_event(|app, event| match event.id.as_ref() {
-                "Quit" => {
-                  
-                  app.exit(0);
+                "exit" =>
+                {
+                    if let Some(window) = app.get_webview_window("main")
+                    {
+                        let _ = window.show();
+                        let _ = window.set_focus();
+                        let _ = window.emit("request-exit", ());
+                    }
                 }
-                _ => {
-                  println!("menu item {:?} not handled", event.id);
+                "show" =>
+                {
+                    if let Some(window) = app.get_webview_window("main")
+                    {
+                        let _ = window.show();
+                        let _ = window.set_focus();
+                    }
                 }
-              })
+                _ =>
+                {
+                    // do nothing
+                }
+            })
+
+            .on_tray_icon_event(|tray, event| match event {
+                TrayIconEvent::Click
+                {
+                    button: MouseButton::Left,
+                    button_state: MouseButtonState::Up,
+                    ..
+                } =>
+                {
+                    let app = tray.app_handle();
+                    if let Some(window) = app.get_webview_window("main") {
+                        let _ = window.unminimize();
+                        let _ = window.show();
+                        let _ = window.set_focus();
+                    }
+                }
+                _ =>
+                {
+                    // do nothing
+                }
+            })
+            // icon
+            .icon(app.default_window_icon().unwrap().clone())
             .build(app)?;
             Ok(())
         })
+
+        // handle window close event
+        .on_window_event(|handle, event|
+        {
+            match event
+            {
+                tauri::WindowEvent::CloseRequested { api, .. } =>
+                {
+                    api.prevent_close();
+                    handle.get_webview_window("main").unwrap()
+                    .hide().unwrap();
+                }
+                _ =>
+                {
+                    // do nothing
+                }
+            }
+        })
+
+        // native library
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             // connect
@@ -101,7 +164,10 @@ pub fn run()
             queue::queue_is_running,
             queue::queue_read_current_output,
             queue::queue_start,
-            queue::queue_stop
+            queue::queue_stop,
+
+            // exit
+            quit
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

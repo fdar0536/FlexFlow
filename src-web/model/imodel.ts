@@ -53,6 +53,7 @@ export interface ProcTask
 
 export interface IQueue
 {
+    handle(): Handle;
     listPending(): Promise<number[]>;
     listFinished(): Promise<number[]>;
     pendingDetails(id: number): Promise<ProcTask>;
@@ -66,4 +67,11 @@ export interface IQueue
     clearPending(): Promise<void>;
     clearFinished(): Promise<void>;
     removeTask(id: number): Promise<void>;
+}
+
+export enum ConnectMode
+{
+    GRPC,
+    Local,
+    Web
 }

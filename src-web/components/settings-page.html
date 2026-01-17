@@ -1,0 +1,17 @@
+<p class="CommonText">Connect Mode: </p>
+<mat-radio-group
+[value]="this.global.connectMode()"
+(change)="onRadioChanged($event.value)"
+[disabled]="this.global.isConnected()">
+    <mat-radio-button [value]="0"
+    [disabled]="this.global.isBrowser">
+        GRPC
+    </mat-radio-button>
+    <mat-radio-button [value]="1"
+    [disabled]="this.global.isBrowser">
+        Local
+    </mat-radio-button>
+    <mat-radio-button [value]="2">
+        Web
+    </mat-radio-button>
+</mat-radio-group>

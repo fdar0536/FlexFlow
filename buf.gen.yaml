@@ -1,14 +1,14 @@
-version: v1
+version: v2
 plugins:
-  - plugin: buf.build/protocolbuffers/cpp:v33.2
+  - remote: buf.build/protocolbuffers/cpp:v33.2
     out: src-cpp/protos
-  - plugin: buf.build/grpc/cpp:v1.76.0
+  - remote: buf.build/grpc/cpp:v1.76.0
     out: src-cpp/protos
-  - plugin: buf.build/protocolbuffers/go:v1.36.11
+  - remote: buf.build/protocolbuffers/go:v1.36.11
     out: src-go/protos
     opt: paths=source_relative
-  - plugin: buf.build/grpc-ecosystem/gateway:v2.27.4
+  - remote: buf.build/grpc-ecosystem/gateway:v2.27.4
     out: src-go/protos
     opt: paths=source_relative
-  - plugin: buf.build/grpc-ecosystem/openapiv2:v2.27.4
+  - remote: buf.build/grpc-ecosystem/openapiv2:v2.27.4
     out: src-openapi

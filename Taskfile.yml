@@ -46,6 +46,11 @@ tasks:
       PROFILE: '{{.BUILD_TYPE}}'
       CPP_BUILD_DIR: '{{.CPP_BUILD_DIR}}'
       CARGO_TARGET_DIR: '{{.GUI_BUILD_DIR}}'
+      GSK_RENDERER: 'ngl'
+      __NV_DISABLE_EXPLICIT_SYNC: 1
+      WEBKIT_DISABLE_DMABUF_RENDERER: 1
+      WEBKIT_DISABLE_COMPOSITING_MODE: 1
+      GDK_BACKEND: 'x11'
     deps: [config-webui, build-cpp]
     cmds:
       - pnpm tauri dev
@@ -156,7 +161,7 @@ tasks:
   clean-webui:
     internal: true
     cmds:
-      - cmake -E rm -rf node_modules "{{.WEBUI_BUILD_DIR}}" pnpm-lock.yaml
+      - cmake -E rm -rf "{{.WEBUI_BUILD_DIR}}"
   
   clean-tauri:
     internal: true

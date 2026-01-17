@@ -1,0 +1,18 @@
+<h2 mat-dialog-title>
+    {{ data.title }}
+</h2>
+<mat-dialog-content>
+    {{ data.message }}
+</mat-dialog-content>
+<mat-dialog-actions>
+    @if (data.type == 'confirm')
+    {
+        <button matButton [mat-dialog-close]="true">Yes</button>
+        <button matButton mat-dialog-close>No</button>
+        <button matButton mat-dialog-close>Cancel</button>
+    }
+    @else if (data.type == 'info')
+    {
+        <button matButton mat-dialog-close>OK</button>
+    }
+</mat-dialog-actions>

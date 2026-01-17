@@ -25,6 +25,10 @@ import { IQueue, ProcTask } from "./imodel";
 
 export class WebQueue implements IQueue
 {
+    handle(): number {
+        throw new Error("Method not implemented.");
+    }
+
     listPending(): Promise<number[]> {
         throw new Error("Method not implemented.");
     }

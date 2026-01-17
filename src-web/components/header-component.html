@@ -1,0 +1,51 @@
+<mat-tab-group>
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <div class="HeaderTab" routerLink="/">
+        <mat-icon>settings</mat-icon>
+        <p class="CommonText">Settings</p>
+      </div>
+    </ng-template>
+  </mat-tab>
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <div class="HeaderTab" routerLink="/QueueList">
+        <mat-icon>playlist_add</mat-icon>
+        <p class="CommonText">Queue List</p>
+      </div>
+    </ng-template>
+  </mat-tab>
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <mat-icon>playlist_play</mat-icon>
+      <p class="CommonText">Queue</p>
+    </ng-template>
+  </mat-tab>
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <mat-icon>terminal</mat-icon>
+      <p class="CommonText">Output</p>
+    </ng-template>
+  </mat-tab>
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <mat-icon>notes</mat-icon>
+      <p class="CommonText">Log</p>
+    </ng-template>
+  </mat-tab>
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <mat-icon>info</mat-icon>
+      <p class="BaseText">About</p>
+    </ng-template>
+  </mat-tab>
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <div (click)="onExitClicked($event)" class="HeaderTab">
+        <mat-icon>close</mat-icon>
+        <p class="CommonText">Exit</p>
+      </div>
+    </ng-template>
+  </mat-tab>
+</mat-tab-group>
+<p class="CommonText">Status: {{ this.global.status() }}</p>
