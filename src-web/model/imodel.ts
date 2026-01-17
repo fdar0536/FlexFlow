@@ -26,6 +26,7 @@ export type Handle = number;
 export interface IConnect
 {
     destroy(): Promise<void>;
+    handle(): Handle;
     startConnect(target: string, port: number): Promise<void>;
     targetPath(): Promise<string>;
 }

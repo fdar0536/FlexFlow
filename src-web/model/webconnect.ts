@@ -21,16 +21,22 @@
  * SOFTWARE.
  */
 
-import { IConnect } from "./imodel";
+import { Handle, IConnect } from "./imodel";
 
 export class WebConnect implements IConnect
 {
     destroy(): Promise<void> {
         throw new Error("Method not implemented.");
     }
+
+    handle(): Handle {
+        throw new Error("Method not implemented.");
+    }
+
     startConnect(target: string, port: number): Promise<void> {
         throw new Error("Method not implemented.");
     }
+
     targetPath(): Promise<string> {
         throw new Error("Method not implemented.");
     }

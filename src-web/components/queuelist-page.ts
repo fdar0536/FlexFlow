@@ -45,7 +45,7 @@ export class QueueListPage
     {
         if (this.global.isConnected() === false)
         {
-            const dialogRef = this.dialog.open(CommonDialog,
+            this.dialog.open(CommonDialog,
             {
                 data:
                 {
@@ -54,6 +54,22 @@ export class QueueListPage
                     message: 'Not connected.'
                 },
             });
+
+            this.router.navigateByUrl("/", { replaceUrl: true });
+            return;
+        }
+
+        if (this.global.queueList === null)
+        {
+            this.dialog.open(CommonDialog,
+            {
+                data:
+                {
+                    type: 'info',
+                    title: 'Oops!',
+                    message: 'Connect may be failed. Please try again.'
+                }
+            })
 
             this.router.navigateByUrl("/", { replaceUrl: true });
             return;

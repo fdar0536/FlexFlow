@@ -40,6 +40,11 @@ export class SettingsPage
 {
     global = inject(Global);
     private dialog = inject(MatDialog);
+
+    constructor()
+    {
+        this.global.cleanModel();
+    }
     
     onRadioChanged = (value: number) =>
     {

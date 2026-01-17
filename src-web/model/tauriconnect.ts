@@ -37,6 +37,11 @@ export class TauriConnect implements IConnect
     {
         return await invoke<void>("connect_destroy", { h: this.conn });;
     }
+    
+    handle(): Handle
+    {
+        return this.conn;
+    }
 
     startConnect =
     async(target: string, port: number): Promise<void> =>
