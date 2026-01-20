@@ -28,10 +28,22 @@ import { Injectable, signal, PLATFORM_ID, inject, DestroyRef } from '@angular/co
 import { isPlatformBrowser } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 
-import { Mutex } from 'async-mutex';
-
 import { CommonDialog } from '../components/common-dialog';
-import { IConnect, IQueueList, IQueue, ConnectMode } from './imodel';
+import { ConnectInfo } from "./connectinfo";
+import { ConnectMode } from "./imodel";
+
+export type ConnectionProfile =
+{
+    name: string;
+    target: string;
+    port: number;
+}
+
+export type AppConfig = 
+{
+    profiles: ConnectionProfile[];
+    current_profile: string | null;
+}
 
 @Injectable
 ({
@@ -51,14 +63,18 @@ export class Global
             this.setupExit();
         }
 
+        this.connectInfo = new ConnectInfo(this);
         if (this.isBrowser)
         {
-            this.connectMode.set(ConnectMode.Web);
+            this.connectInfo.mode.set(ConnectMode.Web);
         }
 
         this.destroyRef.onDestroy(() =>
         {
-            this.cleanModel();
+            if (this.isTauri)
+            {
+                invoke("save_config", { config: this.config });
+            } 
         });
     }
 
@@ -70,49 +86,7 @@ export class Global
     status = signal<string>('Not connected');
 
     // model
-    // todo: optimize it
-    private mutex = new Mutex();
-    connect: IConnect | null = null;
-    queueList: IQueueList | null = null;
-    queue: IQueue | null = null;
-    connectMode = signal<ConnectMode>(ConnectMode.GRPC);
-    connectTarget = signal<string>("");
-    connectPort = signal<number>(0);
-    isConnected = signal<boolean>(false);
-
-    cleanModel = async() =>
-    {
-        const release = await this.mutex.acquire();
-        if (this.queueList)
-        {
-            if (this.queue)
-            {
-                var handle = this.queue.handle();
-                try
-                {
-                    await this.queueList.returnQueue(handle);
-                }
-                catch (e)
-                {
-                    console.error(e);
-                }
-                this.queue = null;
-            }
-
-            await this.queueList.destroy();
-            this.queueList = null;
-        }
-
-        if (this.connect)
-        {
-            await this.connect.destroy();
-            this.connect = null;
-        }
-        
-        this.isConnected.set(false);
-        this.status.set("Not connected");
-        release();
-    }
+    connectInfo: ConnectInfo;
 
     // handle exit
     setupExit = async() =>
@@ -161,4 +135,29 @@ export class Global
             });
         }
     } // onExitEvent
+
+    // status
+    config: AppConfig | null = null;
+    isConfigReady = signal<boolean>(false, { equal: () => false });
+    loadConfig = async() =>
+    {
+        if (this.isTauri)
+        {
+            try
+            {
+                this.config = await invoke<AppConfig>("get_config");
+            }
+            catch (e)
+            {
+                this.config = null;
+                console.log(e)
+            }
+        }
+        else
+        {
+            this.config = null;
+        }
+
+        this.isConfigReady.set(true);
+    }
 }

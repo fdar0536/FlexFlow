@@ -1,0 +1,22 @@
+<common-layout
+    align_items="center"
+    justify_content="center"
+>
+    <p class="CommonText">Connect Mode: </p>
+    <mat-radio-group
+    [value]="this.global.connectInfo.mode()"
+    (change)="onRadioChanged($event.value)"
+    [disabled]="this.global.connectInfo.isConnected()">
+        <mat-radio-button [value]="0"
+        [disabled]="this.global.isBrowser">
+            GRPC
+        </mat-radio-button>
+        <mat-radio-button [value]="1"
+        [disabled]="this.global.isBrowser">
+            Local
+        </mat-radio-button>
+        <mat-radio-button [value]="2">
+            Web
+        </mat-radio-button>
+    </mat-radio-group>
+</common-layout>

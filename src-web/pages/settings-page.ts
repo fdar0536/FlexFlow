@@ -28,12 +28,14 @@ import { MatDialog } from '@angular/material/dialog';
 import { Global } from "../model/global";
 import { ConnectMode } from '../model/imodel';
 import { CommonDialog } from '../components/common-dialog';
+import { CommonLayoutComponent } from '../components/common-layout';
+
 
 @Component
 ({
     selector: "settings-page",
     templateUrl: "./settings-page.html",
-    imports: [MatRadioModule],
+    imports: [MatRadioModule, CommonLayoutComponent],
 })
 
 export class SettingsPage
@@ -43,7 +45,7 @@ export class SettingsPage
 
     constructor()
     {
-        this.global.cleanModel();
+        this.global.connectInfo.clean();
     }
     
     onRadioChanged = (value: number) =>
@@ -62,6 +64,6 @@ export class SettingsPage
             });
         }
 
-        this.global.connectMode.set(value);
+        this.global.connectInfo.mode.set(value);
     }
 }

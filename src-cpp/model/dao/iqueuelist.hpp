@@ -36,29 +36,72 @@ namespace Model
 namespace DAO
 {
 
+/**
+ * @brief define the interface for queue list
+ */
 class IQueueList
 {
 public:
 
     virtual ~IQueueList() {}
 
+    /**
+     * @brief initialize
+     * @param connect the connect object form IConnect
+     * @return u8 return 0 if success
+     */
     virtual u8 init(IConnect *connect) = 0;
 
+    /**
+     * @brief Create a Queue
+     * @param name the name for the new queue
+     * @return u8 return 0 if success
+     */
     virtual u8 createQueue(const std::string &name) = 0;
 
+    /**
+     * @brief list all queue in list
+     * @param[out] out the list of queue(s)
+     * @return u8 return 0 if success
+     */
     virtual u8 listQueue(std::vector<std::string> &out) = 0;
 
+    /**
+     * @brief delete the queue
+     * @param name the name of queue you want to delete
+     * @return u8 return 0 if success
+     */
     virtual u8 deleteQueue(const std::string &name) = 0;
 
+    /**
+     * @brief rename the existed queue
+     * 
+     * @param oldName the current name of queue
+     * @param newName the new name of queue
+     * @return u8 return 0 if success
+     */
     virtual u8 renameQueue(const std::string &oldName,
                            const std::string &newName) = 0;
 
+    /**
+     * @brief Get the Queue object
+     * 
+     * @param name the queue's name you want to get
+     * @return IQueue* return nullptr if failed
+     */
     virtual IQueue *getQueue(const std::string &name) = 0;
 
-    virtual void returnQueue(IQueue *) = 0;
+    /**
+     * @brief return the queue back to this queue list
+     * @param queue the queue you want to return
+     */
+    virtual void returnQueue(IQueue *queue) = 0;
 
 protected:
 
+    /**
+     * @brief the IConnect object 
+     */
     IConnect *m_conn;
 
 }; // end class IQueueList

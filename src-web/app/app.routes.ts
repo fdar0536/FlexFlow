@@ -1,7 +1,8 @@
 import { Routes } from "@angular/router";
 
-import { SettingsPage } from "../components/settings-page";
-import { QueueListPage } from "../components/queuelist-page";
+import { SettingsPage } from "../pages/settings-page";
+import { QueueListPage } from "../pages/queuelist-page";
+import { AboutPage } from "../pages/about-page";
 
 export const routes: Routes =
 [
@@ -12,5 +13,9 @@ export const routes: Routes =
     {
         path: "QueueList",
         component: QueueListPage,
+    },
+    {
+        path: "About",
+        component: AboutPage,
     },
 ];

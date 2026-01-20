@@ -21,26 +21,28 @@
  * SOFTWARE.
  */
 
-import {Component, inject} from "@angular/core";
-import {RouterLink} from '@angular/router';
-import {MatTabsModule} from '@angular/material/tabs';
-import {MatIconModule} from '@angular/material/icon';
-
-import {Global} from "../model/global";
+import {Component, input} from "@angular/core";
 
 @Component
 ({
-    selector: "header-component",
-    templateUrl: "./header-component.html",
-    imports: [MatTabsModule, MatIconModule, RouterLink],
+  selector: 'common-layout',
+  standalone: true,
+  template: `
+    <div [style.display]="'flex'" 
+         [style.flex-direction]="direction()" 
+         [style.gap]="gap() + 'px'"
+         [style.align-items]="align_items()"
+         [style.justify-content]="justify_content()"
+         >
+      <ng-content></ng-content>
+    </div>
+  `
 })
 
-export class HeaderComponent
+export class CommonLayoutComponent
 {
-    global = inject(Global);
-    onExitClicked = (event: Event) =>
-    {
-        event.stopPropagation();
-        this.global.onExitEvent();
-    }
+    direction = input<string>('row');
+    gap = input<number>(0);
+    align_items = input<string>('stretch');
+    justify_content = input<string>('flex-start');
 }

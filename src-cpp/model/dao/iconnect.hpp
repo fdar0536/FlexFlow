@@ -34,6 +34,9 @@ namespace Model
 namespace DAO
 {
 
+/**
+ * @brief Define the connect way to server
+ */
 class IConnect
 {
 
@@ -41,21 +44,50 @@ public:
 
     virtual ~IConnect() = 0;
 
+    /**
+     * @brief Initialize the class
+     * @return u8 return 0 if success
+     */
     virtual u8 init() = 0;
 
+    /**
+     * @brief Start connect to target
+     * 
+     * @param target Target host
+     * @param port Target port
+     * @return u8 return 0 if success
+     */
     virtual u8 startConnect(const std::string &target,
                             const i32 port = 0) = 0;
-
+    
+    /**
+     * @brief Get the connect for further operation
+     * @return void* return nullptr if failed
+     */
     void *connectToken() const;
 
+    /**
+     * @brief Get the target host
+     * @return std::string target host
+     */
     std::string targetPath() const;
 
 protected:
 
+    /**
+     * @brief the pointer to store connect token
+     */
     void *m_connectToken = nullptr;
 
+    /**
+     * @brief target path
+     */
     std::string m_targetPath = "";
 
+    /**
+     * @brief destroy connect token
+     * @tparam T the acturl type or class of connect token
+     */
     template<class T>
     void freeConnectToken()
     {

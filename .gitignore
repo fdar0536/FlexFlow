@@ -8,6 +8,7 @@
 /src-cpp/protos
 /src-go/protos
 /src-openapi
+/src-web/model/version.ts
 
 # Node
 /node_modules

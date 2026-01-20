@@ -1,0 +1,3 @@
+export const FF_VERSION = "@FF_VERSION@";
+export const FF_COMMIT = "@FF_COMMIT@";
+export const FF_BRANCH = "@FF_BRANCH@";

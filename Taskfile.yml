@@ -79,12 +79,8 @@ tasks:
       - src-go/protos/**/*
       - src-openapi/protos/**/*
     cmds:
-      - |
-        {{if eq OS "windows"}}
-        powershell -Command "(Get-Content buf.gen.yaml) -replace 'protocolbuffers/cpp:v[\d.]+', 'protocolbuffers/cpp:{{.PROTO_VERSION}}' | Set-Content buf.gen.temp.yaml"
-        {{else}}
-        sed "s#protocolbuffers/cpp:v[0-9.]*#protocolbuffers/cpp:{{.PROTO_VERSION}}#g" buf.gen.yaml > buf.gen.temp.yaml
-        {{end}}
+      - { cmd: 'powershell -Command "(Get-Content buf.gen.yaml) -replace ''protocolbuffers/cpp:v[\d.]+'', ''protocolbuffers/cpp:{{.PROTO_VERSION}}'' | Set-Content buf.gen.temp.yaml"', platforms: [windows] }
+      - { cmd: 'sed "s#protocolbuffers/cpp:v[0-9.]*#protocolbuffers/cpp:{{.PROTO_VERSION}}#g" buf.gen.yaml > buf.gen.temp.yaml', platforms: [linux, darwin] }
       - buf dep update protos
       - buf generate --template buf.gen.temp.yaml protos
       - cmake -E rm buf.gen.temp.yaml
@@ -112,24 +108,28 @@ tasks:
         -DREAD_BUFFER_SIZE={{.MODEL_READ_BUFFER_SIZE}} 
         -DMAX_READ_QUEUE_SIZE={{.MODEL_MAX_READ_QUEUE_SIZE}}
         {{.CMAKE_EXTRA_ARGS}}
-  
-  create-webui-out-dir:
+
+  prepare-webui-link:
     internal: true
     cmds:
       - { cmd: 'cmake -E make_directory "{{.WEBUI_BUILD_DIR | replace "/" "\\" }}"', platforms: [windows] }
       - { cmd: 'cmake -E make_directory "{{.WEBUI_BUILD_DIR}}"', platforms: [linux, darwin] }
-  
-  prepare-webui-link:
-    internal: true
-    deps: [create-webui-out-dir]
-    cmds:
       - cmake -E rm -rf dist
       - { cmd: "powershell -Command \"New-Item -ItemType Junction -Path dist -Target '{{.WEBUI_BUILD_DIR | replace \"/\" \"\\\\\" }}' \"", platforms: [windows] }
       - { cmd: "ln -s {{.WEBUI_BUILD_DIR}} dist", platforms: [linux, darwin] }
+  
+  prepare-webui-version:
+    internal: true
+    cmds:
+      # windows
+      - { cmd: 'powershell -Command "(Get-Content src-web\\model\\version.ts.in) -replace ''@FF_VERSION@'', ''{{.FF_VERSION}}'' -replace ''@FF_COMMIT@'', ''{{.FF_COMMIT}}'' -replace ''@FF_BRANCH@'', ''{{.FF_BRANCH}}'' | Set-Content src-web\\model\\version.ts"', platforms: [windows] }
+
+      # others
+      - { cmd: 'sed -e "s#@FF_VERSION@#{{.FF_VERSION}}#g" -e "s#@FF_COMMIT@#{{.FF_COMMIT}}#g" -e "s#@FF_BRANCH@#{{.FF_BRANCH}}#g" src-web/model/version.ts.in > src-web/model/version.ts', platforms: [linux, darwin] }
 
   config-webui:
     internal: true
-    deps: [prepare-webui-link]
+    deps: [prepare-webui-link, prepare-webui-version]
     sources:
       - package.json
       - pnpm-lock.yaml
@@ -161,7 +161,7 @@ tasks:
   clean-webui:
     internal: true
     cmds:
-      - cmake -E rm -rf "{{.WEBUI_BUILD_DIR}}"
+      - cmake -E rm -rf "{{.WEBUI_BUILD_DIR}}" src-web/model/version.ts
   
   clean-tauri:
     internal: true

@@ -1,6 +1,6 @@
 /*
  * Flex Flow
- * Copyright (c) 2025-present fdar0536
+ * Copyright (c) 2026-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,26 +21,32 @@
  * SOFTWARE.
  */
 
-import {Component, inject} from "@angular/core";
-import {RouterLink} from '@angular/router';
-import {MatTabsModule} from '@angular/material/tabs';
-import {MatIconModule} from '@angular/material/icon';
-
-import {Global} from "../model/global";
+import {Component} from "@angular/core";
+import { CommonLayoutComponent } from "../components/common-layout";
+import { FF_VERSION, FF_COMMIT, FF_BRANCH } from "../model/version";
 
 @Component
 ({
-    selector: "header-component",
-    templateUrl: "./header-component.html",
-    imports: [MatTabsModule, MatIconModule, RouterLink],
+    selector: "about-page",
+    template: `
+        <common-layout
+            direction="column"
+            align_items="center"
+            justify_content="center"
+        >
+            <h1>Flex Flow</h1>
+            <p class="CommonText">Version: {{ version }}</p>
+            <p class="CommonText">Commit: {{ commit }}</p>
+            <p class="CommonText">Branch: {{ branch }}</p>
+            <p class="CommonText">License: <a class="CommonText" href="https://opensource.org/licenses/MIT" target="_blank">MIT License</a></p>
+        </common-layout>
+    `,
+    imports: [CommonLayoutComponent],
 })
 
-export class HeaderComponent
+export class AboutPage
 {
-    global = inject(Global);
-    onExitClicked = (event: Event) =>
-    {
-        event.stopPropagation();
-        this.global.onExitEvent();
-    }
+    version = FF_VERSION;
+    commit = FF_COMMIT;
+    branch = FF_BRANCH;
 }

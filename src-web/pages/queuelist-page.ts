@@ -43,7 +43,7 @@ export class QueueListPage
 
     constructor()
     {
-        if (this.global.isConnected() === false)
+        if (this.global.connectInfo.isConnected() === false)
         {
             this.dialog.open(CommonDialog,
             {
@@ -59,7 +59,7 @@ export class QueueListPage
             return;
         }
 
-        if (this.global.queueList === null)
+        if (this.global.connectInfo.queueList === null)
         {
             this.dialog.open(CommonDialog,
             {

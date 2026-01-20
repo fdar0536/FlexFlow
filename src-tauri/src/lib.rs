@@ -26,6 +26,7 @@ pub mod ffmodeldef;
 pub mod connect;
 pub mod queue_list;
 pub mod queue;
+pub mod connect_profiles;
 
 use tauri::{
     menu::{Menu, MenuItem},
@@ -109,7 +110,8 @@ pub fn run()
                 }
             })
             // icon
-            .icon(app.default_window_icon().unwrap().clone())
+            .icon(app.default_window_icon().unwrap().clone()
+            )
             .build(app)?;
             Ok(())
         })
@@ -167,7 +169,11 @@ pub fn run()
             queue::queue_stop,
 
             // exit
-            quit
+            quit,
+
+            // config
+            connect_profiles::save_config,
+            connect_profiles::load_config
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
