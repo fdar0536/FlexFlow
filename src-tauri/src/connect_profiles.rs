@@ -23,21 +23,23 @@
 
 use std::fs;
 use std::path::PathBuf;
+use std::collections::HashMap;
 use tauri::{AppHandle, Manager, Runtime};
 use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ConnectionProfile
 {
-    pub name: String,
-    pub host: String,
-    pub port: u16
+    pub mode: u8,
+    pub target: String,
+    pub port: u16,
 }
 
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub struct AppConfig
 {
-    pub profiles: Vec<ConnectionProfile>,
+    // 使用 HashMap，Key 是 Profile 的名稱 (String)
+    pub profiles: HashMap<String, ConnectionProfile>,
     pub current_profile: Option<String>,
 }
 

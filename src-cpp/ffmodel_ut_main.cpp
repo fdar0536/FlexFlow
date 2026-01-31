@@ -23,8 +23,6 @@
 
 #include "gtest/gtest.h"
 
-#include "controller/global/global.hpp"
-
 int main(int argc, char **argv)
 {
     ::testing::InitGoogleTest(&argc, argv);

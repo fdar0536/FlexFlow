@@ -63,6 +63,11 @@ elseif (LINUX)
         model/proc/linuxproc.cpp
         model/proc/linuxproc.hpp
     )
+elseif (Darwin)
+    list(APPEND MODEL_SRC
+        model/proc/macproc.cpp
+        model/proc/macproc.hpp
+    )
 endif (WIN32)
 
 add_library(ffmodel STATIC

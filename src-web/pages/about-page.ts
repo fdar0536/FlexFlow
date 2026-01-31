@@ -23,7 +23,7 @@
 
 import {Component} from "@angular/core";
 import { CommonLayoutComponent } from "../components/common-layout";
-import { FF_VERSION, FF_COMMIT, FF_BRANCH } from "../model/version";
+import { FF_VERSION, FF_COMMIT, FF_BRANCH } from "../model/config";
 
 @Component
 ({

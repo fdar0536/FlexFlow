@@ -34,3 +34,21 @@ body {
   margin: 0;
   height: 100%;
 }
+
+.Logger
+{
+    height: 50vh;
+    width: 95%;
+    border: 3px groove #000000;
+    margin: 10px auto; 
+    display: block;
+
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.Log-item
+{
+  padding: 8px 12px;
+  font-size: 20px;
+}

@@ -23,12 +23,24 @@
 
 export type Handle = number;
 
+export class ExitCode
+{
+    clear()
+    {
+        this.hasError = false;
+        this.msg = "";
+    }
+
+    hasError: boolean = false;
+    msg: string = "";
+}
+
 export interface IConnect
 {
-    destroy(): Promise<void>;
+    destroy(code: ExitCode): Promise<void>;
     handle(): Handle;
-    startConnect(target: string, port: number): Promise<void>;
-    targetPath(): Promise<string>;
+    startConnect(target: string, port: number, code: ExitCode): Promise<void>;
+    targetPath(code: ExitCode): Promise<string>;
 }
 
 export interface IQueueList

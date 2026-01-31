@@ -21,47 +21,51 @@
  * SOFTWARE.
  */
 
-import { Mutex } from 'async-mutex';
-import { signal, DestroyRef, inject } from '@angular/core';
+import { computed, inject, signal } from '@angular/core';
 
-import { IConnect, IQueueList, IQueue, ConnectMode } from './imodel';
-import { Global } from './global';
-
-export class ConnectInfo
+import
 {
-    constructor(global: Global)
+    IConnect,
+    IQueueList,
+    IQueue,
+    ConnectMode,
+    ExitCode
+} from './models';
+import { Global } from './global';
+import { Logger } from './logger';
+import { ConnectionProfile } from './appconfig';
+import { TauriConnect } from './tauriconnect';
+import { TauriQueueList } from './tauriqueuelist';
+import { WebConnect } from './webconnect';
+import { WebQueueList } from './webqueuelist';
+
+export class ConnectUnit
+{
+    constructor(logger: Logger)
     {
-        this.global = global;
-        this.destroyRef.onDestroy(() =>
-        {
-            this.clean();
-        });
+        this.logger = logger;
     }
 
-    connect: IConnect | null = null;
-    queueList: IQueueList | null = null;
-    queue: IQueue | null = null;
-    mode = signal<ConnectMode>(ConnectMode.GRPC);
-    target = signal<string>("");
-    port = signal<number>(0);
-    isConnected = signal<boolean>(false);
-
-    clean = async() =>
+    clean = async(code: ExitCode) =>
     {
-        const release = await this.mutex.acquire();
+        this.logger.debug("ConnectUnit.clean");
+        code.clear();
         if (this.queueList)
         {
+            this.logger.debug("queueList is not null");
             if (this.queue)
             {
+                this.logger.debug("queue is not null");
                 var handle = this.queue.handle();
                 try
                 {
                     await this.queueList.returnQueue(handle);
                 }
-                catch (e)
+                catch (e: any)
                 {
-                    console.error(e);
+                    this.logger.error(e.toString());
                 }
+
                 this.queue = null;
             }
 
@@ -71,16 +75,130 @@ export class ConnectInfo
 
         if (this.connect)
         {
-            await this.connect.destroy();
+            this.logger.debug("connect is not null");
+            await this.connect.destroy(code);
+            if (code.hasError)
+            {
+                return;
+            }
+
             this.connect = null;
         }
-        
-        this.isConnected.set(false);
-        this.global.status.set("Not connected");
-        release();
     }
 
-    private mutex = new Mutex();
+    connect: IConnect | null = null;
+    queueList: IQueueList | null = null;
+    queue: IQueue | null = null;
+    private logger: Logger;
+}
+
+export class ConnectInfo
+{
+    constructor(global: Global)
+    {
+        this.logger.debug("ConnectInfo.constructor");
+        this.global = global;
+        this.global.status.set("Not connected");
+    }
+
+    connect = async(profile: ConnectionProfile, code: ExitCode) =>
+    {
+        code.clear();
+        this.logger.debug("ConnectInfo.connect");
+        this.logger.debug("profile is: " + JSON.stringify(profile));
+
+        if (this.unit[profile.mode] !== null)
+        {
+            code.hasError = true;
+            code.msg = "Already connected or disconnect/reset it first";
+            this.global.status.set(
+                "Already connected or disconnect/reset it first");
+            return;
+        }
+
+        var unit = new ConnectUnit(this.logger);
+        if (profile.mode === ConnectMode.Web)
+        {
+            unit.connect = new WebConnect();
+            await unit.connect.startConnect(profile.target, profile.port, code);
+            unit.queueList = new WebQueueList();
+        }
+        else
+        {
+            unit.connect = await TauriConnect.create(profile.mode, this.logger, code);
+            if (code.hasError)
+            {
+                return;
+            }
+
+            if (unit.connect === null)
+            {
+                code.hasError = true;
+                code.msg = "Connect failed";
+                return;
+            }
+
+            await unit.connect.startConnect(profile.target, profile.port, code);
+            if (code.hasError)
+            {
+                return;
+            }
+
+            // connect success
+            // connect to queue list
+            var handle = unit.connect.handle();
+            unit.queueList = await TauriQueueList.create(handle);
+        }
+
+        this.global.status.set("Connected");
+        this.isConnected.set(true);
+        this.unit[profile.mode] = unit;
+    }
+
+    disconnect = async(mode: ConnectMode, code: ExitCode) =>
+    {
+        this.logger.debug("ConnectInfo.disconnect");
+        this.logger.debug("mode is: " + mode);
+        code.clear();
+        if (this.unit[mode] === null) return;
+
+        this.unit[mode].clean(code);
+        if (code.hasError)
+        {
+            return;
+        }
+
+        this.unit[mode] = null;
+        if (this.unit[ConnectMode.GRPC] === null &&
+            this.unit[ConnectMode.Local] === null &&
+            this.unit[ConnectMode.Web] === null
+        )
+        {
+            this.isConnected.set(false);
+            this.global.status.set("Not connected");
+        }
+    }
+
+    readonly currentUnit = computed((): ConnectUnit | null =>
+    {
+        this.logger.trace("ConnectInfo.currentUnit");
+        return this.unit[this.global.config.current_profile().mode];
+    });
+
+    readonly connected = computed((): boolean =>
+    {
+        this.logger.trace("ConnectInfo.connected");
+        return this.isConnected();
+    });
+
+    private unit: Record<ConnectMode, ConnectUnit | null> =
+    {
+        [ConnectMode.GRPC]: null,
+        [ConnectMode.Local]: null,
+        [ConnectMode.Web]: null
+    }
+
     private global: Global;
-    private destroyRef = inject(DestroyRef);
+    private isConnected = signal<boolean>(false);
+    private logger: Logger = inject(Logger);
 }

@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-import { Handle, IQueueList } from "./imodel";
+import { Handle, IQueueList } from "./models";
 
 export class WebQueueList implements IQueueList
 {

@@ -41,20 +41,6 @@ tasks:
     cmds:
       - cmake --build "{{.CPP_BUILD_DIR}}" -j {{.JOBS}}
   
-  dev-gui:
-    env:
-      PROFILE: '{{.BUILD_TYPE}}'
-      CPP_BUILD_DIR: '{{.CPP_BUILD_DIR}}'
-      CARGO_TARGET_DIR: '{{.GUI_BUILD_DIR}}'
-      GSK_RENDERER: 'ngl'
-      __NV_DISABLE_EXPLICIT_SYNC: 1
-      WEBKIT_DISABLE_DMABUF_RENDERER: 1
-      WEBKIT_DISABLE_COMPOSITING_MODE: 1
-      GDK_BACKEND: 'x11'
-    deps: [config-webui, build-cpp]
-    cmds:
-      - pnpm tauri dev
-  
   build-gui:
     env:
       PROFILE: '{{.BUILD_TYPE}}'
@@ -63,6 +49,11 @@ tasks:
     deps: [build-cpp, build-webui]
     cmds:
       - pnpm tauri build
+  
+  dev-gui:
+    deps: [prepare-dev-gui]
+    cmds:
+      - echo "Done"
   
   clean:
     deps: [clean-cmake, clean-buf, clean-webui, clean-tauri]
@@ -122,10 +113,10 @@ tasks:
     internal: true
     cmds:
       # windows
-      - { cmd: 'powershell -Command "(Get-Content src-web\\model\\version.ts.in) -replace ''@FF_VERSION@'', ''{{.FF_VERSION}}'' -replace ''@FF_COMMIT@'', ''{{.FF_COMMIT}}'' -replace ''@FF_BRANCH@'', ''{{.FF_BRANCH}}'' | Set-Content src-web\\model\\version.ts"', platforms: [windows] }
+      - { cmd: 'powershell -Command "(Get-Content src-web\\model\\config.ts.in) -replace ''@FF_VERSION@'', ''{{.FF_VERSION}}'' -replace ''@FF_COMMIT@'', ''{{.FF_COMMIT}}'' -replace ''@FF_BRANCH@'', ''{{.FF_BRANCH}}'' -replace ''@MODEL_MAX_READ_QUEUE_SIZE@'', ''{{.MODEL_MAX_READ_QUEUE_SIZE}}'' | Set-Content src-web\\model\\config.ts"', platforms: [windows] }
 
       # others
-      - { cmd: 'sed -e "s#@FF_VERSION@#{{.FF_VERSION}}#g" -e "s#@FF_COMMIT@#{{.FF_COMMIT}}#g" -e "s#@FF_BRANCH@#{{.FF_BRANCH}}#g" src-web/model/version.ts.in > src-web/model/version.ts', platforms: [linux, darwin] }
+      - { cmd: 'sed -e "s#@FF_VERSION@#{{.FF_VERSION}}#g" -e "s#@FF_COMMIT@#{{.FF_COMMIT}}#g" -e "s#@FF_BRANCH@#{{.FF_BRANCH}}#g" -e "s#@MODEL_MAX_READ_QUEUE_SIZE@#{{.MODEL_MAX_READ_QUEUE_SIZE}}#g" src-web/model/config.ts.in > src-web/model/config.ts', platforms: [linux, darwin] }
 
   config-webui:
     internal: true
@@ -133,11 +124,38 @@ tasks:
     sources:
       - package.json
       - pnpm-lock.yaml
+      - src-web/model/config.ts.in
     generates:
       - node_modules/**
+      - src-web/model/config.ts
     cmds:
       - pnpm install
   
+  prepare-dev-gui:
+    internal: true
+    env:
+      PROFILE: '{{.BUILD_TYPE}}'
+      CPP_BUILD_DIR: '{{.CPP_BUILD_DIR}}'
+      CARGO_TARGET_DIR: '{{.GUI_BUILD_DIR}}'
+      GSK_RENDERER: 'ngl'
+      __NV_DISABLE_EXPLICIT_SYNC: 1
+      WEBKIT_DISABLE_DMABUF_RENDERER: 1
+      WEBKIT_DISABLE_COMPOSITING_MODE: 1
+      GDK_BACKEND: 'x11'
+    deps: [config-webui, build-cpp]
+    cmds:
+      - pnpm tauri dev
+  
+  prepare-grpc-server:
+    internal: true
+    dir: '{{.CPP_BUILD_DIR}}'
+    deps: [build-cpp]
+    cmds:
+      - { cmd: 'powershell -Command ".\FlexFlowServer.exe"', platforms: [windows] }
+
+      # others
+      - { cmd: 'sh -c "./FlexFlowServer"', platforms: [linux, darwin] }
+
   # build
   build-webui:
     internal: true
@@ -161,7 +179,7 @@ tasks:
   clean-webui:
     internal: true
     cmds:
-      - cmake -E rm -rf "{{.WEBUI_BUILD_DIR}}" src-web/model/version.ts
+      - cmake -E rm -rf "{{.WEBUI_BUILD_DIR}}" src-web/model/config.ts
   
   clean-tauri:
     internal: true

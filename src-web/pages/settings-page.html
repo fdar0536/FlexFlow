@@ -1,12 +1,44 @@
+<!-- select profile -->
+<mat-form-field>
+    <mat-label>Profile</mat-label>
+    <mat-select
+    [disabled]="global.isBrowser"
+    [formControl]="configCtl"
+    >
+    @for (profileName of global.config.profileList();
+    track profileName)
+    {
+        <mat-option [value]="profileName">
+            {{ profileName }}
+        </mat-option>
+    }
+    </mat-select>
+</mat-form-field>
+<common-layout
+    align_items="center"
+    justify_content="center"
+    gap="10"
+>
+    <button matFab extended (click)="onLoadClicked()">
+        <mat-icon>file_open</mat-icon>
+        <p class="CommonText">Load profile</p>
+    </button>
+    <button matFab extended (click)="onDeleteClicked()">
+        <mat-icon>delete</mat-icon>
+        <p class="CommonText">Delete profile</p>
+    </button>
+</common-layout>
+
+<!-- Connect Mode -->
 <common-layout
     align_items="center"
     justify_content="center"
 >
     <p class="CommonText">Connect Mode: </p>
     <mat-radio-group
-    [value]="this.global.connectInfo.mode()"
-    (change)="onRadioChanged($event.value)"
-    [disabled]="this.global.connectInfo.isConnected()">
+    [(ngModel)]="selectedMode"
+    [value]="global.config.current_profile().mode"
+    (change)="onRadioChanged($event.value)">
         <mat-radio-button [value]="0"
         [disabled]="this.global.isBrowser">
             GRPC
@@ -19,4 +51,62 @@
             Web
         </mat-radio-button>
     </mat-radio-group>
+</common-layout>
+
+<!-- Connect info -->
+<form [formGroup]="profileForm">
+    <common-layout
+        align_items="center"
+        justify_content="center"
+        gap="10"
+    >
+        <mat-form-field appearance="outline">
+            <mat-label>Name</mat-label>
+            <input
+                matInput
+                placeholder="Your server ID"
+                formControlName="name"
+            >
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+            <mat-label>Target</mat-label>
+            <input
+                matInput
+                placeholder="Target host"
+                formControlName="target"
+            >
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+            <mat-label>Port</mat-label>
+            <input
+                matInput
+                placeholder="Target port"
+                formControlName="port"
+            >
+        </mat-form-field>
+    </common-layout>
+</form>
+
+<!-- Connect button -->
+<common-layout
+    align_items="center"
+    justify_content="center"
+    gap="10"
+>
+    <button matFab extended (click)="onSaveClicked()">
+        <mat-icon>save</mat-icon>
+        <p class="CommonText">Save profile</p>
+    </button>
+    <button matFab extended (click)="onClearClicked()">
+        <mat-icon>delete</mat-icon>
+        <p class="CommonText">Clear</p>
+    </button>
+    <button matFab extended (click)="onDisconnectClicked()">
+        <mat-icon>link_off</mat-icon>
+        <p class="CommonText">Disconnect/Reset</p>
+    </button>
+    <button matFab extended (click)="onConnectClicked()">
+        <mat-icon>link</mat-icon>
+        <p class="CommonText">Connect</p>
+    </button>
 </common-layout>

@@ -35,10 +35,12 @@ use tauri::{
     Manager,
 };
 
+use tauri_plugin_log::{Target, TargetKind};
+
 #[tauri::command]
-fn quit()
+fn quit(code: i32)
 {
-    std::process::exit(0);
+    std::process::exit(code);
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -53,6 +55,13 @@ pub fn run()
 
     // create menu
     tauri::Builder::default()
+        .plugin(tauri_plugin_log::Builder::default()
+            .targets([
+                Target::new(TargetKind::Stdout), // 印在終端機
+                Target::new(TargetKind::Webview), // 回傳給 Webview console
+                Target::new(TargetKind::LogDir { file_name: Some("app".into()) }), // 存成檔案
+            ])
+            .build())
         .setup(|app| {
             // menu items
             let exit_i = MenuItem::with_id(app, "exit", "Exit", true, None::<&str>)?;
@@ -61,7 +70,7 @@ pub fn run()
             // menu
             let menu = Menu::with_items(app, &[&show_i, &exit_i])?;
 
-            let tray = TrayIconBuilder::new()
+            let _tray = TrayIconBuilder::new()
             // menu
             .menu(&menu)
             .show_menu_on_left_click(false)

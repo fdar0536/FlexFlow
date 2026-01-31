@@ -25,8 +25,9 @@ import {Component, inject} from "@angular/core";
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 
-import {Global} from "../model/global";
+import { Global } from "../model/global";
 import { CommonDialog } from '../components/common-dialog';
+import { Logger } from "../model/logger";
 
 @Component
 ({
@@ -37,13 +38,10 @@ import { CommonDialog } from '../components/common-dialog';
 
 export class QueueListPage
 {
-    private router = inject(Router);
-    private dialog = inject(MatDialog);
-    global = inject(Global);
-
     constructor()
     {
-        if (this.global.connectInfo.isConnected() === false)
+        this.logger.debug("QueueListPage.constructor");
+        if (this.global.connectInfo.connected() === false)
         {
             this.dialog.open(CommonDialog,
             {
@@ -59,7 +57,7 @@ export class QueueListPage
             return;
         }
 
-        if (this.global.connectInfo.queueList === null)
+        if (this.global.connectInfo.currentUnit()?.queueList === null)
         {
             this.dialog.open(CommonDialog,
             {
@@ -67,7 +65,8 @@ export class QueueListPage
                 {
                     type: 'info',
                     title: 'Oops!',
-                    message: 'Connect may be failed. Please try again.'
+                    message:
+                    'Connect may be failed. Please try again.'
                 }
             })
 
@@ -75,4 +74,9 @@ export class QueueListPage
             return;
         }
     }
+
+    global = inject(Global);
+    private router = inject(Router);
+    private dialog = inject(MatDialog);
+    private logger = inject(Logger);
 }

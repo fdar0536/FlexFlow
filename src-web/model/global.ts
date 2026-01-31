@@ -24,26 +24,14 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from '@tauri-apps/api/event';
 
-import { Injectable, signal, PLATFORM_ID, inject, DestroyRef } from '@angular/core';
+import { Injectable, signal, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 
 import { CommonDialog } from '../components/common-dialog';
 import { ConnectInfo } from "./connectinfo";
-import { ConnectMode } from "./imodel";
-
-export type ConnectionProfile =
-{
-    name: string;
-    target: string;
-    port: number;
-}
-
-export type AppConfig = 
-{
-    profiles: ConnectionProfile[];
-    current_profile: string | null;
-}
+import { Logger } from "./logger";
+import { AppConfig } from "./appconfig";
 
 @Injectable
 ({
@@ -52,9 +40,10 @@ export type AppConfig =
 
 export class Global
 {
-    private destroyRef = inject(DestroyRef);
     constructor()
     {
+        this.logger = inject(Logger);
+        this.logger.debug("Global.constructor");
         if (isPlatformBrowser(this.platformId))
         {
             const hasTauriInternal = !!(window as any).__TAURI_INTERNALS__;
@@ -64,18 +53,7 @@ export class Global
         }
 
         this.connectInfo = new ConnectInfo(this);
-        if (this.isBrowser)
-        {
-            this.connectInfo.mode.set(ConnectMode.Web);
-        }
-
-        this.destroyRef.onDestroy(() =>
-        {
-            if (this.isTauri)
-            {
-                invoke("save_config", { config: this.config });
-            } 
-        });
+        this.config = new AppConfig(this);
     }
 
     // tauri
@@ -91,6 +69,7 @@ export class Global
     // handle exit
     setupExit = async() =>
     {
+        this.logger.debug("Global.setupExit");
         if (this.isTauri)
         {
             await listen('request-exit', (event) =>
@@ -103,6 +82,7 @@ export class Global
     private dialog = inject(MatDialog);
     onExitEvent = async() =>
     {
+        this.logger.debug("Global.onExitEvent");
         if (this.isTauri)
         {
             const dialogRef = this.dialog.open(CommonDialog,
@@ -115,11 +95,13 @@ export class Global
                 },
             });
             
-            dialogRef.afterClosed().subscribe(result =>
+            dialogRef.afterClosed().subscribe(async result =>
             {
                 if (result === true)
                 {
-                    invoke("quit");
+                    this.logger.info("Saving configuration before exit...");
+                    await this.config.save();
+                    await invoke("quit", { code: 0 });
                 }
             });
         }
@@ -136,28 +118,6 @@ export class Global
         }
     } // onExitEvent
 
-    // status
-    config: AppConfig | null = null;
-    isConfigReady = signal<boolean>(false, { equal: () => false });
-    loadConfig = async() =>
-    {
-        if (this.isTauri)
-        {
-            try
-            {
-                this.config = await invoke<AppConfig>("get_config");
-            }
-            catch (e)
-            {
-                this.config = null;
-                console.log(e)
-            }
-        }
-        else
-        {
-            this.config = null;
-        }
-
-        this.isConfigReady.set(true);
-    }
+    config: AppConfig;
+    private logger: Logger;
 }

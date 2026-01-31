@@ -21,11 +21,12 @@
  * SOFTWARE.
  */
 
-import { Handle, IConnect } from "./imodel";
+import { ExitCode, Handle, IConnect } from "./models";
 
+// TODO: implement webconnect
 export class WebConnect implements IConnect
 {
-    destroy(): Promise<void> {
+    destroy(code: ExitCode): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
@@ -33,11 +34,11 @@ export class WebConnect implements IConnect
         throw new Error("Method not implemented.");
     }
 
-    startConnect(target: string, port: number): Promise<void> {
+    startConnect(target: string, port: number, code: ExitCode): Promise<void> {
         throw new Error("Method not implemented.");
     }
 
-    targetPath(): Promise<string> {
+    targetPath(code: ExitCode): Promise<string> {
         throw new Error("Method not implemented.");
     }
 }

@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-import { IQueue, ProcTask } from "./imodel";
+import { IQueue, ProcTask } from "./models";
 
 export class WebQueue implements IQueue
 {

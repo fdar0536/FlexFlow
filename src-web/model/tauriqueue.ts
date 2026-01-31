@@ -23,7 +23,7 @@
 
 import { invoke } from "@tauri-apps/api/core";
 
-import { IQueue, Handle, ProcTask } from "./imodel";
+import { IQueue, Handle, ProcTask } from "./models";
 
 export class TauriQueue implements IQueue
 {

@@ -1,14 +1,15 @@
-@defer (when global.isConfigReady()) {
-  <div>
-    <header-component></header-component>
-  </div>
-  <main class="container">
-    <router-outlet />
-  </main>
-}
+@defer (when global.config.ready())
+{
+    <div>
+        <header-component></header-component>
+    </div>
+    <main class="container">
+        <router-outlet />
+    </main>
+    }
 @loading
 {
-  <div>
-    <p class="CommonText">Loading...</p>
-  </div>
+    <div>
+        <h1>Loading...</h1>
+    </div>
 }

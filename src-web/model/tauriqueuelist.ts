@@ -23,14 +23,14 @@
 
 import { invoke } from "@tauri-apps/api/core";
 
-import { IQueueList, Handle } from "./imodel";
+import { IQueueList, Handle } from "./models";
 
 export class TauriQueueList implements IQueueList
 {
     static create = async(conn: Handle): Promise<TauriQueueList> =>
     {
         var list: Handle =
-        await invoke<Handle>("queue_list_init", {connect_handle: conn});
+        await invoke<Handle>("queue_list_init", {connectHandle: conn});
         return new TauriQueueList(list);
     }
 
