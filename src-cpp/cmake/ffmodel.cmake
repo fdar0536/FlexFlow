@@ -58,17 +58,24 @@ if (WIN32)
         model/proc/winproc.cpp
         model/proc/winproc.hpp
     )
-elseif (LINUX)
+else ()
+    list(APPEND MODEL_SRC
+        model/proc/posixproc.cpp
+        model/proc/posixproc.hpp
+    )
+endif (WIN32)
+
+if (LINUX)
     list(APPEND MODEL_SRC
         model/proc/linuxproc.cpp
         model/proc/linuxproc.hpp
     )
-elseif (Darwin)
+else ()
     list(APPEND MODEL_SRC
         model/proc/macproc.cpp
         model/proc/macproc.hpp
     )
-endif (WIN32)
+endif (LINUX)
 
 add_library(ffmodel STATIC
     ${MODEL_SRC}

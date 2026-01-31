@@ -45,8 +45,10 @@ public:
     {
 #ifdef _WIN32
         m_proc = new (std::nothrow) Model::Proc::WinProc();
-#else
+#elif defined(	__linux__)
         m_proc = new (std::nothrow) Model::Proc::LinuxProc();
+#else
+        m_proc = new (std::nothrow) Model::Proc::MacProc();
 #endif
 
         if (!m_proc)

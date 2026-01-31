@@ -21,9 +21,11 @@
  * SOFTWARE.
  */
 
-#include "macproc.hpp"
+#include "util.h"
+#include "spdlog/spdlog.h"
+#include "controller/global/global.hpp"
 
-// implement MacProc
+#include "macproc.hpp"
 
 namespace Model
 {
@@ -31,36 +33,50 @@ namespace Model
 namespace Proc
 {
 
-MacProc::MacProc()
+MacProc::MacProc():
+    PosixProc()
 {}
 
 MacProc::~MacProc()
 {}
 
-u8 MacProc::init()
-{
-    return 0;
-}
-
 u8 MacProc::start(const Task &task)
 {
+    if (isRunning())
+    {
+        spdlog::error("{}:{} Process is running", LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
+
+    if (Controller::Global::isAdmin())
+    {
+        spdlog::error("{}:{} Refuse to run as super user", LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
+
+    m_masterFD = -1;
+    m_exitCode.store(0, std::memory_order_relaxed);
+
+    m_pid = forkpty(&m_masterFD, NULL, NULL, NULL);
+    if (m_pid == -1)
+    {
+        // parent process
+        spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
+        return 1;
+    }
+
+    if (m_pid == 0)
+    {
+        // child process
+        startChild(task);
+    }
+
     return 0;
 }
-
-void MacProc::stop()
-{}
 
 bool MacProc::isRunning()
 {
     return false;
-}
-
-void MacProc::readCurrentOutput(std::vector<std::string> &out)
-{}
-
-u8 MacProc::exitCode(i32 &out)
-{
-    return 0;
 }
 
 } // end namespace Proc

@@ -62,7 +62,6 @@ tasks:
   
   # prepare
   generate-buf:
-    internal: true
     sources:
       - protos/**/*.proto
     generates:

@@ -30,7 +30,7 @@
 
 #include "sys/epoll.h"
 
-#include "iproc.hpp"
+#include "posixproc.hpp"
 
 namespace Model
 {
@@ -38,7 +38,7 @@ namespace Model
 namespace Proc
 {
 
-class LinuxProc : public IProc
+class LinuxProc : public PosixProc
 {
 public:
 
@@ -46,31 +46,11 @@ public:
 
     ~LinuxProc();
 
-    virtual u8 init() override;
-
-    virtual u8 start(const Task &task) override;
-
-    virtual void stop() override;
+    virtual u8 start(const Task &task) override;   
 
     virtual bool isRunning() override;
 
-    virtual void readCurrentOutput(std::vector<std::string> &out) override;
-
-    virtual u8 exitCode(i32 &out) override;
-
 private:
-
-    pid_t m_pid;
-
-    int m_masterFD = -1;
-
-    std::atomic<i32> m_exitCode;
-
-    void startChild(const Task &);
-
-    char **buildChildArgv(const Task &);
-
-    void stopImpl();
 
     // epoll
     struct epoll_event m_event, m_events[10];
@@ -85,10 +65,6 @@ private:
 
     // for reading current output
     std::jthread m_thread;
-
-    std::mutex m_mutex;
-
-    std::deque<std::string> m_deque;
 
     void readOutputLoop();
 };

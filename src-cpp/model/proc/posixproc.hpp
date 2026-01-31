@@ -21,10 +21,12 @@
  * SOFTWARE.
  */
 
-#ifndef _MODEL_PROC_MACPROC_HPP_
-#define _MODEL_PROC_MACPROC_HPP_
+#ifndef _MODEL_PROC_POSIXPROC_HPP_
+#define _MODEL_PROC_POSIXPROC_HPP_
 
-#include "posixproc.hpp"
+#include <deque>
+
+#include "iproc.hpp"
 
 namespace Model
 {
@@ -32,19 +34,38 @@ namespace Model
 namespace Proc
 {
 
-class MacProc : public PosixProc
+class PosixProc : public IProc
 {
 public:
 
-    MacProc();
+    ~PosixProc();
 
-    ~MacProc();
+    virtual u8 init() override;
 
-    virtual u8 start(const Task &task) override;   
+    virtual void stop() override;
 
-    virtual bool isRunning() override;
+    virtual void readCurrentOutput(std::vector<std::string> &out) override;
 
-private:
+    virtual u8 exitCode(i32 &out) override;
+
+protected:
+
+    pid_t m_pid = 0;
+
+    int m_masterFD = -1;
+
+    std::atomic<i32> m_exitCode;
+
+    void startChild(const Task &);
+
+    char **buildChildArgv(const Task &);
+
+    void stopImpl();
+
+    // for read child process' output
+    std::mutex m_mutex;
+
+    std::deque<std::string> m_deque;
 
 };
 
@@ -52,4 +73,4 @@ private:
 
 } // end namespace Model
 
-#endif // _MODEL_PROC_MACPROC_HPP_
+#endif // _MODEL_PROC_POSIXPROC_HPP_

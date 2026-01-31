@@ -26,8 +26,10 @@
 
 #ifdef _WIN32
 #include "model/proc/winproc.hpp"
-#else
+#elif defined(	__linux__)
 #include "model/proc/linuxproc.hpp"
+#else
+#include "model/proc/macproc.hpp"
 #endif
 
 #include "model/dao/iqueuelist.hpp"

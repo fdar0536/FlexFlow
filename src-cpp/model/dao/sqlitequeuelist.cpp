@@ -33,10 +33,12 @@
 #include "sqlitequeuelist.hpp"
 #include "dirutils.hpp"
 
-#if (defined _WIN32)
+#ifdef _WIN32
 #include "model/proc/winproc.hpp"
 #elif (defined __linux__)
 #include "model/proc/linuxproc.hpp"
+#else
+#include "model/proc/macproc.hpp"
 #endif
 
 namespace Model
@@ -128,8 +130,10 @@ u8 SQLiteQueueList::createQueue(const std::string &name)
 
 #ifdef _WIN32
     Proc::WinProc *proc = new (std::nothrow) Proc::WinProc();
-#else
+#elif defined(	__linux__)
     Proc::LinuxProc *proc = new (std::nothrow) Proc::LinuxProc();
+#else
+    Proc::MacProc *proc = new (std::nothrow) Proc::MacProc();
 #endif
     if (!proc)
     {

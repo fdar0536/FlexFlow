@@ -26,6 +26,7 @@
 #include <mutex>
 #include <string.h>
 
+#include "model/proc/posixproc.hpp"
 #include "sys/types.h"
 #include "sys/wait.h"
 #include "fcntl.h"
@@ -43,19 +44,11 @@ namespace Model
 namespace Proc
 {
 
-LinuxProc::LinuxProc() :
-    m_pid(0)
+LinuxProc::LinuxProc()
 {}
 
 LinuxProc::~LinuxProc()
 {}
-
-u8 LinuxProc::init()
-{
-    m_exitCode.store(0, std::memory_order_relaxed);
-    m_deque.clear();
-    return 0;
-}
 
 u8 LinuxProc::start(const Task &task)
 {
@@ -115,11 +108,6 @@ u8 LinuxProc::start(const Task &task)
     return 0;
 }
 
-void LinuxProc::stop()
-{
-    stopImpl();
-}
-
 bool LinuxProc::isRunning()
 {
     int status;
@@ -146,134 +134,7 @@ bool LinuxProc::isRunning()
     }
 }
 
-void LinuxProc::readCurrentOutput(std::vector<std::string> &out)
-{
-    out.clear();
-
-    {
-        std::unique_lock<std::mutex> lock(m_mutex);
-
-        if (m_deque.empty())
-        {
-            spdlog::debug("{}:{} nothing to read", LOG_FILE_PATH(__FILE__), __LINE__);
-            return;
-        }
-
-        out.reserve(m_deque.size());
-        for (size_t index = 0; index < m_deque.size(); ++index)
-        {
-            out.push_back(std::move(m_deque.front()));
-            m_deque.pop_front();
-        }
-    }
-}
-
-u8 LinuxProc::exitCode(i32 &out)
-{
-    if (isRunning())
-    {
-        spdlog::error("{}:{} Process is running", LOG_FILE_PATH(__FILE__), __LINE__);
-        return 1;
-    }
-
-    out = m_exitCode.load(std::memory_order_relaxed);
-    return 0;
-}
-
 // private member functions
-void LinuxProc::startChild(const Task &task)
-{
-    if (chdir(task.workDir.c_str()) == -1)
-    {
-        perror("chdir");
-        exit(1);
-    }
-
-    char **argv = buildChildArgv(task);
-    if (!argv)
-    {
-        exit(1);
-    }
-
-    // start child
-    char *env[] = { NULL };
-    execve(task.execName.c_str(), argv, env);
-    perror("execve");   /* execve() returns only on error */
-    exit(1);
-}
-
-char **LinuxProc::buildChildArgv(const Task &task)
-{
-    char **argv(nullptr);
-    if (task.args.size())
-    {
-        argv = new ( std::nothrow ) char *[task.args.size() + 2](); // process name + null for tail
-    }
-    else
-    {
-        argv = new ( std::nothrow ) char *[2]();
-    }
-
-    if (!argv)
-    {
-        fprintf(stderr, "Fail to allocate child process' argv.");
-        return nullptr;
-    }
-
-    size_t nameLen = task.execName.length() + 1;
-    argv[0] = new ( std::nothrow ) char[nameLen]();
-    if (!argv[0])
-    {
-        delete[] argv;
-        fprintf(stderr, "Fail to allocate child process' argv[0].");
-        return nullptr;
-    }
-
-    memcpy(argv[0], task.execName.c_str(), nameLen);
-    if (task.args.size())
-    {
-        size_t index(0);
-        for (size_t i = 0; i < task.args.size(); ++i)
-        {
-            index = i + 1;
-            argv[index] = new ( std::nothrow ) char[task.args[i].size() + 1](); // +1 for '\0'
-            if (!argv[index])
-            {
-                for (size_t j = 0; j < index; ++j)
-                {
-                    delete[] argv[j];
-                }
-
-                delete[] argv;
-                fprintf(stderr, "Fail to allocate child process' argv[%zu].", index);
-                return nullptr;
-            }
-
-            memcpy(argv[index], task.args[i].c_str(), task.args[i].size());
-            argv[index][task.args[i].size()] = '\0';
-        }
-
-        argv[task.args.size() + 1] = NULL;
-    }
-    else
-    {
-        argv[1] = NULL;
-    }
-
-    return argv;
-}
-
-void LinuxProc::stopImpl()
-{
-    if (kill(m_pid, SIGKILL) == -1)
-    {
-        spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
-        return;
-    }
-
-    sleep(2);
-}
-
 u8 LinuxProc::epollInit()
 {
     m_epoll_fd = epoll_create1(0);

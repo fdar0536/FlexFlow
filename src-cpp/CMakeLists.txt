@@ -13,8 +13,6 @@ if (UNIX)
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         add_compile_options(-Weffc++)
     endif ()
-
-    add_link_options(-Wl,--unresolved-symbols=report-all)
 else () # Windows
     if (MINGW)
         add_compile_options(-Wall -Werror -Wextra -fvisibility=hidden)
@@ -22,8 +20,6 @@ else () # Windows
         if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
             add_compile_options(-Weffc++)
         endif ()
-
-        add_link_options(-Wl,--unresolved-symbols=report-all)
     else () # msvc or icc
         add_compile_options(/W4 /utf-8)
     endif (MINGW)
