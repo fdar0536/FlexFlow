@@ -3,3 +3,7 @@ ignoredBuiltDependencies:
   - esbuild
   - lmdb
   - msgpackr-extract
+
+overrides:
+  '@isaacs/brace-expansion@<=5.0.0': '>=5.0.1'
+  '@modelcontextprotocol/sdk@>=1.10.0 <=1.25.3': '>=1.26.0'
