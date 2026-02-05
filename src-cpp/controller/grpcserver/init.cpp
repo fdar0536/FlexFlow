@@ -44,6 +44,8 @@ Model::DAO::IQueueList *sqliteQueueList = nullptr;
 
 u8 init(int argc, char **argv)
 {
+    spdlog::debug("{}:{} init", LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (Global::consoleInit())
     {
         spdlog::error("{}:{} initConsole failed", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -58,13 +60,15 @@ u8 init(int argc, char **argv)
             return 2;
         }
 
-        spdlog::error("{}:{} parse config failed", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} parse config failed",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     if (Controller::Global::sqliteInit(&sqliteQueueList, config.dbPath))
     {
-        spdlog::error("{}:{} Fail to initialize sqlite queue list", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} Fail to initialize sqlite queue list",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -80,7 +84,8 @@ u8 init(int argc, char **argv)
 
     if (ret)
     {
-        spdlog::error("{}:{} Fail to initialize spdlog", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} Fail to initialize spdlog",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -90,6 +95,7 @@ u8 init(int argc, char **argv)
 
 void fin()
 {
+    spdlog::debug("{}:{} fin", LOG_FILE_PATH(__FILE__), __LINE__);
     Global::consoleFin();
     if (sqliteQueueList) delete sqliteQueueList;
 }

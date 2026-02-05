@@ -76,7 +76,8 @@ uint_fast8_t Server::start()
     }
     catch (...)
     {
-        spdlog::error("{}:{} Fail to start server", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} Fail to start server",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         m_server = nullptr;
         return 1;
     }

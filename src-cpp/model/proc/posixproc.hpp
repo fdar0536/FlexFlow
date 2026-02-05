@@ -24,6 +24,7 @@
 #ifndef _MODEL_PROC_POSIXPROC_HPP_
 #define _MODEL_PROC_POSIXPROC_HPP_
 
+#include <atomic>
 #include <deque>
 
 #include "iproc.hpp"
@@ -42,7 +43,11 @@ public:
 
     virtual u8 init() override;
 
+    virtual u8 start(const Task &task) override; 
+
     virtual void stop() override;
+
+    virtual bool isRunning() override;
 
     virtual void readCurrentOutput(std::vector<std::string> &out) override;
 
@@ -62,11 +67,18 @@ protected:
 
     void stopImpl();
 
+    void closeFile(int *);
+
     // for read child process' output
     std::mutex m_mutex;
 
     std::deque<std::string> m_deque;
 
+    virtual u8 asioInit() = 0;
+
+    virtual void asioFin() = 0;
+
+    virtual void readOutputLoop() = 0;
 };
 
 } // end namespace Proc

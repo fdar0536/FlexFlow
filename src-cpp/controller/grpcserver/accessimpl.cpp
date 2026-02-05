@@ -21,7 +21,10 @@
  * SOFTWARE.
  */
 
+#include "spdlog/spdlog.h"
+
 #include "controller/global/defines.h"
+#include "controller/global/global.hpp"
 
 #include "accessimpl.hpp"
 
@@ -31,10 +34,11 @@ namespace Controller
 namespace GRPCServer
 {
 
-grpc::Status AccessImpl::Echo(grpc::ServerContext* context,
-                              const ff::Empty* request,
-                              ff::EchoRes* response)
+grpc::Status AccessImpl::Echo(grpc::ServerContext *context,
+                              const ff::Empty *request,
+                              ff::EchoRes *response)
 {
+    spdlog::debug("{}:{} AccessImpl::Echo", LOG_FILE_PATH(__FILE__), __LINE__);
     UNUSED(context);
     UNUSED(request);
     UNUSED(response);

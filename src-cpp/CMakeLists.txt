@@ -26,10 +26,6 @@ else () # Windows
 endif (UNIX) # end if (UNIX)
 
 # options
-option(ENABLE_SERVER "enable server" on)
-option(ENABLE_CAPI "enable model CAPI for ffi" on)
-option(ENABLE_TEST "Enable model unit test" on)
-
 if((NOT ENABLE_SERVER) AND (NOT ENABLE_CAPI))
     set(ENABLE_SERVER on)
 endif((NOT ENABLE_SERVER) AND (NOT ENABLE_CAPI))
@@ -68,11 +64,17 @@ if (UPB_LIBRARIES)
 endif()
 
 find_package(gRPC REQUIRED)
-find_package(cxxopts REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(SQLite3 REQUIRED)
-find_package(yaml-cpp REQUIRED)
-find_package(GTest REQUIRED)
+
+if (ENABLE_SERVER)
+    find_package(cxxopts REQUIRED)
+    find_package(yaml-cpp REQUIRED)
+endif (ENABLE_SERVER)
+
+if(ENABLE_TEST)
+    find_package(GTest REQUIRED)
+endif(ENABLE_TEST)
 
 file(GLOB_RECURSE PROTO_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/protos/*.cc")
 file(GLOB_RECURSE PROTO_HDRS "${CMAKE_CURRENT_SOURCE_DIR}/protos/*.h")

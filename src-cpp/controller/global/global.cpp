@@ -120,6 +120,7 @@ void consoleFin()
 
 bool isAdmin()
 {
+    spdlog::debug("{}:{} isAdmin", LOG_FILE_PATH(__FILE__), __LINE__);
 #ifdef _WIN32
     PSID sid;
     SID_IDENTIFIER_AUTHORITY auth = SECURITY_NT_AUTHORITY;
@@ -154,6 +155,8 @@ bool isAdmin()
 
 u8 spdlogInit(const std::string &path)
 {
+    spdlog::debug("{}:{} spdlogInit", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} path is: {}", LOG_FILE_PATH(__FILE__), __LINE__, path);
     if (path.empty())
     {
         return 0;
@@ -177,6 +180,9 @@ u8 spdlogInit(const std::string &path)
 
 u8 sqliteInit(Model::DAO::IQueueList **out, const std::string &target)
 {
+    spdlog::debug("{}:{} sqliteInit", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} target is: {}", LOG_FILE_PATH(__FILE__), __LINE__, target);
+
     Model::DAO::SQLiteConnect *conn(nullptr);
     conn = new (std::nothrow) Model::DAO::SQLiteConnect();
     if (!conn)
@@ -221,6 +227,10 @@ u8 sqliteInit(Model::DAO::IQueueList **out, const std::string &target)
 
 u8 grpcInit(Model::DAO::IQueueList **out, const std::string &target, const i32 port)
 {
+    spdlog::debug("{}:{} grpcInit", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} target is: {}", LOG_FILE_PATH(__FILE__), __LINE__, target);
+    spdlog::debug("{}:{} port is: {}", LOG_FILE_PATH(__FILE__), __LINE__, port);
+    
     Model::DAO::GRPCConnect *conn = new (std::nothrow) Model::DAO::GRPCConnect;
     if (!conn)
     {

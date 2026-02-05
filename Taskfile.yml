@@ -49,6 +49,11 @@ tasks:
     deps: [build-cpp, build-webui]
     cmds:
       - pnpm tauri build
+
+  build-webui:
+    deps: [config-webui]
+    cmds:
+      - npx ng build --delete-output-path=false
   
   dev-gui:
     deps: [prepare-dev-gui]
@@ -145,23 +150,6 @@ tasks:
     deps: [config-webui, build-cpp]
     cmds:
       - pnpm tauri dev
-  
-  prepare-grpc-server:
-    internal: true
-    dir: '{{.CPP_BUILD_DIR}}'
-    deps: [build-cpp]
-    cmds:
-      - { cmd: 'powershell -Command ".\FlexFlowServer.exe"', platforms: [windows] }
-
-      # others
-      - { cmd: 'sh -c "./FlexFlowServer"', platforms: [linux, darwin] }
-
-  # build
-  build-webui:
-    internal: true
-    deps: [config-webui]
-    cmds:
-      - npx ng build --delete-output-path=false
 
   # clean
   clean-buf:

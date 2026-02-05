@@ -59,7 +59,6 @@ pub fn run()
             .targets([
                 Target::new(TargetKind::Stdout), // 印在終端機
                 Target::new(TargetKind::Webview), // 回傳給 Webview console
-                Target::new(TargetKind::LogDir { file_name: Some("app".into()) }), // 存成檔案
             ])
             .build())
         .setup(|app| {

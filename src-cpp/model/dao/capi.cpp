@@ -21,7 +21,11 @@
  * SOFTWARE.
  */
 
+#include <mutex>
+
 #include "spdlog/spdlog.h"
+#include "spdlog/sinks/base_sink.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
 
 #include "controller/global/global.hpp"
 
@@ -30,6 +34,75 @@
 #include "queue.h"
 
 #include "capi.h"
+
+template<typename Mutex>
+class CapiSink : public spdlog::sinks::base_sink<Mutex>
+{
+public:
+    static void setCallback(LogCallback cb)
+    {
+        spdlog::debug("{}:{} setCallback", LOG_FILE_PATH(__FILE__), __LINE__);
+        std::lock_guard<std::mutex> lock(s_mutex);
+        s_callback = cb;
+    }
+
+protected:
+    void sink_it_(const spdlog::details::log_msg& msg) override
+    {
+        std::lock_guard<std::mutex> lock(s_mutex);
+        if (s_callback)
+        {
+            // 如果有註冊 Callback，就把格式化後的字串丟出去
+            spdlog::memory_buf_t formatted;
+            spdlog::sinks::base_sink<Mutex>::formatter_->format(msg, formatted);
+            s_callback(static_cast<int>(msg.level), fmt::to_string(formatted).c_str());
+        }
+
+        // if callback is nullptr, do nothing
+    }
+
+    void flush_() override {}
+
+private:
+    static LogCallback s_callback;
+    static std::mutex s_mutex;
+}; // class CapiSink
+
+template<typename Mutex> LogCallback CapiSink<Mutex>::s_callback = nullptr;
+template<typename Mutex> std::mutex CapiSink<Mutex>::s_mutex;
+
+static u8 initLogging(i32 level, LogCallback cb)
+{
+    spdlog::debug("{}:{} initLogging", LOG_FILE_PATH(__FILE__), __LINE__);
+    
+    if (level < 0 || level > 6)
+    {
+        spdlog::error("{}:{} invalid level", LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
+
+    try
+    {
+        auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+        auto capiSink = std::make_shared<CapiSink<std::mutex>>();
+        capiSink->setCallback(cb);
+
+        // 組合多個 Sink
+        std::vector<spdlog::sink_ptr> sinks { consoleSink, capiSink };
+        auto logger = std::make_shared<spdlog::logger>("multi_sink", sinks.begin(), sinks.end());
+        logger->set_level(static_cast<spdlog::level::level_enum>(level));
+        
+        spdlog::set_default_logger(logger);
+    }
+    catch (...)
+    {
+        // it may cause memory allocate failed
+        spdlog::error("{}:{} Fail to init logging", LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
+
+    return 0;
+}
 
 static void buildConnect(FFConnect &c)
 {
@@ -73,11 +146,17 @@ static void buildQueue(FFQueue &q)
 extern "C"
 {
 
-FF_MODEL_API u8 getFFModel(FFModel *in)
+FF_MODEL_API u8 getFFModel(FFModel *in, int level, LogCallback cb)
 {
     if (!in)
     {
         spdlog::error("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
+
+    if (initLogging(level, cb))
+    {
+        spdlog::error("{}:{} Fail to init logging", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -88,4 +167,4 @@ FF_MODEL_API u8 getFFModel(FFModel *in)
     return 0;
 }
 
-}
+} // extern "C"

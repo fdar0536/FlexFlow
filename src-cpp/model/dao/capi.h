@@ -42,7 +42,9 @@ typedef struct FFModel
     FFQueue Queue;
 } FFModel;
 
-FF_MODEL_API u8 getFFModel(FFModel *);
+typedef void (*LogCallback)(int level, const char* msg);
+
+FF_MODEL_API u8 getFFModel(FFModel *in, int level, LogCallback cb);
 
 #ifdef __cplusplus
 }

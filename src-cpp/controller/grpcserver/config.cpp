@@ -50,6 +50,8 @@ Config::~Config()
 
 u8 Config::parse(Config *in, int argc, char **argv)
 {
+    spdlog::debug("{}:{} Config::parse", LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (!in)
     {
         spdlog::warn("{}:{} input is nullptr", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -159,6 +161,8 @@ u8 Config::parse(Config *in, int argc, char **argv)
 
 uint_fast8_t Config::parse(Config *obj, const std::string &path)
 {
+    spdlog::debug("{}:{} Config::parse", LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (!obj)
     {
         spdlog::warn("{}:{} input is nullptr", LOG_FILE_PATH(__FILE__), __LINE__);

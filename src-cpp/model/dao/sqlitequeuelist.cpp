@@ -130,7 +130,7 @@ u8 SQLiteQueueList::createQueue(const std::string &name)
 
 #ifdef _WIN32
     Proc::WinProc *proc = new (std::nothrow) Proc::WinProc();
-#elif defined(	__linux__)
+#elif defined(__linux__)
     Proc::LinuxProc *proc = new (std::nothrow) Proc::LinuxProc();
 #else
     Proc::MacProc *proc = new (std::nothrow) Proc::MacProc();

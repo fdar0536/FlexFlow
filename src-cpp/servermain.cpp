@@ -36,12 +36,14 @@ static BOOL eventHandler(DWORD dwCtrlType);
 
 int main(int argc, char **argv)
 {
+    spdlog::debug("{}:{} main", LOG_FILE_PATH(__FILE__), __LINE__);
     if (Controller::Global::isAdmin())
     {
 #ifdef _WIN32
         spdlog::error("{}:{} Refuse to run as administrator", LOG_FILE_PATH(__FILE__), __LINE__);
 #else
-        spdlog::error("{}:{} Refuse to run as super user", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} Refuse to run as super user",
+            LOG_FILE_PATH(__FILE__), __LINE__);
 #endif
         return 1;
     }

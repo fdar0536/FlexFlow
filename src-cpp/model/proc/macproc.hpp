@@ -24,6 +24,8 @@
 #ifndef _MODEL_PROC_MACPROC_HPP_
 #define _MODEL_PROC_MACPROC_HPP_
 
+#include "sys/event.h"
+
 #include "posixproc.hpp"
 
 namespace Model
@@ -40,12 +42,20 @@ public:
 
     ~MacProc();
 
-    virtual u8 start(const Task &task) override;   
+protected:
 
-    virtual bool isRunning() override;
+    virtual u8 asioInit() override;
+
+    virtual void asioFin() override;
+
+    virtual void readOutputLoop() override;
 
 private:
 
+    int m_kqueue = -1;
+
+    struct kevent m_change_event;
+    struct kevent m_event_list[8];
 };
 
 } // end namespace Proc

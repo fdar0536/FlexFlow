@@ -70,7 +70,7 @@ if (LINUX)
         model/proc/linuxproc.cpp
         model/proc/linuxproc.hpp
     )
-else ()
+else (APPLE)
     list(APPEND MODEL_SRC
         model/proc/macproc.cpp
         model/proc/macproc.hpp

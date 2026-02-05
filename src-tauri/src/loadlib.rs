@@ -22,7 +22,9 @@
  */
 
 use libloading::{Library, Symbol};
+use tauri_plugin_log::log::{trace, debug, info, warn, error};
 use std::sync::{Arc, OnceLock};
+use std::ffi::c_char;
 
 use crate::ffmodeldef::FFModel;
 
@@ -58,6 +60,24 @@ fn find_lib() -> anyhow::Result<Library>
     return Err(anyhow::anyhow!("Cannot find native library"));
 } // fn find_lib() -> anyhow::Result<Library>
 
+extern "C" fn rust_log_handler(level: i32, msg: *const c_char)
+{
+    let c_str = unsafe { std::ffi::CStr::from_ptr(msg) };
+    let message = c_str.to_string_lossy();
+    
+    // 現在日誌會出現在 cargo tauri dev 的終端機裡，因為這是 Rust 噴出來的
+    match level
+    {
+        0 => trace!("C++: {}", message), // spdlog::level::trace
+        1 => debug!("C++: {}", message), // spdlog::level::debug
+        2 => info!("C++: {}", message), // spdlog::level::info
+        3 => warn!("C++: {}", message), // spdlog::level::warn
+        4 => error!("C++: {}", message), // spdlog::level::err
+        5 => error!("C++: {}", message), // spdlog::level::critical
+        _ => println!("C++: {}", message),
+    }
+}
+
 pub fn load_api() -> anyhow::Result<()>
 {
     if GLOBAL_API.get().is_none()
@@ -65,7 +85,7 @@ pub fn load_api() -> anyhow::Result<()>
         let lib = find_lib().expect("Fail to find library");
         let lib = Box::leak(Box::new(lib));
 
-        type GetApiFn = unsafe extern "C" fn(*mut FFModel) -> u8;
+        type GetApiFn = unsafe extern "C" fn(*mut FFModel, i32, cb: extern "C" fn(i32, *const c_char)) -> u8;
 
         let get_api: Symbol<GetApiFn> =
         unsafe { lib.get(b"getFFModel\0") }
@@ -73,7 +93,7 @@ pub fn load_api() -> anyhow::Result<()>
 
         let mut api = std::mem::MaybeUninit::<FFModel>::uninit();
 
-        if (unsafe { get_api(api.as_mut_ptr()) } != 0)
+        if (unsafe { get_api(api.as_mut_ptr(), 1, rust_log_handler) } != 0)
         {
             return Err(anyhow::anyhow!("Fail to load lib"));
         }

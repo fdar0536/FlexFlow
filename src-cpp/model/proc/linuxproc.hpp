@@ -24,8 +24,6 @@
 #ifndef _MODEL_PROC_LINUXPROC_HPP_
 #define _MODEL_PROC_LINUXPROC_HPP_
 
-#include <atomic>
-#include <deque>
 #include <thread>
 
 #include "sys/epoll.h"
@@ -46,9 +44,13 @@ public:
 
     ~LinuxProc();
 
-    virtual u8 start(const Task &task) override;   
+protected:
 
-    virtual bool isRunning() override;
+    virtual u8 asioInit() override;
+
+    virtual void asioFin() override;
+
+    virtual void readOutputLoop() override;
 
 private:
 
@@ -59,14 +61,10 @@ private:
 
     u8 epollInit();
 
-    void closeFile(int *);
-
     void epollFin();
 
     // for reading current output
     std::jthread m_thread;
-
-    void readOutputLoop();
 };
 
 } // end namespace Proc

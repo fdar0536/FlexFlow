@@ -21,9 +21,16 @@
  * SOFTWARE.
  */
 
-#include <csignal>
+#include <signal.h>
 
 #include "unistd.h"
+
+#ifdef __linux__
+#include "sys/wait.h"
+#include "pty.h"
+#else
+#include "util.h"
+#endif
 
 #include "spdlog/spdlog.h"
 
@@ -40,7 +47,9 @@ namespace Proc
 
 // implement public member functions
 PosixProc::~PosixProc()
-{}
+{
+    stopImpl();
+}
 
 u8 PosixProc::init()
 {
@@ -49,9 +58,67 @@ u8 PosixProc::init()
     return 0;
 }
 
+u8 PosixProc::start(const Task &task)
+{
+    if (isRunning())
+    {
+        spdlog::error("{}:{} Process is running", LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
+
+    if (Controller::Global::isAdmin())
+    {
+        spdlog::error("{}:{} Refuse to run as super user", LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
+
+    m_masterFD = -1;
+    m_exitCode.store(0, std::memory_order_relaxed);
+
+    m_pid = forkpty(&m_masterFD, NULL, NULL, NULL);
+    if (m_pid == -1)
+    {
+        // parent process
+        spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
+        return 1;
+    }
+
+    if (m_pid == 0)
+    {
+        // child process
+        startChild(task);
+    }
+
+    return asioInit();
+}
+
 void PosixProc::stop()
 {
     stopImpl();
+}
+
+bool PosixProc::isRunning()
+{
+    int status;
+    pid_t ret = waitpid(m_pid, &status, WNOHANG);
+    if (ret == -1)
+    {
+        spdlog::debug("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
+        asioFin();
+        return false;
+    }
+    else if (ret == 0)
+    {
+        return true;
+    }
+    
+    if (WIFEXITED(status) || WIFSIGNALED(status))
+    {
+        m_exitCode.store(status, std::memory_order_relaxed);
+    }
+
+    asioFin();
+    return false;
 }
 
 void PosixProc::readCurrentOutput(std::vector<std::string> &out)
@@ -180,6 +247,15 @@ void PosixProc::stopImpl()
     }
 
     sleep(2);
+}
+
+void PosixProc::closeFile(int *fd)
+{
+    if (*fd != -1)
+    {
+        close(*fd);
+        *fd = -1;
+    }
 }
 
 } // end namespace Proc

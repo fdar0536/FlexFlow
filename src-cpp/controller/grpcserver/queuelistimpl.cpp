@@ -40,19 +40,22 @@ QueueListImpl::Create(grpc::ServerContext *ctx,
                       const ff::QueueReq *req,
                       ff::Empty *res)
 {
+    spdlog::debug("{}:{} QueueListImpl::Create", LOG_FILE_PATH(__FILE__), __LINE__);
+
     UNUSED(ctx);
     UNUSED(res);
 
     if (!req)
     {
-        spdlog::critical("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
         return grpc::Status(grpc::StatusCode::INTERNAL,
                             "Internal server error");
     }
 
     if (req->name().empty())
     {
-        spdlog::debug("{}:{} trace", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} \"name\" is empty string",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT,
                             "\"name\" is empty string");
     }
@@ -60,7 +63,8 @@ QueueListImpl::Create(grpc::ServerContext *ctx,
     u8 code = sqliteQueueList->createQueue(req->name());
     if (code)
     {
-        spdlog::debug("{}:{} trace", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} Fail to create queue",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return Model::ErrMsg::toGRPCStatus(code, "Fail to create queue");
     }
 
@@ -72,19 +76,21 @@ QueueListImpl::Rename(grpc::ServerContext *ctx,
                       const ff::RenameQueueReq *req,
                       ff::Empty *res)
 {
+    spdlog::debug("{}:{} QueueListImpl::Rename", LOG_FILE_PATH(__FILE__), __LINE__);
+
     UNUSED(ctx);
     UNUSED(res);
 
     if (!req)
     {
-        spdlog::critical("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
         return grpc::Status(grpc::StatusCode::INTERNAL,
                             "Internal server error");
     }
 
     if (req->oldname().empty() || req->newname().empty())
     {
-        spdlog::debug("{}:{} trace", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} \"oldName\" or \"newName\" is empty string", LOG_FILE_PATH(__FILE__), __LINE__);
         return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT,
                             "\"oldName\" or \"newName\" is empty string");
     }
@@ -92,7 +98,7 @@ QueueListImpl::Rename(grpc::ServerContext *ctx,
     u8 code = sqliteQueueList->renameQueue(req->oldname(), req->newname());
     if (code)
     {
-        spdlog::debug("{}:{} trace", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} Fail to rename", LOG_FILE_PATH(__FILE__), __LINE__);
         return Model::ErrMsg::toGRPCStatus(code, "Fail to rename");
     }
 
@@ -104,19 +110,22 @@ QueueListImpl::Delete(grpc::ServerContext *ctx,
                       const ff::QueueReq *req,
                       ff::Empty *res)
 {
+    spdlog::debug("{}:{} QueueListImpl::Delete", LOG_FILE_PATH(__FILE__), __LINE__);
+
     UNUSED(ctx);
     UNUSED(res);
 
     if (!req)
     {
-        spdlog::critical("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
         return grpc::Status(grpc::StatusCode::INTERNAL,
                             "Internal server error");
     }
 
     if (req->name().empty())
     {
-        spdlog::debug("{}:{} trace", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} \"name\" is empty string",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT,
                             "\"name\" is empty string");
     }
@@ -124,7 +133,7 @@ QueueListImpl::Delete(grpc::ServerContext *ctx,
     u8 code = sqliteQueueList->deleteQueue(req->name());
     if (code)
     {
-        spdlog::debug("{}:{} trace", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} Fail to delete", LOG_FILE_PATH(__FILE__), __LINE__);
         return Model::ErrMsg::toGRPCStatus(code, "Fail to delete");
     }
 
@@ -136,12 +145,14 @@ QueueListImpl::List(grpc::ServerContext *ctx,
                     const ff::Empty *req,
                     grpc::ServerWriter<::ff::ListQueueRes> *writer)
 {
+    spdlog::debug("{}:{} QueueListImpl::List", LOG_FILE_PATH(__FILE__), __LINE__);
+
     UNUSED(ctx);
     UNUSED(req);
 
     if (!writer)
     {
-        spdlog::critical("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
         return grpc::Status(grpc::StatusCode::INTERNAL,
                             "Internal server error");
     }
@@ -150,7 +161,7 @@ QueueListImpl::List(grpc::ServerContext *ctx,
     u8 code = sqliteQueueList->listQueue(out);
     if (code)
     {
-        spdlog::debug("{}:{} trace", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} Fail to list queue", LOG_FILE_PATH(__FILE__), __LINE__);
         return Model::ErrMsg::toGRPCStatus(code, "Fail to list queue");
     }
 
@@ -169,11 +180,14 @@ QueueListImpl::GetQueue(grpc::ServerContext *ctx,
                         const ff::QueueReq *req,
                         ff::Empty *res)
 {
+    spdlog::debug("{}:{} QueueListImpl::GetQueue",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     UNUSED(ctx);
     UNUSED(res);
     if (!req)
     {
-        spdlog::critical("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
         return grpc::Status(grpc::StatusCode::INTERNAL,
                             "Internal server error");
     }
@@ -181,6 +195,7 @@ QueueListImpl::GetQueue(grpc::ServerContext *ctx,
     auto queue = sqliteQueueList->getQueue(req->name());
     if (queue == nullptr)
     {
+        spdlog::error("{}:{} No such queue", LOG_FILE_PATH(__FILE__), __LINE__);
         return grpc::Status(grpc::StatusCode::NOT_FOUND,
                             "No such queue");
     }

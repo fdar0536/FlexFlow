@@ -10,8 +10,9 @@ This is a simple tool that allow you can manage the task flow by remote or in lo
 ***Warning: DO NOT RUN THIS PROGRAM AS SUPER USER AND ADMINISTRATOR, OR IT WILL CAUSE CRITICAL SECURITY ISSUES.***
 
 ## Supported OS (Others are not tested yet)
-- Windows 10 1903 or later with UTF-8 enabled
+- Windows 11 x86_64 or later with UTF-8 enabled
 - Arch Linux
+- Mac OS with Apple silicon
 
 ## How to build
 
