@@ -1,5 +1,5 @@
 /*
- * Simple Task Queue
+ * Flex Flow
  * Copyright (c) 2023-2024 fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,6 +23,10 @@
 
 #include <unordered_map>
 
+#include "spdlog/spdlog.h"
+
+#include "controller/global/global.hpp"
+
 #include "errmsg.hpp"
 
 namespace Model
@@ -35,6 +39,7 @@ static std::unordered_map<u8, grpc::StatusCode> table;
 
 void init()
 {
+    spdlog::debug("{}:{} init", LOG_FILE_PATH(__FILE__), __LINE__);
     table[ErrCode_OK] = grpc::StatusCode::OK;
     table[ErrCode_INVALID_ARGUMENT] = grpc::StatusCode::INVALID_ARGUMENT;
     table[ErrCode_NOT_FOUND] = grpc::StatusCode::NOT_FOUND;
@@ -45,6 +50,7 @@ void init()
 
 grpc::Status toGRPCStatus(u8 code, const std::string &msg)
 {
+    spdlog::debug("{}:{} toGRPCStatus", LOG_FILE_PATH(__FILE__), __LINE__);
     return grpc::Status(table[code], msg);
 }
 

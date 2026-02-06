@@ -48,18 +48,13 @@ MacProc::~MacProc()
 // protected member functions
 u8 MacProc::asioInit()
 {
-    int flags = fcntl(m_masterFD, F_GETFL, 0);
-    if (flags == -1)
-    {
-        spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
-        kill(m_pid, SIGKILL);
-    }
-    fcntl(m_masterFD, F_SETFL, flags | O_NONBLOCK);
+    spdlog::debug("{}:{} MacProc::asioInit", LOG_FILE_PATH(__FILE__), __LINE__);
 
     m_kqueue = kqueue();
     if (m_kqueue == -1)
     {
-        spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
+        spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__,
+            strerror(errno));
         return 1;
     }
 
@@ -69,12 +64,17 @@ u8 MacProc::asioInit()
 
 void MacProc::asioFin()
 {
+    spdlog::debug("{}:{} MacProc::asioFin", LOG_FILE_PATH(__FILE__), __LINE__);
+
     closeFile(&m_masterFD);
     closeFile(&m_kqueue);
 }
 
 void MacProc::readOutputLoop()
 {
+    spdlog::debug("{}:{} MacProc::readOutputLoop",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     while (1)
     {
         int nevents = kevent(m_kqueue, &m_change_event, 1, m_event_list, 8, NULL);
@@ -88,7 +88,6 @@ void MacProc::readOutputLoop()
         {
             if (static_cast<int>(m_event_list[i].ident) == m_masterFD)
             {
-                // 檢查是否結束
                 if (m_event_list[i].flags & EV_EOF)
                 {
                     printf("\n[Done] 子進程已退出。\n");
@@ -96,7 +95,6 @@ void MacProc::readOutputLoop()
                     return;
                 }
 
-                // 3. 邊緣觸發風格的讀取：循環讀取直到 EAGAIN
                 char buffer[FF_READ_BUFFER_SIZE];
                 while (1)
                 {
@@ -110,19 +108,19 @@ void MacProc::readOutputLoop()
                     {
                         if (errno == EAGAIN || errno == EWOULDBLOCK)
                         {
-                            // 資料讀完了，等待下一次 kqueue 通知
                             break; 
                         }
                         else
                         {
-                            spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
+                            spdlog::error("{}:{} {}",
+                                LOG_FILE_PATH(__FILE__), __LINE__,
+                                strerror(errno));
                             asioFin();
                             return;
                         }
                     }
                     else
                     {
-                        // n == 0 通常代表 EOF
                         asioFin();
                         return;
                     }

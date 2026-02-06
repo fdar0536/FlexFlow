@@ -1,5 +1,5 @@
 /*
- * Simple Task Queue
+ * Flex Flow
  * Copyright (c) 2023-2024 fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,6 +21,10 @@
  * SOFTWARE.
  */
 
+#include "spdlog/spdlog.h"
+
+#include "controller/global/global.hpp"
+
 #include "iconnect.hpp"
 
 namespace Model
@@ -34,11 +38,15 @@ IConnect::~IConnect()
 
 void *IConnect::connectToken() const
 {
+    spdlog::debug("{}:{} IConnect::connectToken", LOG_FILE_PATH(__FILE__), __LINE__);
+
     return m_connectToken;
 }
 
 std::string IConnect::targetPath() const
 {
+    spdlog::debug("{}:{} IConnect::targetPath", LOG_FILE_PATH(__FILE__), __LINE__);
+
     return m_targetPath;
 }
 

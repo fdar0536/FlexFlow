@@ -1,5 +1,5 @@
 /*
- * Simple Task Queue
+ * Flex Flow
  * Copyright (c) 2025-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -86,7 +86,15 @@ public:
     template<class T>
     u8 create(Handle *h, T *obj, Parent parent, Type type)
     {
-        if (!h || !obj) return 1;
+        spdlog::debug("{}:{} HandleManager::create",
+            LOG_FILE_PATH(__FILE__), __LINE__);
+
+        if (!h || !obj)
+        {
+            spdlog::error("{}:{} h or obj is nullptr",
+                LOG_FILE_PATH(__FILE__), __LINE__);
+            return 1;
+        }
 
         u32 idx;
         if (!m_free_indices.empty())
@@ -95,7 +103,8 @@ public:
             m_free_indices.pop_back();
             if (idx > IDX_MASK)
             {
-                spdlog::error("{}:{} idx is full", LOG_FILE_PATH(__FILE__), __LINE__);
+                spdlog::error("{}:{} idx is full",
+                    LOG_FILE_PATH(__FILE__), __LINE__);
                 return 1;
             }
         }
@@ -104,7 +113,8 @@ public:
             idx = static_cast<u32>(m_entries.size());
             if (idx > IDX_MASK)
             {
-                spdlog::error("{}:{} idx is full", LOG_FILE_PATH(__FILE__), __LINE__);
+                spdlog::error("{}:{} idx is full",
+                    LOG_FILE_PATH(__FILE__), __LINE__);
                 return 1;
             }
 
@@ -133,6 +143,9 @@ public:
     template<class T>
     T *get(Handle h)
     {
+        spdlog::debug("{}:{} HandleManager::get",
+            LOG_FILE_PATH(__FILE__), __LINE__);
+
         if (isNotValid(h))
         {
             return nullptr;

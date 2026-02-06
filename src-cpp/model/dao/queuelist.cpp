@@ -33,11 +33,23 @@ using namespace Model::DAO;
 
 static IQueueList *getList(Handle h)
 {
+    spdlog::debug("{}:{} getList", LOG_FILE_PATH(__FILE__), __LINE__);
+
     Parent parent = hm.parent(h);
-    if (parent != Parent::IQueueList) return nullptr;
+    if (parent != Parent::IQueueList)
+    {
+        spdlog::error("{}:{} parent is not IQueueList",
+            LOG_FILE_PATH(__FILE__), __LINE__);
+        return nullptr;
+    }
 
     IQueueList *list = hm.get<IQueueList>(h);
-    if (!list) return nullptr;
+    if (!list)
+    {
+        spdlog::error("{}:{} Fail to get IQueueList",
+            LOG_FILE_PATH(__FILE__), __LINE__);
+        return nullptr;
+    }
 
     return list;
 }
@@ -47,21 +59,36 @@ extern "C"
 
 u8 queuelist_init(Handle conn, Handle *out)
 {
-    if (!out) return 1;
+    spdlog::debug("{}:{} queuelist_init", LOG_FILE_PATH(__FILE__), __LINE__);
+
+    if (!out)
+    {
+        spdlog::error("{}:{} out is nullptr", LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
 
     if (!hm.isNotValid(*out))
     {
         // valid handle
+        spdlog::error("{}:{} out is valid handle",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     if (hm.parent(conn) != Parent::IConnect)
     {
+        spdlog::error("{}:{} parent is not IConnect",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     IConnect *connPtr(hm.get<IConnect>(conn));
-    if (!connPtr) return 1;
+    if (!connPtr)
+    {
+        spdlog::error("{}:{} Fail to get IConnect",
+            LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
 
     IQueueList *list(nullptr);
     Type connType = hm.type(conn);
@@ -83,21 +110,32 @@ u8 queuelist_init(Handle conn, Handle *out)
     }
     default:
     {
+        spdlog::error("{}:{} invalid connType",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
     }; // switch (connType)
 
-    if (!list) return 1;
+    if (!list)
+    {
+        spdlog::error("{}:{} Fail to allocate memory",
+            LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
 
     if (list->init(connPtr))
     {
         delete list;
+        spdlog::error("{}:{} Fail to initialize list",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     if (hm.create(out, list, parent, type))
     {
         delete list;
+        spdlog::error("{}:{} Fail to create handle",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -108,8 +146,15 @@ u8 queuelist_init(Handle conn, Handle *out)
 
 u8 queuelist_destroy(Handle h)
 {
+    spdlog::debug("{}:{} queuelist_destroy", LOG_FILE_PATH(__FILE__), __LINE__);
+
     Parent parent = hm.parent(h);
-    if (parent != Parent::IQueueList) return 1;
+    if (parent != Parent::IQueueList)
+    {
+        spdlog::error("{}:{} parent is not IQueueList",
+            LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
 
     hm.remove(h);
     return 0;
@@ -117,9 +162,21 @@ u8 queuelist_destroy(Handle h)
 
 u8 queuelist_createQueue(Handle h, const char *name)
 {
+    spdlog::debug("{}:{} queuelist_createQueue", LOG_FILE_PATH(__FILE__), __LINE__);
+
+    if (!name)
+    {
+        spdlog::error("{}:{} name is nullptr", LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
+
+    spdlog::debug("{}:{} name: {}", LOG_FILE_PATH(__FILE__), __LINE__, name);
+
     IQueueList *list(getList(h));
     if (!list)
     {
+        spdlog::error("{}:{} Fail to get IQueueList",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -128,20 +185,28 @@ u8 queuelist_createQueue(Handle h, const char *name)
 
 u8 queuelist_listQueue(Handle h, char ***out, size_t *outSize)
 {
+    spdlog::debug("{}:{} queuelist_listQueue", LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (!out || !outSize)
     {
+        spdlog::error("{}:{} out or outSize is nullptr",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     IQueueList *list(getList(h));
     if (!list)
     {
+        spdlog::error("{}:{} Fail to get IQueueList",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     std::vector<std::string> output;
     if (list->listQueue(output))
     {
+        spdlog::error("{}:{} Fail to list queue",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -161,6 +226,9 @@ u8 queuelist_listQueue(Handle h, char ***out, size_t *outSize)
         *out[i] = (char *)calloc((strlen(str) + 1), sizeof(char));
         if (!out[i])
         {
+            spdlog::error("{}:{} Fail to calloc",
+                LOG_FILE_PATH(__FILE__), __LINE__);
+
             for (size_t j = 1; j <= i; ++j)
             {
                 free(out[j]);
@@ -180,9 +248,13 @@ u8 queuelist_listQueue(Handle h, char ***out, size_t *outSize)
 
 u8 queuelist_deleteQueue(Handle h, const char *name)
 {
+    spdlog::debug("{}:{} queuelist_deleteQueue", LOG_FILE_PATH(__FILE__), __LINE__);
+
     IQueueList *list(getList(h));
     if (!list)
     {
+        spdlog::error("{}:{} Fail to get IQueueList",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -192,9 +264,13 @@ u8 queuelist_deleteQueue(Handle h, const char *name)
 u8 queuelist_renameQueue(Handle h, const char *oldName,
                          const char *newName)
 {
+    spdlog::debug("{}:{} queuelist_renameQueue", LOG_FILE_PATH(__FILE__), __LINE__);
+
     IQueueList *list(getList(h));
     if (!list)
     {
+        spdlog::error("{}:{} Fail to get IQueueList",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -203,9 +279,13 @@ u8 queuelist_renameQueue(Handle h, const char *oldName,
 
 u8 queuelist_getQueue(Handle h, const char *name, Handle *out)
 {
+    spdlog::debug("{}:{} queuelist_getQueue", LOG_FILE_PATH(__FILE__), __LINE__);
+
     IQueueList *list(getList(h));
     if (!list)
     {
+        spdlog::error("{}:{} Fail to get IQueueList",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -229,12 +309,16 @@ u8 queuelist_getQueue(Handle h, const char *name, Handle *out)
     default:
     {
         list->returnQueue(queue);
+        spdlog::error("{}:{} invalid parent type",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
     }; // switch (parentType)
 
     if (hm.create(out, queue, Parent::IQueue, type))
     {
+        spdlog::error("{}:{} Fail to create handle",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         list->returnQueue(queue);
         return 1;
     }
@@ -245,20 +329,28 @@ u8 queuelist_getQueue(Handle h, const char *name, Handle *out)
 
 u8 queuelist_returnQueue(Handle h, Handle queue)
 {
+    spdlog::debug("{}:{} queuelist_returnQueue", LOG_FILE_PATH(__FILE__), __LINE__);
+
     IQueueList *list(getList(h));
     if (!list)
     {
+        spdlog::error("{}:{} Fail to get IQueueList",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     if (hm.parent(queue) != Parent::IQueue)
     {
+        spdlog::error("{}:{} queue is not IQueue",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     IQueue *ptr = hm.get<IQueue>(queue);
     if (!ptr)
     {
+        spdlog::error("{}:{} Fail to get IQueue",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 

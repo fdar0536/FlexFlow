@@ -1,5 +1,5 @@
 /*
- * Simple Task Queue
+ * Flex Flow
  * Copyright (c) 2023-2024 fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -48,8 +48,10 @@ GRPCQueue::init(IConnect *connect,
                 Proc::IProc *process,
                 const std::string &name)
 {
+    spdlog::debug("{}:{} GRPCQueue::init", LOG_FILE_PATH(__FILE__), __LINE__);
+
     UNUSED(process);
-    if (connect == nullptr)
+    if (!connect)
     {
         spdlog::error("{}:{} connect is nullptr", LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_INVALID_ARGUMENT;
@@ -57,7 +59,8 @@ GRPCQueue::init(IConnect *connect,
 
     if (!connect->connectToken())
     {
-        spdlog::error("{}:{} connect token is nullptr", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} connect token is nullptr",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_INVALID_ARGUMENT;
     }
 
@@ -74,13 +77,15 @@ GRPCQueue::init(IConnect *connect,
         m_stub = ff::Queue::NewStub(token->channel);
         if (m_stub == nullptr)
         {
-            spdlog::error("{}:{} Fail to get stub", LOG_FILE_PATH(__FILE__), __LINE__);
+            spdlog::error("{}:{} Fail to get stub",
+                LOG_FILE_PATH(__FILE__), __LINE__);
             return ErrCode_OS_ERROR;
         }
     }
     catch (...)
     {
-        spdlog::error("{}:{} Fail to get stub", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} Fail to get stub",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_OS_ERROR;
     }
 
@@ -90,6 +95,8 @@ GRPCQueue::init(IConnect *connect,
 
 u8 GRPCQueue::listPending(std::vector<int> &out)
 {
+    spdlog::debug("{}:{} GRPCQueue::listPending", LOG_FILE_PATH(__FILE__), __LINE__);
+
     out.clear();
     out.reserve(128);
 
@@ -118,6 +125,9 @@ u8 GRPCQueue::listPending(std::vector<int> &out)
 
 u8 GRPCQueue::listFinished(std::vector<int> &out)
 {
+    spdlog::debug("{}:{} GRPCQueue::listFinished",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     out.clear();
     out.reserve(128);
 
@@ -147,6 +157,9 @@ u8 GRPCQueue::listFinished(std::vector<int> &out)
 u8 GRPCQueue::pendingDetails(const int id,
                              Proc::Task &out)
 {
+    spdlog::debug("{}:{} GRPCQueue::pendingDetails",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     ff::TaskDetailsReq req;
     req.set_name(m_queueName);
     req.set_id(id);
@@ -169,6 +182,9 @@ u8 GRPCQueue::pendingDetails(const int id,
 u8 GRPCQueue::finishedDetails(const int id,
                               Proc::Task &out)
 {
+    spdlog::debug("{}:{} GRPCQueue::finishedDetails",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     ff::TaskDetailsReq req;
     req.set_name(m_queueName);
     req.set_id(id);
@@ -190,6 +206,9 @@ u8 GRPCQueue::finishedDetails(const int id,
 
 u8 GRPCQueue::clearPending()
 {
+    spdlog::debug("{}:{} GRPCQueue::clearPending",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     ff::QueueReq req;
     req.set_name(m_queueName);
 
@@ -209,6 +228,9 @@ u8 GRPCQueue::clearPending()
 
 u8 GRPCQueue::clearFinished()
 {
+    spdlog::debug("{}:{} GRPCQueue::clearFinished",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     ff::QueueReq req;
     req.set_name(m_queueName);
 
@@ -228,6 +250,9 @@ u8 GRPCQueue::clearFinished()
 
 u8 GRPCQueue::currentTask(Proc::Task &out)
 {
+    spdlog::debug("{}:{} GRPCQueue::currentTask",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     ff::QueueReq req;
     req.set_name(m_queueName);
 
@@ -248,6 +273,9 @@ u8 GRPCQueue::currentTask(Proc::Task &out)
 
 u8 GRPCQueue::addTask(Proc::Task &in)
 {
+    spdlog::debug("{}:{} GRPCQueue::addTask",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     ff::AddTaskReq req;
     req.set_name(m_queueName);
     req.set_workdir(in.workDir);
@@ -276,6 +304,9 @@ u8 GRPCQueue::addTask(Proc::Task &in)
 
 u8 GRPCQueue::removeTask(const i32 in)
 {
+    spdlog::debug("{}:{} GRPCQueue::removeTask",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     ff::TaskDetailsReq req;
     req.set_name(m_queueName);
     req.set_id(in);
@@ -298,6 +329,9 @@ u8 GRPCQueue::removeTask(const i32 in)
 
 bool GRPCQueue::isRunning() const
 {
+    spdlog::debug("{}:{} GRPCQueue::isRunning",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     ff::QueueReq req;
     req.set_name(m_queueName);
 
@@ -317,6 +351,9 @@ bool GRPCQueue::isRunning() const
 
 void GRPCQueue::readCurrentOutput(std::vector<std::string> &out)
 {
+    spdlog::debug("{}:{} GRPCQueue::readCurrentOutput",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     out.clear();
     out.reserve(FF_MAX_READ_QUEUE_SIZE);
 
@@ -344,6 +381,8 @@ void GRPCQueue::readCurrentOutput(std::vector<std::string> &out)
 
 u8 GRPCQueue::start()
 {
+    spdlog::debug("{}:{} GRPCQueue::start", LOG_FILE_PATH(__FILE__), __LINE__);
+
     ff::QueueReq req;
     req.set_name(m_queueName);
 
@@ -363,6 +402,8 @@ u8 GRPCQueue::start()
 
 void GRPCQueue::stop()
 {
+    spdlog::debug("{}:{} GRPCQueue::stop", LOG_FILE_PATH(__FILE__), __LINE__);
+
     ff::QueueReq req;
     req.set_name(m_queueName);
 
@@ -382,6 +423,8 @@ void GRPCQueue::stop()
 // private member functions
 void GRPCQueue::buildTask(ff::TaskDetailsRes &res, Proc::Task &task)
 {
+    spdlog::debug("{}:{} GRPCQueue::buildTask", LOG_FILE_PATH(__FILE__), __LINE__);
+
     task.workDir = res.workdir();
     task.execName = res.execname();
     task.args.clear();

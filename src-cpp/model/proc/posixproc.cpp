@@ -24,6 +24,7 @@
 #include <signal.h>
 
 #include "unistd.h"
+#include "fcntl.h"
 
 #ifdef __linux__
 #include "sys/wait.h"
@@ -53,6 +54,9 @@ PosixProc::~PosixProc()
 
 u8 PosixProc::init()
 {
+    spdlog::debug("{}:{} PosixProc::init", LOG_FILE_PATH(__FILE__), __LINE__);
+
+    m_pid = 0;
     m_exitCode.store(0, std::memory_order_relaxed);
     m_deque.clear();
     return 0;
@@ -60,6 +64,8 @@ u8 PosixProc::init()
 
 u8 PosixProc::start(const Task &task)
 {
+    spdlog::debug("{}:{} PosixProc::start", LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (isRunning())
     {
         spdlog::error("{}:{} Process is running", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -79,7 +85,8 @@ u8 PosixProc::start(const Task &task)
     if (m_pid == -1)
     {
         // parent process
-        spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
+        spdlog::error("{}:{} {}",
+            LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
         return 1;
     }
 
@@ -87,6 +94,23 @@ u8 PosixProc::start(const Task &task)
     {
         // child process
         startChild(task);
+    }
+
+    int fileFlag = fcntl(m_masterFD, F_GETFL, 0);
+    if (fileFlag == -1)
+    {
+        spdlog::error("{}:{} {}",
+            LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
+        kill(m_pid, SIGKILL);
+        return 1;
+    }
+    
+    if (fcntl(m_masterFD, F_SETFL, fileFlag | O_NONBLOCK) == -1)
+    {
+        spdlog::error("{}:{} {}",
+            LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
+        kill(m_pid, SIGKILL);
+        return 1;
     }
 
     return asioInit();
@@ -99,11 +123,14 @@ void PosixProc::stop()
 
 bool PosixProc::isRunning()
 {
+    spdlog::debug("{}:{} PosixProc::isRunning", LOG_FILE_PATH(__FILE__), __LINE__);
+
     int status;
     pid_t ret = waitpid(m_pid, &status, WNOHANG);
     if (ret == -1)
     {
-        spdlog::debug("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
+        spdlog::debug("{}:{} {}",
+            LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
         asioFin();
         return false;
     }
@@ -123,6 +150,9 @@ bool PosixProc::isRunning()
 
 void PosixProc::readCurrentOutput(std::vector<std::string> &out)
 {
+    spdlog::debug("{}:{} PosixProc::readCurrentOutput",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     out.clear();
 
     {
@@ -130,7 +160,8 @@ void PosixProc::readCurrentOutput(std::vector<std::string> &out)
 
         if (m_deque.empty())
         {
-            spdlog::debug("{}:{} nothing to read", LOG_FILE_PATH(__FILE__), __LINE__);
+            spdlog::debug("{}:{} nothing to read",
+                LOG_FILE_PATH(__FILE__), __LINE__);
             return;
         }
 
@@ -145,6 +176,8 @@ void PosixProc::readCurrentOutput(std::vector<std::string> &out)
 
 u8 PosixProc::exitCode(i32 &out)
 {
+    spdlog::debug("{}:{} PosixProc::exitCode", LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (isRunning())
     {
         spdlog::error("{}:{} Process is running", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -158,31 +191,43 @@ u8 PosixProc::exitCode(i32 &out)
 // protected member function
 void PosixProc::startChild(const Task &task)
 {
+    spdlog::debug("{}:{} PosixProc::startChild", LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (chdir(task.workDir.c_str()) == -1)
     {
-        perror("chdir");
+        spdlog::error("{}:{} {}",
+            LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
         exit(1);
     }
 
     char **argv = buildChildArgv(task);
     if (!argv)
     {
+        spdlog::error("{}:{} {}",
+            LOG_FILE_PATH(__FILE__), __LINE__,
+            "Fail to allocate child process' argv.");
         exit(1);
     }
 
     // start child
     char *env[] = { NULL };
     execve(task.execName.c_str(), argv, env);
-    perror("execve");   /* execve() returns only on error */
+    /* execve() only return on error */
+    spdlog::error("{}:{} {}",
+        LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
     exit(1);
 }
 
 char **PosixProc::buildChildArgv(const Task &task)
 {
+    spdlog::debug("{}:{} PosixProc::buildChildArgv",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     char **argv(nullptr);
     if (task.args.size())
     {
-        argv = new ( std::nothrow ) char *[task.args.size() + 2](); // process name + null for tail
+        // process name + null for tail
+        argv = new ( std::nothrow ) char *[task.args.size() + 2](); 
     }
     else
     {
@@ -191,7 +236,10 @@ char **PosixProc::buildChildArgv(const Task &task)
 
     if (!argv)
     {
-        fprintf(stderr, "Fail to allocate child process' argv.");
+        spdlog::error("{}:{} {}",
+            LOG_FILE_PATH(__FILE__), __LINE__,
+            "Fail to allocate child process' argv.");
+
         return nullptr;
     }
 
@@ -200,7 +248,10 @@ char **PosixProc::buildChildArgv(const Task &task)
     if (!argv[0])
     {
         delete[] argv;
-        fprintf(stderr, "Fail to allocate child process' argv[0].");
+        spdlog::error("{}:{} {}",
+            LOG_FILE_PATH(__FILE__), __LINE__,
+            "Fail to allocate child process' argv[0].");
+
         return nullptr;
     }
 
@@ -220,7 +271,10 @@ char **PosixProc::buildChildArgv(const Task &task)
                 }
 
                 delete[] argv;
-                fprintf(stderr, "Fail to allocate child process' argv[%zu].", index);
+                spdlog::error("{}:{} {}",
+                    LOG_FILE_PATH(__FILE__), __LINE__,
+                    "Fail to allocate child process' argv[%zu].", index);
+
                 return nullptr;
             }
 
@@ -240,9 +294,12 @@ char **PosixProc::buildChildArgv(const Task &task)
 
 void PosixProc::stopImpl()
 {
+    spdlog::debug("{}:{} PosixProc::stopImpl", LOG_FILE_PATH(__FILE__), __LINE__);
+    
     if (kill(m_pid, SIGKILL) == -1)
     {
-        perror("kill");
+        spdlog::error("{}:{} kill failed: {}",
+            LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
         return;
     }
 
@@ -251,6 +308,8 @@ void PosixProc::stopImpl()
 
 void PosixProc::closeFile(int *fd)
 {
+    spdlog::debug("{}:{} PosixProc::closeFile", LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (*fd != -1)
     {
         close(*fd);

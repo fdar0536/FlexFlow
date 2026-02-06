@@ -1,5 +1,5 @@
 /*
- * Simple Task Queue
+ * Flex Flow
  * Copyright (c) 2023-2024 fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -60,10 +60,13 @@ u8 GRPCConnect::init()
 u8 GRPCConnect::startConnect(const std::string &target,
                              const i32 port)
 {
+    spdlog::debug("{}:{} startConnect", LOG_FILE_PATH(__FILE__), __LINE__);
+
     GRPCToken *token = new (std::nothrow) GRPCToken;
     if (!token)
     {
-        spdlog::error("{}:{} Fail to allocate memory", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} Fail to allocate memory",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_OS_ERROR;
     }
 
@@ -79,7 +82,8 @@ u8 GRPCConnect::startConnect(const std::string &target,
 
         if (token->channel == nullptr)
         {
-            spdlog::error("{}:{} Fail to create channel", LOG_FILE_PATH(__FILE__), __LINE__);
+            spdlog::error("{}:{} Fail to create channel",
+                LOG_FILE_PATH(__FILE__), __LINE__);
             delete token;
             return ErrCode_OS_ERROR;
         }
@@ -87,14 +91,16 @@ u8 GRPCConnect::startConnect(const std::string &target,
         stub = ff::Access::NewStub(token->channel);
         if (stub == nullptr)
         {
-            spdlog::error("{}:{} Fail to create access' stub", LOG_FILE_PATH(__FILE__), __LINE__);
+            spdlog::error("{}:{} Fail to create access' stub",
+                LOG_FILE_PATH(__FILE__), __LINE__);
             delete token;
             return ErrCode_OS_ERROR;
         }
     }
     catch (...)
     {
-        spdlog::error("{}:{} Fail to initialize connection", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} Fail to initialize connection",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         delete token;
         return ErrCode_OS_ERROR;
     }

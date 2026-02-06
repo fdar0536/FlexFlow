@@ -1,5 +1,5 @@
 /*
- * Simple Task Queue
+ * Flex Flow
  * Copyright (c) 2023-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -53,20 +53,7 @@ LinuxProc::~LinuxProc()
 // protected member functions
 u8 LinuxProc::asioInit()
 {
-    int fileFlag(fcntl(m_masterFD, F_GETFL));
-    if (fileFlag == -1)
-    {
-        spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
-        kill(m_pid, SIGKILL);
-        return 1;
-    }
-
-    if (fcntl(m_masterFD, F_SETFL, fileFlag | O_NONBLOCK) == -1)
-    {
-        spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
-        kill(m_pid, SIGKILL);
-        return 1;
-    }
+    spdlog::debug("{}:{} LinuxProc::asioInit", LOG_FILE_PATH(__FILE__), __LINE__);
 
     if (epollInit())
     {
@@ -82,11 +69,16 @@ u8 LinuxProc::asioInit()
 
 void LinuxProc::asioFin()
 {
+    spdlog::debug("{}:{} LinuxProc::asioFin", LOG_FILE_PATH(__FILE__), __LINE__);
+
     return epollFin();
 }
 
 void LinuxProc::readOutputLoop()
 {
+    spdlog::debug("{}:{} LinuxProc::readOutputLoop",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     ssize_t count(0);
     while(1)
     {
@@ -134,7 +126,8 @@ void LinuxProc::readOutputLoop()
                     else if (count == 0)
                     {
                         // pipe is closed or child process is exited
-                        spdlog::debug("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, "Nothing to read");
+                        spdlog::debug("{}:{} {}",
+                            LOG_FILE_PATH(__FILE__), __LINE__, "Nothing to read");
                         return;
                     }
                     else // count != 0
@@ -169,6 +162,8 @@ void LinuxProc::readOutputLoop()
 // private member functions
 u8 LinuxProc::epollInit()
 {
+    spdlog::debug("{}:{} LinuxProc::epollInit", LOG_FILE_PATH(__FILE__), __LINE__);
+
     m_epoll_fd = epoll_create1(0);
     if (m_epoll_fd == -1)
     {
@@ -180,7 +175,8 @@ u8 LinuxProc::epollInit()
     m_event.data.fd = m_masterFD;
     if (epoll_ctl(m_epoll_fd, EPOLL_CTL_ADD, m_masterFD, &m_event))
     {
-        spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
+        spdlog::error("{}:{} {}",
+            LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
         return 1;
     }
 
@@ -189,6 +185,8 @@ u8 LinuxProc::epollInit()
 
 void LinuxProc::epollFin()
 {
+    spdlog::debug("{}:{} LinuxProc::epollFin", LOG_FILE_PATH(__FILE__), __LINE__);
+
     closeFile(&m_epoll_fd);
     closeFile(&m_masterFD);
 }

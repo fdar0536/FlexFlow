@@ -1,5 +1,5 @@
 /*
- * Simple Task Queue
+ * Flex Flow
  * Copyright (c) 2023-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -49,6 +49,9 @@ WinProc::~WinProc()
 
 u8 WinProc::init()
 {
+    spdlog::debug("{}:{} WinProc::init", LOG_FILE_PATH(__FILE__), __LINE__);
+
+    m_exitCode.store(0, std::memory_order_relaxed);
     m_procInfo.hProcess = NULL;
     m_procInfo.hThread = NULL;
     resetHandle();
@@ -58,9 +61,12 @@ u8 WinProc::init()
 
 u8 WinProc::start(const Task &task)
 {
+    spdlog::debug("{}:{} WinProc::start", LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (isRunning())
     {
-        spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, "Process is running");
+        spdlog::error("{}:{} {}",
+            LOG_FILE_PATH(__FILE__), __LINE__, "Process is running");
         return 1;
     }
 
@@ -101,7 +107,8 @@ u8 WinProc::start(const Task &task)
     // Create the child process.
     if (CreateChildProcess(task))
     {
-        spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, "Fail to start process");
+        spdlog::error("{}:{} {}",
+            LOG_FILE_PATH(__FILE__), __LINE__, "Fail to start process");
         resetHandle();
         return 1;
     }
@@ -121,6 +128,7 @@ void WinProc::stop()
 
 bool WinProc::isRunning()
 {
+    spdlog::debug("{}:{} WinProc::isRunning", LOG_FILE_PATH(__FILE__), __LINE__);
     if (m_procInfo.hProcess == NULL)
     {
         return false;
@@ -149,6 +157,9 @@ bool WinProc::isRunning()
 
 void WinProc::readCurrentOutput(std::vector<std::string> &out)
 {
+    spdlog::debug("{}:{} WinProc::readCurrentOutput",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     out.clear();
 
     {
@@ -156,7 +167,8 @@ void WinProc::readCurrentOutput(std::vector<std::string> &out)
 
         if (m_deque.empty())
         {
-            spdlog::debug("{}:{} nothing to read", LOG_FILE_PATH(__FILE__), __LINE__);
+            spdlog::debug("{}:{} nothing to read",
+                LOG_FILE_PATH(__FILE__), __LINE__);
             return;
         }
 
@@ -171,9 +183,12 @@ void WinProc::readCurrentOutput(std::vector<std::string> &out)
 
 u8 WinProc::exitCode(i32 &out)
 {
+    spdlog::debug("{}:{} WinProc::exitCode", LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (isRunning())
     {
-        spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, "Process is running");
+        spdlog::error("{}:{} {}",
+            LOG_FILE_PATH(__FILE__), __LINE__, "Process is running");
         return 1;
     }
 
@@ -184,9 +199,13 @@ u8 WinProc::exitCode(i32 &out)
 // private member functions
 u8 WinProc::prepareStartupInformation(STARTUPINFOEXA *output)
 {
+    spdlog::debug("{}:{} WinProc::prepareStartupInformation",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (!output)
     {
-        spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, "invalid input");
+        spdlog::error("{}:{} {}",
+            LOG_FILE_PATH(__FILE__), __LINE__, "invalid input");
         return 1;
     }
 
@@ -200,7 +219,8 @@ u8 WinProc::prepareStartupInformation(STARTUPINFOEXA *output)
         (PPROC_THREAD_ATTRIBUTE_LIST)HeapAlloc(GetProcessHeap(),0, bytesRequired);
     if (!output->lpAttributeList)
     {
-        spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, "no enough memory");
+        spdlog::error("{}:{} {}",
+            LOG_FILE_PATH(__FILE__), __LINE__, "no enough memory");
         return 1;
     }
 
@@ -230,9 +250,13 @@ u8 WinProc::prepareStartupInformation(STARTUPINFOEXA *output)
 
 u8 WinProc::CreateChildProcess(const Task &task)
 {
+    spdlog::debug("{}:{} WinProc::CreateChildProcess",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (task.execName.empty())
     {
-        spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, "task.execName is empty");
+        spdlog::error("{}:{} {}",
+            LOG_FILE_PATH(__FILE__), __LINE__, "task.execName is empty");
         return 1;
     }
 
@@ -261,7 +285,8 @@ u8 WinProc::CreateChildProcess(const Task &task)
     char *cmdPtr = new ( std::nothrow )char[cmdLine.length() + 1]();
     if (!cmdPtr)
     {
-        spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, "Fail to allocate memory");
+        spdlog::error("{}:{} {}",
+            LOG_FILE_PATH(__FILE__), __LINE__, "Fail to allocate memory");
         return 1;
     }
 
@@ -294,6 +319,8 @@ u8 WinProc::CreateChildProcess(const Task &task)
 
 void WinProc::resetHandle()
 {
+    spdlog::debug("{}:{} WinProc::resetHandle", LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (m_childStdoutRead)
     {
         CloseHandle(m_childStdoutRead);
@@ -341,6 +368,8 @@ void WinProc::resetHandle()
 
 void WinProc::stopImpl()
 {
+    spdlog::debug("{}:{} WinProc::stopImpl", LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (m_pseudoConsole)
     {
         ClosePseudoConsole(m_pseudoConsole);
@@ -352,6 +381,8 @@ void WinProc::stopImpl()
 
 void WinProc::readOutputLoop()
 {
+    spdlog::debug("{}:{} WinProc::readOutputLoop", LOG_FILE_PATH(__FILE__), __LINE__);
+
     BOOL bSuccess;
     DWORD dwRead;
 

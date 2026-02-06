@@ -1,5 +1,5 @@
 /*
- * Simple Task Queue
+ * Flex Flow
  * Copyright (c) 2023-2024 fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,9 +24,11 @@
 #ifndef _MODEL_DAO_ICONNECT_HPP_
 #define _MODEL_DAO_ICONNECT_HPP_
 
+#include "spdlog/spdlog.h"
+
 #include <string>
 
-#include "controller/global/defines.h"
+#include "controller/global/global.hpp"
 
 namespace Model
 {
@@ -91,6 +93,10 @@ protected:
     template<class T>
     void freeConnectToken()
     {
+        spdlog::debug("{}:{} IConnect::freeConnectToken",
+            LOG_FILE_PATH(__FILE__), __LINE__);
+
+
         if (m_connectToken)
         {
             T *token = reinterpret_cast<T *>(m_connectToken);

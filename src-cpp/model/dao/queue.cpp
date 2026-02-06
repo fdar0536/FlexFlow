@@ -21,6 +21,7 @@
  * SOFTWARE.
  */
 
+#include "controller/global/global.hpp"
 #include "handlemanager.hpp"
 #include "iqueue.hpp"
 
@@ -30,12 +31,25 @@ using namespace Model::DAO;
 
 static u8 taskToProcTask(const Model::Proc::Task &in, ProcTask *out)
 {
-    if (!out) return 1;
+    spdlog::debug("{}:{} taskToProcTask", LOG_FILE_PATH(__FILE__), __LINE__);
+
+    if (!out)
+    {
+        spdlog::error("{}:{} out is nullptr", LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
+
     memset(out, 0, sizeof(ProcTask));
 
     (*out).execName = (char *)calloc(in.execName.size() + 1, sizeof(char));
-    if (!(*out).execName) return 1;
-    snprintf((*out).execName, in.execName.size() + 1, "%s", in.execName.c_str());
+    if (!(*out).execName)
+    {
+        spdlog::error("{}:{} Fail to calloc", LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
+
+    snprintf((*out).execName,
+    in.execName.size() + 1, "%s", in.execName.c_str());
 
     (*out).argc = in.args.size();
     if (in.args.size())
@@ -43,6 +57,7 @@ static u8 taskToProcTask(const Model::Proc::Task &in, ProcTask *out)
         (*out).argv = (char **)calloc(in.args.size(), sizeof(char *));
         if (!(*out).argv)
         {
+            spdlog::error("{}:{} Fail to calloc", LOG_FILE_PATH(__FILE__), __LINE__);
             queue_destroyProcTask(out);
             return 1;
         }
@@ -53,6 +68,8 @@ static u8 taskToProcTask(const Model::Proc::Task &in, ProcTask *out)
                                              sizeof(char));
             if (!(*out).argv[i])
             {
+                spdlog::error("{}:{} Fail to calloc",
+                    LOG_FILE_PATH(__FILE__), __LINE__);
                 queue_destroyProcTask(out);
                 return 1;
             }
@@ -67,6 +84,7 @@ static u8 taskToProcTask(const Model::Proc::Task &in, ProcTask *out)
         (*out).workDir = (char *)calloc(in.workDir.size() + 1, sizeof(char));
         if (!(*out).workDir)
         {
+            spdlog::error("{}:{} Fail to calloc", LOG_FILE_PATH(__FILE__), __LINE__);
             queue_destroyProcTask(out);
             return 1;
         }
@@ -85,10 +103,20 @@ static u8 taskToProcTask(const Model::Proc::Task &in, ProcTask *out)
 static IQueue *getQueue(Handle h)
 {
     Parent parent = hm.parent(h);
-    if (parent != Parent::IQueue) return nullptr;
+    if (parent != Parent::IQueue)
+    {
+        spdlog::error("{}:{} parent is not IQueue",
+            LOG_FILE_PATH(__FILE__), __LINE__);
+        return nullptr;
+    }
 
     IQueue *queue = hm.get<IQueue>(h);
-    if (!queue) return nullptr;
+    if (!queue)
+    {
+        spdlog::error("{}:{} queue is nullptr",
+            LOG_FILE_PATH(__FILE__), __LINE__);
+        return nullptr;
+    }
 
     return queue;
 }
@@ -100,6 +128,11 @@ extern "C"
 // does not free ProcTask
 void queue_destroyProcTask(ProcTask *in)
 {
+    spdlog::debug("{}:{} queue_destroyProcTask",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
+    if (!in) return;
+
     if (in->execName)
     {
         free(in->execName);
@@ -129,20 +162,27 @@ void queue_destroyProcTask(ProcTask *in)
 
 u8 queue_listPending(Handle h, int **out, size_t *outSize)
 {
+    spdlog::debug("{}:{} queue_listPending", LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (!out || !outSize)
     {
+        spdlog::error("{}:{} out or outSize is nullptr",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     IQueue *queue = getQueue(h);
     if (!queue)
     {
+        spdlog::error("{}:{} Fail to get queue", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     std::vector<int> output;
     if (queue->listPending(output))
     {
+        spdlog::error("{}:{} Fail to list pending",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -156,6 +196,7 @@ u8 queue_listPending(Handle h, int **out, size_t *outSize)
     *out = (int *)calloc(*outSize, sizeof(int));
     if (!(*out))
     {
+        spdlog::error("{}:{} Fail to calloc", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -165,20 +206,27 @@ u8 queue_listPending(Handle h, int **out, size_t *outSize)
 
 u8 queue_listFinished(Handle h, int **out, size_t *outSize)
 {
+    spdlog::debug("{}:{} queue_listFinished", LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (!out || !outSize)
     {
+        spdlog::error("{}:{} out or outSize is nullptr",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     IQueue *queue = getQueue(h);
     if (!queue)
     {
+        spdlog::error("{}:{} Fail to get queue", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     std::vector<int> output;
     if (queue->listFinished(output))
     {
+        spdlog::error("{}:{} Fail to list finished",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -192,6 +240,7 @@ u8 queue_listFinished(Handle h, int **out, size_t *outSize)
     *out = (int *)calloc(*outSize, sizeof(int));
     if (!(*out))
     {
+        spdlog::error("{}:{} Fail to calloc", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -201,21 +250,33 @@ u8 queue_listFinished(Handle h, int **out, size_t *outSize)
 
 u8 queue_pendingDetails(Handle h, const int id, ProcTask *out)
 {
-    if (!out) return 1;
+    spdlog::debug("{}:{} queue_pendingDetails", LOG_FILE_PATH(__FILE__), __LINE__);
+
+    if (!out)
+    {
+        spdlog::error("{}:{} out is nullptr", LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
+
     IQueue *queue = getQueue(h);
     if (!queue)
     {
+        spdlog::error("{}:{} Fail to get queue", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     Model::Proc::Task task;
     if (queue->pendingDetails(id, task))
     {
+        spdlog::error("{}:{} Fail to get pending details",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     if (taskToProcTask(task, out))
     {
+        spdlog::error("{}:{} Fail to convert task to ProcTask",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -224,21 +285,33 @@ u8 queue_pendingDetails(Handle h, const int id, ProcTask *out)
 
 u8 queue_finishedDetails(Handle h, const int id, ProcTask *out)
 {
-    if (!out) return 1;
+    spdlog::debug("{}:{} queue_finishedDetails", LOG_FILE_PATH(__FILE__), __LINE__);
+
+    if (!out)
+    {
+        spdlog::error("{}:{} out is nullptr", LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
+
     IQueue *queue = getQueue(h);
     if (!queue)
     {
+        spdlog::error("{}:{} Fail to get queue", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     Model::Proc::Task task;
     if (queue->finishedDetails(id, task))
     {
+        spdlog::error("{}:{} Fail to get finished details",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     if (taskToProcTask(task, out))
     {
+        spdlog::error("{}:{} Fail to convert task to ProcTask",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -247,9 +320,12 @@ u8 queue_finishedDetails(Handle h, const int id, ProcTask *out)
 
 u8 queue_clearPending(Handle h)
 {
+    spdlog::debug("{}:{} queue_clearPending", LOG_FILE_PATH(__FILE__), __LINE__);
+
     IQueue *queue = getQueue(h);
     if (!queue)
     {
+        spdlog::error("{}:{} Fail to get queue", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -258,9 +334,12 @@ u8 queue_clearPending(Handle h)
 
 u8 queue_clearFinished(Handle h)
 {
+    spdlog::debug("{}:{} queue_clearFinished", LOG_FILE_PATH(__FILE__), __LINE__);
+
     IQueue *queue = getQueue(h);
     if (!queue)
     {
+        spdlog::error("{}:{} Fail to get queue", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -269,21 +348,28 @@ u8 queue_clearFinished(Handle h)
 
 u8 queue_currentTask(Handle h, ProcTask *out)
 {
+    spdlog::debug("{}:{} queue_currentTask", LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (!out) return 1;
     IQueue *queue = getQueue(h);
     if (!queue)
     {
+        spdlog::error("{}:{} Fail to get queue", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     Model::Proc::Task task;
     if (queue->currentTask(task))
     {
+        spdlog::error("{}:{} Fail to get current task",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     if (taskToProcTask(task, out))
     {
+        spdlog::error("{}:{} Fail to convert task to ProcTask",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -292,10 +378,18 @@ u8 queue_currentTask(Handle h, ProcTask *out)
 
 u8 queue_addTask(Handle h, const ProcTask *in)
 {
-    if (!in) return 1;
+    spdlog::debug("{}:{} queue_addTask", LOG_FILE_PATH(__FILE__), __LINE__);
+
+    if (!in)
+    {
+        spdlog::error("{}:{} in is nullptr", LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
+
     IQueue *queue = getQueue(h);
     if (!queue)
     {
+        spdlog::error("{}:{} Fail to get queue", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -307,11 +401,22 @@ u8 queue_addTask(Handle h, const ProcTask *in)
     task.args.reserve(in->argc);
     if (in->argc)
     {
-        if (!in->argv) return 1;
+        if (!in->argv)
+        {
+            spdlog::error("{}:{} in->argv is nullptr",
+                LOG_FILE_PATH(__FILE__), __LINE__);
+            return 1;
+        }
 
         for (size_t i = 0; i < in->argc; ++i)
         {
-            if (!in->argv[i]) return 1;
+            if (!in->argv[i])
+            {
+                spdlog::error("{}:{} in->argv[{}] is nullptr",
+                    LOG_FILE_PATH(__FILE__), __LINE__, i);
+                return 1;
+            }
+
             task.args.push_back(std::string(in->argv[i]));
         }
     }
@@ -330,9 +435,12 @@ u8 queue_addTask(Handle h, const ProcTask *in)
 
 u8 queue_removeTask(Handle h, const i32 in)
 {
+    spdlog::debug("{}:{} queue_removeTask", LOG_FILE_PATH(__FILE__), __LINE__);
+
     IQueue *queue = getQueue(h);
     if (!queue)
     {
+        spdlog::error("{}:{} Fail to get queue", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -341,9 +449,12 @@ u8 queue_removeTask(Handle h, const i32 in)
 
 u8 queue_isRunning(Handle h)
 {
+    spdlog::debug("{}:{} queue_isRunning", LOG_FILE_PATH(__FILE__), __LINE__);
+
     IQueue *queue = getQueue(h);
     if (!queue)
     {
+        spdlog::error("{}:{} Fail to get queue", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -352,10 +463,15 @@ u8 queue_isRunning(Handle h)
 
 u8 queue_readCurrentOutput(Handle h, char ***out, size_t *outSize)
 {
+    spdlog::debug("{}:{} queue_readCurrentOutput",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
+
     if (!out || !outSize) return 1;
     IQueue *queue = getQueue(h);
     if (!queue)
     {
+        spdlog::error("{}:{} Fail to get queue", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -371,6 +487,7 @@ u8 queue_readCurrentOutput(Handle h, char ***out, size_t *outSize)
     *out = (char **)calloc(*outSize, sizeof(char *));
     if (!(*out))
     {
+        spdlog::error("{}:{} Fail to calloc", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -379,6 +496,8 @@ u8 queue_readCurrentOutput(Handle h, char ***out, size_t *outSize)
         *out[i] = (char *)calloc(output.at(i).size() + 1, sizeof(char));
         if (!(*out[i]))
         {
+            spdlog::error("{}:{} Fail to calloc", LOG_FILE_PATH(__FILE__), __LINE__);
+
             for (size_t j = 1; j <= i; ++j)
             {
                 free(*out[j]);
@@ -398,9 +517,12 @@ u8 queue_readCurrentOutput(Handle h, char ***out, size_t *outSize)
 
 u8 queue_start(Handle h)
 {
+    spdlog::debug("{}:{} queue_start", LOG_FILE_PATH(__FILE__), __LINE__);
+
     IQueue *queue = getQueue(h);
     if (!queue)
     {
+        spdlog::error("{}:{} Fail to get queue", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -409,9 +531,12 @@ u8 queue_start(Handle h)
 
 u8 queue_stop(Handle h)
 {
+    spdlog::debug("{}:{} queue_stop", LOG_FILE_PATH(__FILE__), __LINE__);
+
     IQueue *queue = getQueue(h);
     if (!queue)
     {
+        spdlog::error("{}:{} Fail to get queue", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 

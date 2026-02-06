@@ -1,5 +1,5 @@
 /*
- * Simple Task Queue
+ * Flex Flow
  * Copyright (c) 2023-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,6 +24,7 @@
 #include <regex>
 #include <mutex>
 
+#include "controller/global/global.hpp"
 #include "spdlog/spdlog.h"
 
 #ifdef _WIN32
@@ -45,11 +46,13 @@ static std::mutex consoleMutex;
 
 void writeLastError(const std::string_view &file, int line)
 {
+    spdlog::debug("{}:{} writeLastError", LOG_FILE_PATH(__FILE__), __LINE__);
 #ifdef _WIN32
     LPSTR msgBuf = nullptr;
     DWORD errID = GetLastError();
     if (!errID)
     {
+        spdlog::error("{}:{} GetLastError failed", LOG_FILE_PATH(__FILE__), __LINE__);
         return;
     }
 
@@ -62,7 +65,7 @@ void writeLastError(const std::string_view &file, int line)
         MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
         (LPSTR)&msgBuf, 0, NULL);
 
-    spdlog::error("{}:{} {}\n", file, line, std::string(msgBuf, errSize));
+    spdlog::error("{}:{} {}", file, line, std::string(msgBuf, errSize));
     LocalFree(msgBuf);
 #else
     static_cast<void>(file);
@@ -72,12 +75,14 @@ void writeLastError(const std::string_view &file, int line)
 
 void writeConsole(const std::string &in)
 {
+    spdlog::debug("{}:{} writeConsole", LOG_FILE_PATH(__FILE__), __LINE__);
     std::unique_lock<std::mutex> lock(consoleMutex);
     fmt::print("{}", in.c_str());
 }
 
 u8 verifyIP(const std::string &in)
 {
+    spdlog::debug("{}:{} verifyIP", LOG_FILE_PATH(__FILE__), __LINE__);
     if (!std::regex_match(in, ipRegex))
     {
         return 1;

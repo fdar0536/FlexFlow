@@ -41,7 +41,7 @@ class CapiSink : public spdlog::sinks::base_sink<Mutex>
 public:
     static void setCallback(LogCallback cb)
     {
-        spdlog::debug("{}:{} setCallback", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::debug("{}:{} CapiSink::setCallback", LOG_FILE_PATH(__FILE__), __LINE__);
         std::lock_guard<std::mutex> lock(s_mutex);
         s_callback = cb;
     }
@@ -81,15 +81,22 @@ static u8 initLogging(i32 level, LogCallback cb)
         return 1;
     }
 
+    spdlog::sink_ptr ptr = nullptr;
+
     try
     {
-        auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-        auto capiSink = std::make_shared<CapiSink<std::mutex>>();
-        capiSink->setCallback(cb);
+        if (cb)
+        {
+            auto capiSink = std::make_shared<CapiSink<std::mutex>>();
+            capiSink->setCallback(cb);
+            ptr = capiSink;
+        }
+        else
+        {
+            ptr = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+        }
 
-        // 組合多個 Sink
-        std::vector<spdlog::sink_ptr> sinks { consoleSink, capiSink };
-        auto logger = std::make_shared<spdlog::logger>("multi_sink", sinks.begin(), sinks.end());
+        auto logger = std::make_shared<spdlog::logger>("myink", ptr);
         logger->set_level(static_cast<spdlog::level::level_enum>(level));
         
         spdlog::set_default_logger(logger);
@@ -106,6 +113,8 @@ static u8 initLogging(i32 level, LogCallback cb)
 
 static void buildConnect(FFConnect &c)
 {
+    spdlog::debug("{}:{} buildConnect", LOG_FILE_PATH(__FILE__), __LINE__);
+
     c.init = connect_init;
     c.destroy = connect_destroy;
     c.startConnect = connect_startConnect;
@@ -115,6 +124,8 @@ static void buildConnect(FFConnect &c)
 
 static void buildQueueList(FFQueueList &l)
 {
+    spdlog::debug("{}:{} buildQueueList", LOG_FILE_PATH(__FILE__), __LINE__);
+
     l.init = queuelist_init;
     l.destroy = queuelist_destroy;
     l.createQueue = queuelist_createQueue;
@@ -127,6 +138,8 @@ static void buildQueueList(FFQueueList &l)
 
 static void buildQueue(FFQueue &q)
 {
+    spdlog::debug("{}:{} buildQueue", LOG_FILE_PATH(__FILE__), __LINE__);
+
     q.destroyProcTask = queue_destroyProcTask;
     q.listPending = queue_listPending;
     q.listFinished = queue_listFinished;
@@ -148,6 +161,8 @@ extern "C"
 
 FF_MODEL_API u8 getFFModel(FFModel *in, int level, LogCallback cb)
 {
+    spdlog::debug("{}:{} getFFModel", LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (!in)
     {
         spdlog::error("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);

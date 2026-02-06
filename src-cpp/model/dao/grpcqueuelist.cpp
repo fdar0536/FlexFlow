@@ -1,5 +1,5 @@
 /*
- * Simple Task Queue
+ * Flex Flow
  * Copyright (c) 2023-2024 fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -48,6 +48,8 @@ GRPCQueueList::~GRPCQueueList()
 
 u8 GRPCQueueList::init(IConnect *connect)
 {
+    spdlog::debug("{}:{} GRPCQueueList::init", LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (!connect)
     {
         spdlog::error("{}:{} connect is nullptr", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -56,7 +58,8 @@ u8 GRPCQueueList::init(IConnect *connect)
 
     if (!connect->connectToken())
     {
-        spdlog::error("{}:{} connect token is nullptr", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} connect token is nullptr",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_INVALID_ARGUMENT;
     }
 
@@ -66,7 +69,8 @@ u8 GRPCQueueList::init(IConnect *connect)
         m_stub = ff::QueueList::NewStub(token->channel);
         if (m_stub == nullptr)
         {
-            spdlog::error("{}:{} Fail to get stub", LOG_FILE_PATH(__FILE__), __LINE__);
+            spdlog::error("{}:{} Fail to get stub",
+                LOG_FILE_PATH(__FILE__), __LINE__);
             return ErrCode_OS_ERROR;
         }
     }
@@ -82,6 +86,9 @@ u8 GRPCQueueList::init(IConnect *connect)
 
 u8 GRPCQueueList::createQueue(const std::string &name)
 {
+    spdlog::debug("{}:{} GRPCQueueList::createQueue",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     ff::QueueReq req;
     req.set_name(name);
 
@@ -101,6 +108,9 @@ u8 GRPCQueueList::createQueue(const std::string &name)
 
 u8 GRPCQueueList::listQueue(std::vector<std::string> &out)
 {
+    spdlog::debug("{}:{} GRPCQueueList::listQueue",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     out.clear();
     out.reserve(100);
 
@@ -133,6 +143,9 @@ u8 GRPCQueueList::listQueue(std::vector<std::string> &out)
 
 u8 GRPCQueueList::deleteQueue(const std::string &name)
 {
+    spdlog::debug("{}:{} GRPCQueueList::deleteQueue",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     ff::QueueReq req;
     req.set_name(name);
 
@@ -153,6 +166,9 @@ u8 GRPCQueueList::deleteQueue(const std::string &name)
 u8 GRPCQueueList::renameQueue(const std::string &oldName,
                               const std::string &newName)
 {
+    spdlog::debug("{}:{} GRPCQueueList::renameQueue",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     ff::RenameQueueReq req;
     req.set_oldname(oldName);
     req.set_newname(newName);
@@ -173,6 +189,9 @@ u8 GRPCQueueList::renameQueue(const std::string &oldName,
 
 IQueue *GRPCQueueList::getQueue(const std::string &name)
 {
+    spdlog::debug("{}:{} GRPCQueueList::getQueue",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     ff::QueueReq req;
     req.set_name(name);
 
@@ -186,13 +205,15 @@ IQueue *GRPCQueueList::getQueue(const std::string &name)
         GRPCQueue *queue = new (std::nothrow) GRPCQueue;
         if (!queue)
         {
-            spdlog::error("{}:{} Fail to allocate memory", LOG_FILE_PATH(__FILE__), __LINE__);
+            spdlog::error("{}:{} Fail to allocate memory",
+                LOG_FILE_PATH(__FILE__), __LINE__);
             return nullptr;
         }
 
         if (queue->init(m_conn, nullptr, name))
         {
-            spdlog::error("{}:{} Fail to initialize queue", LOG_FILE_PATH(__FILE__), __LINE__);
+            spdlog::error("{}:{} Fail to initialize queue",
+                LOG_FILE_PATH(__FILE__), __LINE__);
             delete queue;
             return nullptr;
         }
@@ -206,6 +227,9 @@ IQueue *GRPCQueueList::getQueue(const std::string &name)
 
 void GRPCQueueList::returnQueue(IQueue *queue)
 {
+    spdlog::debug("{}:{} GRPCQueueList::returnQueue",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (!queue) return;
 
     delete queue;

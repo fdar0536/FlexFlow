@@ -1,5 +1,5 @@
 /*
- * Simple Task Queue
+ * Flex Flow
  * Copyright (c) 2025-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -46,6 +46,11 @@ HandleManager::~HandleManager()
 
 bool HandleManager::isNotValid(Handle h)
 {
+    spdlog::debug("{}:{} HandleManager::isNotValid",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
+    if (!h) return true;
+
     uint32_t idx = HANDLE_GET_IDX(h);
     if (idx >= m_entries.size()) return true;
 
@@ -60,6 +65,9 @@ bool HandleManager::isNotValid(Handle h)
 
 u8 HandleManager::takeOwned(Handle h)
 {
+    spdlog::debug("{}:{} HandleManager::takeOwned",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (isNotValid(h))
     {
         return 1;
@@ -73,6 +81,9 @@ u8 HandleManager::takeOwned(Handle h)
 
 Parent HandleManager::parent(Handle h)
 {
+    spdlog::debug("{}:{} HandleManager::parent",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (isNotValid(h))
     {
         return Parent::invaild;
@@ -84,6 +95,9 @@ Parent HandleManager::parent(Handle h)
 
 Type HandleManager::type(Handle h)
 {
+    spdlog::debug("{}:{} HandleManager::type",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (isNotValid(h))
     {
         return Type::invaild;
@@ -95,6 +109,9 @@ Type HandleManager::type(Handle h)
 
 void HandleManager::remove(Handle h)
 {
+    spdlog::debug("{}:{} HandleManager::remove",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (isNotValid(h))
     {
         return;

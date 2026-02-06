@@ -1,6 +1,6 @@
 /*
- * Simple Task Queue
- * Copyright (c) 2023-2024 fdar0536
+ * Flex Flow
+ * Copyright (c) 2023-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -60,6 +60,8 @@ SQLiteQueueList::~SQLiteQueueList()
 u8
 SQLiteQueueList::init(IConnect *connect)
 {
+    spdlog::debug("{}:{} SQLiteQueueList::init", LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (!connect)
     {
         spdlog::error("{}:{} \"connect\" is nullptr.", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -88,7 +90,8 @@ SQLiteQueueList::init(IConnect *connect)
 
         if (!std::filesystem::is_regular_file(entry))
         {
-            spdlog::warn("{}:{} {} is not regular file, ignore...", LOG_FILE_PATH(__FILE__), __LINE__,
+            spdlog::warn("{}:{} {} is not regular file, ignore...",
+                LOG_FILE_PATH(__FILE__), __LINE__,
                 entry.path().string());
             continue;
         }
@@ -101,7 +104,8 @@ SQLiteQueueList::init(IConnect *connect)
         index = name.find_last_of(".");
         if (name.substr(index + 1) != "db")
         {
-            spdlog::warn("{}:{} {} is not database, ignore...", LOG_FILE_PATH(__FILE__), __LINE__,
+            spdlog::warn("{}:{} {} is not database, ignore...",
+                LOG_FILE_PATH(__FILE__), __LINE__,
                 fileName);
             continue;
         }
@@ -122,6 +126,9 @@ SQLiteQueueList::init(IConnect *connect)
 
 u8 SQLiteQueueList::createQueue(const std::string &name)
 {
+    spdlog::debug("{}:{} SQLiteQueueList::createQueue", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} name: {}", LOG_FILE_PATH(__FILE__), __LINE__, name.c_str());
+
     if (m_queueList.find(name) != m_queueList.end())
     {
         spdlog::error("{}:{} {} is already exists", LOG_FILE_PATH(__FILE__), __LINE__, name);
@@ -169,6 +176,8 @@ u8 SQLiteQueueList::createQueue(const std::string &name)
 
 u8 SQLiteQueueList::listQueue(std::vector<std::string> &out)
 {
+    spdlog::debug("{}:{} SQLiteQueueList::listQueue", LOG_FILE_PATH(__FILE__), __LINE__);
+
     out.clear();
     out.reserve(m_queueList.size());
     for (auto it = m_queueList.begin();
@@ -183,6 +192,8 @@ u8 SQLiteQueueList::listQueue(std::vector<std::string> &out)
 
 u8 SQLiteQueueList::deleteQueue(const std::string &name)
 {
+    spdlog::debug("{}:{} SQLiteQueueList::deleteQueue", LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (!m_queueList.erase(name))
     {
         spdlog::error("{}:{} No such queue: {}", LOG_FILE_PATH(__FILE__), __LINE__,
@@ -198,6 +209,10 @@ u8
 SQLiteQueueList::renameQueue(const std::string &oldName,
                              const std::string &newName)
 {
+    spdlog::debug("{}:{} SQLiteQueueList::renameQueue", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} oldName: {}", LOG_FILE_PATH(__FILE__), __LINE__, oldName.c_str());
+    spdlog::debug("{}:{} newName: {}", LOG_FILE_PATH(__FILE__), __LINE__, newName.c_str());
+
     for (auto &it : m_queueList)
     {
         if (it.first == oldName)
@@ -222,13 +237,18 @@ SQLiteQueueList::renameQueue(const std::string &oldName,
 
 IQueue *SQLiteQueueList::getQueue(const std::string &name)
 {
+    spdlog::debug("{}:{} SQLiteQueueList::getQueue", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} name: {}", LOG_FILE_PATH(__FILE__), __LINE__, name.c_str());
+
     auto it = m_queueList.find(name);
     if (it == m_queueList.end()) return nullptr;
     return it->second.get();
 }
 
 void SQLiteQueueList::returnQueue(IQueue *)
-{}
+{
+    spdlog::debug("{}:{} SQLiteQueueList::returnQueue", LOG_FILE_PATH(__FILE__), __LINE__);
+}
 
 } // end namespace DAO
 

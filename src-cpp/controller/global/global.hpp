@@ -1,5 +1,5 @@
 /*
- * Simple Task Queue
+ * Flex Flow
  * Copyright (c) 2024 fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,11 +24,17 @@
 #ifndef _CONTROLLER_GLOBAL_GLOBAL_HPP_
 #define _CONTROLLER_GLOBAL_GLOBAL_HPP_
 
-#include <memory>
 #include <string>
 
 #include "defines.h"
-#include "model/dao/iqueuelist.hpp"
+
+namespace Model
+{
+    namespace DAO
+    {
+        class IQueueList;
+    }
+} // namespace Model
 
 constexpr
 std::string_view relative_path(std::string_view path, std::string_view prefix)

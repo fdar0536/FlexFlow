@@ -1,5 +1,5 @@
 /*
- * Simple Task Queue
+ * Flex Flow
  * Copyright (c) 2023-2024 fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,7 +21,9 @@
  * SOFTWARE.
  */
 
-#include "fmt/core.h"
+#include "spdlog/spdlog.h"
+
+#include "controller/global/global.hpp"
 
 #include "task.hpp"
 
@@ -44,6 +46,8 @@ Task::Task() :
 
 void Task::print() const
 {
+    spdlog::debug("{}:{} Task::print", LOG_FILE_PATH(__FILE__), __LINE__);
+    
     fmt::println("execName: {}", execName);
     fmt::println("args: ");
     for (auto it = args.begin(); it != args.end(); ++it)

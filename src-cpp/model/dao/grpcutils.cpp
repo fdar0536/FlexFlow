@@ -1,5 +1,5 @@
 /*
- * Simple Task Queue
+ * Flex Flow
  * Copyright (c) 2023-2024 fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,7 +21,10 @@
  * SOFTWARE.
  */
 
+
 #include "spdlog/spdlog.h"
+
+#include "controller/global/global.hpp"
 
 #include "grpcutils.hpp"
 
@@ -38,12 +41,16 @@ namespace GRPCUtils
 
 void setupCtx(grpc::ClientContext &ctx)
 {
+    spdlog::debug("{}:{} setupCtx", LOG_FILE_PATH(__FILE__), __LINE__);
+    
     ctx.set_deadline(std::chrono::system_clock::now() +
                      std::chrono::milliseconds(FF_CLIENT_TIMEOUT * 1000));
 }
 
 void buildErrMsg(const std::string_view &file, i32 line, grpc::Status &status)
 {
+    spdlog::debug("{}:{} buildErrMsg", LOG_FILE_PATH(__FILE__), __LINE__);
+
     spdlog::error("{}:{} gRPC error code {}: {}", file, line,
                   static_cast<i32>(status.error_code()), status.error_message());
 }

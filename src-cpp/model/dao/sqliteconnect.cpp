@@ -1,6 +1,6 @@
 /*
- * Simple Task Queue
- * Copyright (c) 2023-2024 fdar0536
+ * Flex Flow
+ * Copyright (c) 2023-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -62,6 +62,8 @@ SQLiteConnect::~SQLiteConnect()
 
 u8 SQLiteConnect::init()
 {
+    spdlog::debug("{}:{} SQLiteConnect::init", LOG_FILE_PATH(__FILE__), __LINE__);
+
     m_connectToken = nullptr;
     return ErrCode_OK;
 }
@@ -70,7 +72,12 @@ u8
 SQLiteConnect::startConnect(const std::string &target,
                             const i32 port)
 {
-    static_cast<void>(port);
+    spdlog::debug("{}:{} SQLiteConnect::startConnect",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("target: {}, port: {}", target, port);
+
+    UNUSED(port);
+
     if (target.empty())
     {
         spdlog::error("{}:{} target is empty.", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -86,7 +93,8 @@ SQLiteConnect::startConnect(const std::string &target,
 
     if (DirUtils::verifyDir(basePath))
     {
-        spdlog::error("{}:{} Fail to verify basePath.", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} Fail to verify basePath.",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_INVALID_ARGUMENT;
     }
 

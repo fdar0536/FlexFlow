@@ -1,5 +1,5 @@
 /*
- * Simple Task Queue
+ * Flex Flow
  * Copyright (c) 2024 fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -27,7 +27,6 @@
 #include "model/dao/grpcqueuelist.hpp"
 #include "model/dao/sqliteconnect.hpp"
 #include "model/dao/sqlitequeuelist.hpp"
-#include "model/utils.hpp"
 
 #ifdef _WIN32
 #include "windows.h"

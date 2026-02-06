@@ -1,5 +1,5 @@
 /*
- * Simple Task Queue
+ * Flex Flow
  * Copyright (c) 2023-2024 fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -39,6 +39,8 @@ namespace DirUtils
 
 u8 verifyDir(const std::string &in)
 {
+    spdlog::debug("{}:{} verifyDir", LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (in.empty())
     {
         spdlog::error("{}:{} \"in\" is empty.", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -70,6 +72,8 @@ u8 verifyDir(const std::string &in)
 
 u8 verifyFile(const std::string &in)
 {
+    spdlog::debug("{}:{} verifyFile", LOG_FILE_PATH(__FILE__), __LINE__);
+
     if (in.empty())
     {
         spdlog::error("{}:{} \"in\" is empty.", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -79,7 +83,8 @@ u8 verifyFile(const std::string &in)
     std::error_code ec;
     if (!std::filesystem::exists(in, ec))
     {
-        spdlog::error("{}:{} {} is not exist.", LOG_FILE_PATH(__FILE__), __LINE__, in);
+        spdlog::error("{}:{} {} is not exist.",
+            LOG_FILE_PATH(__FILE__), __LINE__, in);
         return 1;
     }
 
@@ -95,6 +100,9 @@ u8 verifyFile(const std::string &in)
 
 void deleteDirectoryContents(const std::string& dir_path)
 {
+    spdlog::debug("{}:{} deleteDirectoryContents",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
     std::error_code ec;
     for (const auto& entry : std::filesystem::directory_iterator(dir_path))
         std::filesystem::remove_all(entry.path(), ec);
@@ -102,6 +110,8 @@ void deleteDirectoryContents(const std::string& dir_path)
 
 void convertPath(std::string &toConvert)
 {
+    spdlog::debug("{}:{} convertPath", LOG_FILE_PATH(__FILE__), __LINE__);
+
 #ifdef _WIN32
     std::string from = "\\";
     std::string to = "/";
