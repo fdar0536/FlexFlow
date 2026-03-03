@@ -62,7 +62,6 @@ QueueImpl::ListPending(grpc::ServerContext *ctx,
     u8 code = queue->listPending(out);
     if (code)
     {
-        sqliteQueueList->returnQueue(queue);
         spdlog::error("{}:{} Fail to list pending",
             LOG_FILE_PATH(__FILE__), __LINE__); 
         return Model::ErrMsg::toGRPCStatus(code, "Fail to list pending");
@@ -75,7 +74,6 @@ QueueImpl::ListPending(grpc::ServerContext *ctx,
         writer->Write(res);
     }
 
-    sqliteQueueList->returnQueue(queue);
     return grpc::Status::OK;
 }
 
@@ -105,7 +103,6 @@ QueueImpl::ListFinished(grpc::ServerContext *ctx,
     u8 code = queue->listFinished(out);
     if (code)
     {
-        sqliteQueueList->returnQueue(queue);
         spdlog::error("{}:{} Fail to list finished",
             LOG_FILE_PATH(__FILE__), __LINE__);
         return Model::ErrMsg::toGRPCStatus(code, "Fail to list finished");
@@ -118,7 +115,6 @@ QueueImpl::ListFinished(grpc::ServerContext *ctx,
         writer->Write(res);
     }
 
-    sqliteQueueList->returnQueue(queue);
     return grpc::Status::OK;
 }
 
@@ -172,12 +168,10 @@ QueueImpl::PendingDetails(grpc::ServerContext *ctx,
     {
         spdlog::error("{}:{} Fail to get pending detailes",
             LOG_FILE_PATH(__FILE__), __LINE__);
-        sqliteQueueList->returnQueue(queue);
         return Model::ErrMsg::toGRPCStatus(code, "Fail to get pending detailes");
     }
 
     buildTaskDetailsRes(out, res);
-    sqliteQueueList->returnQueue(queue);
     return grpc::Status::OK;
 }
 
@@ -208,14 +202,12 @@ QueueImpl::FinishedDetails(grpc::ServerContext *ctx,
     u8 code = queue->finishedDetails(req->id(), out);
     if (code)
     {
-        sqliteQueueList->returnQueue(queue);
         spdlog::error("{}:{} Fail to get pending detailes",
             LOG_FILE_PATH(__FILE__), __LINE__);
         return Model::ErrMsg::toGRPCStatus(code, "Fail to get pending detailes");
     }
 
     buildTaskDetailsRes(out, res);
-    sqliteQueueList->returnQueue(queue);
     return grpc::Status::OK;
 }
 
@@ -245,11 +237,9 @@ QueueImpl::ClearPending(grpc::ServerContext *ctx,
     if (code)
     {
         spdlog::error("{}:{} Fail to clean pending", LOG_FILE_PATH(__FILE__), __LINE__);
-        sqliteQueueList->returnQueue(queue);
         return Model::ErrMsg::toGRPCStatus(code, "Fail to clean pending");
     }
 
-    sqliteQueueList->returnQueue(queue);
     return grpc::Status::OK;
 }
 
@@ -282,11 +272,9 @@ QueueImpl::ClearFinished(grpc::ServerContext *ctx,
     {
         spdlog::error("{}:{} Fail to clean finished",
             LOG_FILE_PATH(__FILE__), __LINE__);
-        sqliteQueueList->returnQueue(queue);
         return Model::ErrMsg::toGRPCStatus(code, "Fail to clean finished");
     }
 
-    sqliteQueueList->returnQueue(queue);
     return grpc::Status::OK;
 }
 
@@ -317,12 +305,10 @@ QueueImpl::CurrentTask(grpc::ServerContext *ctx,
     {
         spdlog::error("{}:{} Fail to get current task",
             LOG_FILE_PATH(__FILE__), __LINE__);
-        sqliteQueueList->returnQueue(queue);
         return Model::ErrMsg::toGRPCStatus(code, "Fail to get current task");
     }
 
     buildTaskDetailsRes(out, res);
-    sqliteQueueList->returnQueue(queue);
     return grpc::Status::OK;
 }
 
@@ -359,12 +345,10 @@ QueueImpl::AddTask(grpc::ServerContext *ctx,
     if (code)
     {
         spdlog::error("{}:{} Fail to add task", LOG_FILE_PATH(__FILE__), __LINE__);
-        sqliteQueueList->returnQueue(queue);
         return Model::ErrMsg::toGRPCStatus(code, "Fail to add task");
     }
 
     res->set_id(in.ID);
-    sqliteQueueList->returnQueue(queue);
     return grpc::Status::OK;
 }
 
@@ -394,11 +378,9 @@ QueueImpl::RemoveTask(grpc::ServerContext *ctx,
     if (code)
     {
         spdlog::error("{}:{} Fail to remove task", LOG_FILE_PATH(__FILE__), __LINE__);
-        sqliteQueueList->returnQueue(queue);
         return Model::ErrMsg::toGRPCStatus(code, "Fail to remove task");
     }
 
-    sqliteQueueList->returnQueue(queue);
     return grpc::Status::OK;
 }
 
@@ -424,7 +406,6 @@ QueueImpl::IsRunning(grpc::ServerContext *ctx,
     }
 
     res->set_isrunning(queue->isRunning());
-    sqliteQueueList->returnQueue(queue);
     return grpc::Status::OK;
 }
 
@@ -460,7 +441,6 @@ QueueImpl::ReadCurrentOutput(grpc::ServerContext *ctx,
         writer->Write(res);
     }
 
-    sqliteQueueList->returnQueue(queue);
     return grpc::Status::OK;
 }
 
@@ -490,11 +470,9 @@ QueueImpl::Start(grpc::ServerContext *ctx,
     if (code)
     {
         spdlog::error("{}:{} Fail to start queue", LOG_FILE_PATH(__FILE__), __LINE__);
-        sqliteQueueList->returnQueue(queue);
         return Model::ErrMsg::toGRPCStatus(code, "Fail to start queue");
     }
 
-    sqliteQueueList->returnQueue(queue);
     return grpc::Status::OK;
 }
 
@@ -521,7 +499,6 @@ QueueImpl::Stop(grpc::ServerContext *ctx,
     }
 
     queue->stop();
-    sqliteQueueList->returnQueue(queue);
     return grpc::Status::OK;
 }
 

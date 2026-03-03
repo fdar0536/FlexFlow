@@ -30,6 +30,8 @@ export class TauriConnect implements IConnect
 {
     static create = async(backend: number, logger: Logger, code: ExitCode): Promise<TauriConnect | null> =>
     {
+        logger.debug("TauriConnect.create");
+        logger.debug("backend is: " + backend);
         code.clear();
         var h: Handle;
         try
@@ -49,6 +51,7 @@ export class TauriConnect implements IConnect
 
     destroy = async(code: ExitCode): Promise<void> =>
     {
+        this.logger.debug("TauriConnect.destroy");
         code.clear();
         try
         {
@@ -70,6 +73,10 @@ export class TauriConnect implements IConnect
     startConnect =
     async(target: string, port: number, code: ExitCode): Promise<void> =>
     {
+        this.logger.debug("TauriConnect.startConnect");
+        this.logger.debug("target is: " + target);
+        this.logger.debug("port is: " + port);
+
         code.clear();
         this.logger.debug("TauriConnect.startConnect");
         this.logger.debug("target is: " + target);
@@ -89,6 +96,8 @@ export class TauriConnect implements IConnect
 
     targetPath = async(code: ExitCode): Promise<string> =>
     {
+        this.logger.debug("TauriConnect.targetPath");
+
         code.clear();
         try
         {

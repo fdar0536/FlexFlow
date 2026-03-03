@@ -206,7 +206,7 @@ export class AppConfig
     {
         this.logger.debug("AppConfig.update");
         this.logger.debug("name is " + name);
-        this.logger.debug("profile is " + profile.toString());
+        this.logger.debug("profile is " + JSON.stringify(profile));
 
         const release = await this.mutex.acquire();
         if (name === "" || isEmptyObj(profile))
@@ -217,7 +217,7 @@ export class AppConfig
         }
 
         const currentProfiles = this.profiles();
-        this.logger.debug("currentProfiles is " + currentProfiles.toString());
+        this.logger.debug("currentProfiles is " + JSON.stringify(currentProfiles));
 
         if (!currentProfiles.hasOwnProperty(name))
         {
@@ -294,7 +294,7 @@ export class AppConfig
             }
         }
 
-        this.logger.debug("data is " + data.toString());
+        this.logger.debug("data is " + JSON.stringify(data));
         this.profiles.set(data);
         this.current_name.set("default");
     } // defaultProfile

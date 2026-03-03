@@ -26,10 +26,6 @@ else () # Windows
 endif (UNIX) # end if (UNIX)
 
 # options
-if((NOT ENABLE_SERVER) AND (NOT ENABLE_CAPI))
-    set(ENABLE_SERVER on)
-endif((NOT ENABLE_SERVER) AND (NOT ENABLE_CAPI))
-
 if(ENABLE_TEST)
     enable_testing()
     set(ENABLE_SERVER on)
@@ -72,6 +68,13 @@ if (ENABLE_SERVER)
     find_package(yaml-cpp REQUIRED)
 endif (ENABLE_SERVER)
 
+if (ENABLE_GUI)
+    set(CMAKE_AUTOUIC ON)
+    set(CMAKE_AUTOMOC ON)
+    set(CMAKE_AUTORCC ON)
+    find_package(Qt6 6.10 COMPONENTS Widgets REQUIRED)
+endif (ENABLE_GUI)
+
 if(ENABLE_TEST)
     find_package(GTest REQUIRED)
 endif(ENABLE_TEST)
@@ -95,3 +98,4 @@ set_property(TARGET grpc_common PROPERTY POSITION_INDEPENDENT_CODE ON)
 include(cmake/ffmodel.cmake)
 include(cmake/ffmodel_ut.cmake)
 include(cmake/flexflowserver.cmake)
+include(cmake/flexflowgui.cmake)

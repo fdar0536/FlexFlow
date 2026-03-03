@@ -54,9 +54,7 @@ public:
     u8 renameQueue(const std::string &oldName,
                    const std::string &newName) override;
 
-    IQueue *getQueue(const std::string &name) override;
-
-    void returnQueue(IQueue *) override;
+    std::shared_ptr<IQueue> getQueue(const std::string &name) override;
 
 private:
 

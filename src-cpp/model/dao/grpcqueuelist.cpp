@@ -30,6 +30,7 @@
 #include "grpcqueue.hpp"
 #include "grpcqueuelist.hpp"
 #include "grpcutils.hpp"
+#include <memory>
 
 namespace Model
 {
@@ -187,7 +188,7 @@ u8 GRPCQueueList::renameQueue(const std::string &oldName,
     return ErrCode_OS_ERROR;
 }
 
-IQueue *GRPCQueueList::getQueue(const std::string &name)
+std::shared_ptr<IQueue> GRPCQueueList::getQueue(const std::string &name)
 {
     spdlog::debug("{}:{} GRPCQueueList::getQueue",
         LOG_FILE_PATH(__FILE__), __LINE__);
@@ -218,22 +219,11 @@ IQueue *GRPCQueueList::getQueue(const std::string &name)
             return nullptr;
         }
 
-        return queue;
+        return std::shared_ptr<IQueue>(queue);
     }
 
     GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
     return nullptr;
-}
-
-void GRPCQueueList::returnQueue(IQueue *queue)
-{
-    spdlog::debug("{}:{} GRPCQueueList::returnQueue",
-        LOG_FILE_PATH(__FILE__), __LINE__);
-
-    if (!queue) return;
-
-    delete queue;
-    queue = nullptr;
 }
 
 } // end namespace DAO

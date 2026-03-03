@@ -89,13 +89,7 @@ public:
      * @param name the queue's name you want to get
      * @return IQueue* return nullptr if failed
      */
-    virtual IQueue *getQueue(const std::string &name) = 0;
-
-    /**
-     * @brief return the queue back to this queue list
-     * @param queue the queue you want to return
-     */
-    virtual void returnQueue(IQueue *queue) = 0;
+    virtual std::shared_ptr<IQueue> getQueue(const std::string &name) = 0;
 
 protected:
 

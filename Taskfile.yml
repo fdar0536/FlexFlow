@@ -5,7 +5,7 @@ dotenv: ['.env']
 
 vars:
   # version info
-  FF_VERSION: "r12"
+  FF_VERSION: "2.0"
   FF_COMMIT:
     sh: git rev-parse --short HEAD
   FF_BRANCH:
@@ -20,7 +20,7 @@ vars:
   CPP_BUILD_DIR: '{{ .CPP_BUILD_DIR | default (printf "%s/build-cpp" .TMP_DIR) }}'
   CMAKE_GENERATOR: '{{ .CMAKE_GENERATOR | default "Ninja" }}'
   ENABLE_SERVER: '{{ .ENABLE_SERVER | default 1 }}'
-  ENABLE_CAPI: '{{ .ENABLE_CAPI | default 1 }}'
+  ENABLE_GUI: '{{ .ENABLE_GUI | default 1 }}' 
   ENABLE_MODEL_TEST: '{{ .ENABLE_MODEL_TEST | default 1 }}'
   CMAKE_EXTRA_ARGS: '{{ .CMAKE_EXTRA_ARGS | default "" }}'
   JOBS: '{{ .JOBS | default 1 }}'
@@ -31,37 +31,20 @@ vars:
   # for webui
   WEBUI_BUILD_DIR: '{{ .WEBUI_BUILD_DIR | default (printf "%s/build-webui" .TMP_DIR) }}'
 
-  # for tauri
-  GUI_BUILD_DIR: '{{ .GUI_BUILD_DIR | default (printf "%s/build-gui" .TMP_DIR) }}'
-
 tasks:
   # wrapper
   build-cpp:
     deps: [config-cmake]
     cmds:
       - cmake --build "{{.CPP_BUILD_DIR}}" -j {{.JOBS}}
-  
-  build-gui:
-    env:
-      PROFILE: '{{.BUILD_TYPE}}'
-      CPP_BUILD_DIR: '{{.CPP_BUILD_DIR}}'
-      CARGO_TARGET_DIR: '{{.GUI_BUILD_DIR}}'
-    deps: [build-cpp, build-webui]
-    cmds:
-      - pnpm tauri build
 
   build-webui:
     deps: [config-webui]
     cmds:
       - npx ng build --delete-output-path=false
   
-  dev-gui:
-    deps: [prepare-dev-gui]
-    cmds:
-      - echo "Done"
-  
   clean:
-    deps: [clean-cmake, clean-buf, clean-webui, clean-tauri]
+    deps: [clean-cmake, clean-buf, clean-webui]
     cmds:
       - echo "Clean done!"
   
@@ -94,7 +77,7 @@ tasks:
       - >
         cmake -S src-cpp -B "{{.CPP_BUILD_DIR}}" -G "{{.CMAKE_GENERATOR}}" 
         -DENABLE_SERVER={{.ENABLE_SERVER}} 
-        -DENABLE_CAPI={{.ENABLE_CAPI}} 
+        -DENABLE_GUI={{.ENABLE_GUI}} 
         -DENABLE_TEST={{.ENABLE_MODEL_TEST}} 
         -DCMAKE_BUILD_TYPE={{.BUILD_TYPE}} 
         -DFF_VERSION={{.FF_VERSION}} 
@@ -135,21 +118,6 @@ tasks:
       - src-web/model/config.ts
     cmds:
       - pnpm install
-  
-  prepare-dev-gui:
-    internal: true
-    env:
-      PROFILE: '{{.BUILD_TYPE}}'
-      CPP_BUILD_DIR: '{{.CPP_BUILD_DIR}}'
-      CARGO_TARGET_DIR: '{{.GUI_BUILD_DIR}}'
-      GSK_RENDERER: 'ngl'
-      __NV_DISABLE_EXPLICIT_SYNC: 1
-      WEBKIT_DISABLE_DMABUF_RENDERER: 1
-      WEBKIT_DISABLE_COMPOSITING_MODE: 1
-      GDK_BACKEND: 'x11'
-    deps: [config-webui, build-cpp]
-    cmds:
-      - pnpm tauri dev
 
   # clean
   clean-buf:
@@ -168,8 +136,3 @@ tasks:
     internal: true
     cmds:
       - cmake -E rm -rf "{{.WEBUI_BUILD_DIR}}" src-web/model/config.ts
-  
-  clean-tauri:
-    internal: true
-    cmds:
-      - cmake -E rm -rf "{{.GUI_BUILD_DIR}}"

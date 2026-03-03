@@ -190,7 +190,7 @@ static void testQueueList(Model::DAO::IQueueList *list)
     EXPECT_STREQ(out.at(0).c_str(), "test");
 }
 
-static void testQueue(Model::DAO::IQueue *queue)
+static void testQueue(std::shared_ptr<Model::DAO::IQueue> queue)
 {
     std::vector<int> out;
 
@@ -214,5 +214,4 @@ TEST(GRPCModel, Testing)
     EXPECT_NE(queue, nullptr);
 
     testQueue(queue);
-    list->returnQueue(queue);
 }

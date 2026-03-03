@@ -235,19 +235,14 @@ SQLiteQueueList::renameQueue(const std::string &oldName,
     return ErrCode_NOT_FOUND;
 }
 
-IQueue *SQLiteQueueList::getQueue(const std::string &name)
+std::shared_ptr<IQueue> SQLiteQueueList::getQueue(const std::string &name)
 {
     spdlog::debug("{}:{} SQLiteQueueList::getQueue", LOG_FILE_PATH(__FILE__), __LINE__);
     spdlog::debug("{}:{} name: {}", LOG_FILE_PATH(__FILE__), __LINE__, name.c_str());
 
     auto it = m_queueList.find(name);
     if (it == m_queueList.end()) return nullptr;
-    return it->second.get();
-}
-
-void SQLiteQueueList::returnQueue(IQueue *)
-{
-    spdlog::debug("{}:{} SQLiteQueueList::returnQueue", LOG_FILE_PATH(__FILE__), __LINE__);
+    return it->second;
 }
 
 } // end namespace DAO
