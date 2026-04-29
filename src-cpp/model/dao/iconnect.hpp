@@ -24,11 +24,11 @@
 #ifndef _MODEL_DAO_ICONNECT_HPP_
 #define _MODEL_DAO_ICONNECT_HPP_
 
-#include "spdlog/spdlog.h"
-
 #include <string>
 
-#include "controller/global/global.hpp"
+#include "spdlog/spdlog.h"
+
+#include "model/utils.hpp"
 
 namespace Model
 {
@@ -93,9 +93,7 @@ protected:
     template<class T>
     void freeConnectToken()
     {
-        spdlog::debug("{}:{} IConnect::freeConnectToken",
-            LOG_FILE_PATH(__FILE__), __LINE__);
-
+        spdlog::debug("{}:{} IConnect::freeConnectToken", LOG_FILE_PATH(__FILE__), __LINE__);
 
         if (m_connectToken)
         {

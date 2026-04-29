@@ -26,7 +26,7 @@
 #include "spdlog/spdlog.h"
 
 #include "controller/grpcserver/init.hpp"
-#include "controller/global/global.hpp"
+#include "model/utils.hpp"
 
 static void sighandler(int signum);
 
@@ -37,7 +37,7 @@ static BOOL eventHandler(DWORD dwCtrlType);
 int main(int argc, char **argv)
 {
     spdlog::debug("{}:{} main", LOG_FILE_PATH(__FILE__), __LINE__);
-    if (Controller::Global::isAdmin())
+    if (Model::Utils::isAdmin())
     {
 #ifdef _WIN32
         spdlog::error("{}:{} Refuse to run as administrator", LOG_FILE_PATH(__FILE__), __LINE__);

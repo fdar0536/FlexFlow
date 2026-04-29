@@ -27,10 +27,10 @@
 #include <inttypes.h>
 
 #include "config.hpp"
-#include "controller/global/defines.h"
+#include "model/defines.h"
 
 #include "controller/grpcserver/server.hpp"
-#include "model/dao/sqlitequeuelist.hpp"
+#include "model/dao/iqueuelist.hpp"
 
 namespace Controller
 {

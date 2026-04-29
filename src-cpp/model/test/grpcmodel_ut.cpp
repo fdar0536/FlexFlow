@@ -27,8 +27,8 @@
 #include "gtest/gtest.h"
 
 #include "controller/global/global.hpp"
-#include "model/dao/grpcconnect.hpp"
-#include "model/dao/grpcqueuelist.hpp"
+#include "model/dao/grpc/connect.hpp"
+#include "model/dao/grpc/queuelist.hpp"
 
 #include "param.hpp"
 
@@ -80,7 +80,7 @@ public:
         m_keepRunning.store(true, std::memory_order_relaxed);
         m_thread = std::jthread(&GRPCModelTesting::readProcOutput, this);
 
-        Model::DAO::GRPCConnect *conn = new (std::nothrow) Model::DAO::GRPCConnect;
+        Model::DAO::GRPC::Connect *conn = new (std::nothrow) Model::DAO::GRPC::Connect;
         if (!conn)
         {
             printLog(LOG_FILE_PATH(__FILE__), __LINE__, "Fail to allocate memory");
@@ -104,7 +104,7 @@ public:
             return 1;
         }
 
-        auto list = new (std::nothrow) Model::DAO::GRPCQueueList;
+        auto list = new (std::nothrow) Model::DAO::GRPC::QueueList;
         if (!list)
         {
             printLog(LOG_FILE_PATH(__FILE__), __LINE__, "Fail to allocate memory");

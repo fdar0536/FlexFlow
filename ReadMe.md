@@ -36,8 +36,6 @@ This is a simple tool that allow you can manage the task flow by remote or in lo
   - Model
   - [cxxopts](https://github.com/jarro2783/cxxopts)
   - [yaml-cpp](https://github.com/jbeder/yaml-cpp)
-- GUI
-  - [Qt6](https://www.qt.io)
 
 ### Environment variable for build
 
@@ -46,7 +44,7 @@ This is a simple tool that allow you can manage the task flow by remote or in lo
 
 ### Build command
 
-- ```task build-cpp```: to build model, grpc server and desktop gui
+- ```task build-cpp```: to build model and grpc server
 - ```task build-webui```: to build web ui
 - ```task clean```: to clean build
 

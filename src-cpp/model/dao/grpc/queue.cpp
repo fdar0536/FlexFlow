@@ -21,13 +21,14 @@
  * SOFTWARE.
  */
 
-#include "model/errmsg.hpp"
-#include "model/dao/grpcconnect.hpp"
 #include "spdlog/spdlog.h"
 
+#include "model/errmsg.hpp"
+#include "connect.hpp"
+
 #include "controller/global/global.hpp"
-#include "grpcutils.hpp"
-#include "grpcqueue.hpp"
+#include "utils.hpp"
+#include "queue.hpp"
 
 namespace Model
 {
@@ -35,25 +36,30 @@ namespace Model
 namespace DAO
 {
 
-GRPCQueue::GRPCQueue() :
+namespace GRPC
+{
+
+Queue::Queue() :
     m_stub(nullptr),
     m_queueName("")
 {}
 
-GRPCQueue::~GRPCQueue()
+Queue::~Queue()
 {}
 
 u8
-GRPCQueue::init(IConnect *connect,
+Queue::init(IConnect *connect,
                 Proc::IProc *process,
                 const std::string &name)
 {
-    spdlog::debug("{}:{} GRPCQueue::init", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::init", LOG_FILE_PATH(__FILE__), __LINE__);
 
     UNUSED(process);
     if (!connect)
     {
-        spdlog::error("{}:{} connect is nullptr", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error(
+            "{}:{} connect is nullptr",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_INVALID_ARGUMENT;
     }
 
@@ -70,7 +76,7 @@ GRPCQueue::init(IConnect *connect,
         return ErrCode_INVALID_ARGUMENT;
     }
 
-    GRPCToken *token = reinterpret_cast<GRPCToken *>(connect->connectToken());
+    Token *token = reinterpret_cast<Token *>(connect->connectToken());
 
     try
     {
@@ -93,9 +99,9 @@ GRPCQueue::init(IConnect *connect,
     return ErrCode_OK;
 }
 
-u8 GRPCQueue::listPending(std::vector<int> &out)
+u8 Queue::listPending(std::vector<int> &out)
 {
-    spdlog::debug("{}:{} GRPCQueue::listPending", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::listPending", LOG_FILE_PATH(__FILE__), __LINE__);
 
     out.clear();
     out.reserve(128);
@@ -106,7 +112,7 @@ u8 GRPCQueue::listPending(std::vector<int> &out)
     grpc::ClientContext ctx;
     ff::ListTaskRes res;
 
-    GRPCUtils::setupCtx(ctx);
+    Utils::setupCtx(ctx);
     auto reader = m_stub->ListPending(&ctx, req);
     if (reader == nullptr)
     {
@@ -123,9 +129,9 @@ u8 GRPCQueue::listPending(std::vector<int> &out)
     return ErrCode_OK;
 }
 
-u8 GRPCQueue::listFinished(std::vector<int> &out)
+u8 Queue::listFinished(std::vector<int> &out)
 {
-    spdlog::debug("{}:{} GRPCQueue::listFinished",
+    spdlog::debug("{}:{} Queue::listFinished",
         LOG_FILE_PATH(__FILE__), __LINE__);
 
     out.clear();
@@ -137,7 +143,7 @@ u8 GRPCQueue::listFinished(std::vector<int> &out)
     grpc::ClientContext ctx;
     ff::ListTaskRes res;
 
-    GRPCUtils::setupCtx(ctx);
+    Utils::setupCtx(ctx);
     auto reader = m_stub->ListFinished(&ctx, req);
     if (reader == nullptr)
     {
@@ -154,10 +160,10 @@ u8 GRPCQueue::listFinished(std::vector<int> &out)
     return ErrCode_OK;
 }
 
-u8 GRPCQueue::pendingDetails(const int id,
+u8 Queue::pendingDetails(const int id,
                              Proc::Task &out)
 {
-    spdlog::debug("{}:{} GRPCQueue::pendingDetails",
+    spdlog::debug("{}:{} Queue::pendingDetails",
         LOG_FILE_PATH(__FILE__), __LINE__);
 
     ff::TaskDetailsReq req;
@@ -167,7 +173,7 @@ u8 GRPCQueue::pendingDetails(const int id,
     grpc::ClientContext ctx;
     ff::TaskDetailsRes res;
 
-    GRPCUtils::setupCtx(ctx);
+    Utils::setupCtx(ctx);
     grpc::Status status = m_stub->PendingDetails(&ctx, req, &res);
     if (status.ok())
     {
@@ -175,14 +181,14 @@ u8 GRPCQueue::pendingDetails(const int id,
         return ErrCode_OK;
     }
 
-    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
+    Utils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
     return ErrCode_OS_ERROR;
 }
 
-u8 GRPCQueue::finishedDetails(const int id,
+u8 Queue::finishedDetails(const int id,
                               Proc::Task &out)
 {
-    spdlog::debug("{}:{} GRPCQueue::finishedDetails",
+    spdlog::debug("{}:{} Queue::finishedDetails",
         LOG_FILE_PATH(__FILE__), __LINE__);
 
     ff::TaskDetailsReq req;
@@ -192,7 +198,7 @@ u8 GRPCQueue::finishedDetails(const int id,
     grpc::ClientContext ctx;
     ff::TaskDetailsRes res;
 
-    GRPCUtils::setupCtx(ctx);
+    Utils::setupCtx(ctx);
     grpc::Status status = m_stub->FinishedDetails(&ctx, req, &res);
     if (status.ok())
     {
@@ -200,13 +206,13 @@ u8 GRPCQueue::finishedDetails(const int id,
         return ErrCode_OK;
     }
 
-    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
+    Utils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
     return ErrCode_OS_ERROR;
 }
 
-u8 GRPCQueue::clearPending()
+u8 Queue::clearPending()
 {
-    spdlog::debug("{}:{} GRPCQueue::clearPending",
+    spdlog::debug("{}:{} Queue::clearPending",
         LOG_FILE_PATH(__FILE__), __LINE__);
 
     ff::QueueReq req;
@@ -215,20 +221,20 @@ u8 GRPCQueue::clearPending()
     grpc::ClientContext ctx;
     ff::Empty res;
 
-    GRPCUtils::setupCtx(ctx);
+    Utils::setupCtx(ctx);
     grpc::Status status = m_stub->ClearPending(&ctx, req, &res);
     if (status.ok())
     {
         return ErrCode_OK;
     }
 
-    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
+    Utils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
     return ErrCode_OS_ERROR;
 }
 
-u8 GRPCQueue::clearFinished()
+u8 Queue::clearFinished()
 {
-    spdlog::debug("{}:{} GRPCQueue::clearFinished",
+    spdlog::debug("{}:{} Queue::clearFinished",
         LOG_FILE_PATH(__FILE__), __LINE__);
 
     ff::QueueReq req;
@@ -237,20 +243,20 @@ u8 GRPCQueue::clearFinished()
     grpc::ClientContext ctx;
     ff::Empty res;
 
-    GRPCUtils::setupCtx(ctx);
+    Utils::setupCtx(ctx);
     grpc::Status status = m_stub->ClearFinished(&ctx, req, &res);
     if (status.ok())
     {
         return ErrCode_OK;
     }
 
-    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
+    Utils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
     return ErrCode_OS_ERROR;
 }
 
-u8 GRPCQueue::currentTask(Proc::Task &out)
+u8 Queue::currentTask(Proc::Task &out)
 {
-    spdlog::debug("{}:{} GRPCQueue::currentTask",
+    spdlog::debug("{}:{} Queue::currentTask",
         LOG_FILE_PATH(__FILE__), __LINE__);
 
     ff::QueueReq req;
@@ -259,7 +265,7 @@ u8 GRPCQueue::currentTask(Proc::Task &out)
     grpc::ClientContext ctx;
     ff::TaskDetailsRes res;
 
-    GRPCUtils::setupCtx(ctx);
+    Utils::setupCtx(ctx);
     grpc::Status status = m_stub->CurrentTask(&ctx, req, &res);
     if (status.ok())
     {
@@ -267,13 +273,14 @@ u8 GRPCQueue::currentTask(Proc::Task &out)
         return ErrCode_OK;
     }
 
-    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
+    Utils::buildErrMsg(
+        LOG_FILE_PATH(__FILE__), __LINE__, status);
     return ErrCode_OS_ERROR;
 }
 
-u8 GRPCQueue::addTask(Proc::Task &in)
+u8 Queue::addTask(Proc::Task &in)
 {
-    spdlog::debug("{}:{} GRPCQueue::addTask",
+    spdlog::debug("{}:{} Queue::addTask",
         LOG_FILE_PATH(__FILE__), __LINE__);
 
     ff::AddTaskReq req;
@@ -290,7 +297,7 @@ u8 GRPCQueue::addTask(Proc::Task &in)
     grpc::ClientContext ctx;
     ff::ListTaskRes res;
 
-    GRPCUtils::setupCtx(ctx);
+    Utils::setupCtx(ctx);
     grpc::Status status = m_stub->AddTask(&ctx, req, &res);
     if (status.ok())
     {
@@ -298,13 +305,14 @@ u8 GRPCQueue::addTask(Proc::Task &in)
         return ErrCode_OK;
     }
 
-    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
+    Utils::buildErrMsg(
+        LOG_FILE_PATH(__FILE__), __LINE__, status);
     return ErrCode_OS_ERROR;
 }
 
-u8 GRPCQueue::removeTask(const i32 in)
+u8 Queue::removeTask(const i32 in)
 {
-    spdlog::debug("{}:{} GRPCQueue::removeTask",
+    spdlog::debug("{}:{} Queue::removeTask",
         LOG_FILE_PATH(__FILE__), __LINE__);
 
     ff::TaskDetailsReq req;
@@ -314,22 +322,22 @@ u8 GRPCQueue::removeTask(const i32 in)
     grpc::ClientContext ctx;
     ff::Empty res;
 
-    GRPCUtils::setupCtx(ctx);
+    Utils::setupCtx(ctx);
     grpc::Status status;
 
     status = m_stub->RemoveTask(&ctx, req, &res);
     if (!status.ok())
     {
-        GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
+        Utils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
         return ErrCode_OS_ERROR;
     }
 
     return ErrCode_OK;
 }
 
-bool GRPCQueue::isRunning() const
+bool Queue::isRunning() const
 {
-    spdlog::debug("{}:{} GRPCQueue::isRunning",
+    spdlog::debug("{}:{} Queue::isRunning",
         LOG_FILE_PATH(__FILE__), __LINE__);
 
     ff::QueueReq req;
@@ -338,20 +346,20 @@ bool GRPCQueue::isRunning() const
     grpc::ClientContext ctx;
     ff::IsRunningRes res;
 
-    GRPCUtils::setupCtx(ctx);
+    Utils::setupCtx(ctx);
     grpc::Status status = m_stub->IsRunning(&ctx, req, &res);
     if (status.ok())
     {
         return res.isrunning();
     }
 
-    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
+    Utils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
     return false;
 }
 
-void GRPCQueue::readCurrentOutput(std::vector<std::string> &out)
+void Queue::readCurrentOutput(std::vector<std::string> &out)
 {
-    spdlog::debug("{}:{} GRPCQueue::readCurrentOutput",
+    spdlog::debug("{}:{} Queue::readCurrentOutput",
         LOG_FILE_PATH(__FILE__), __LINE__);
 
     out.clear();
@@ -362,7 +370,7 @@ void GRPCQueue::readCurrentOutput(std::vector<std::string> &out)
 
     grpc::ClientContext ctx;
     ff::Msg res;
-    GRPCUtils::setupCtx(ctx);
+    Utils::setupCtx(ctx);
 
     auto reader = m_stub->ReadCurrentOutput(&ctx, req);
     if (reader == nullptr)
@@ -379,9 +387,9 @@ void GRPCQueue::readCurrentOutput(std::vector<std::string> &out)
     UNUSED(reader->Finish());
 }
 
-u8 GRPCQueue::start()
+u8 Queue::start()
 {
-    spdlog::debug("{}:{} GRPCQueue::start", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::start", LOG_FILE_PATH(__FILE__), __LINE__);
 
     ff::QueueReq req;
     req.set_name(m_queueName);
@@ -389,20 +397,20 @@ u8 GRPCQueue::start()
     grpc::ClientContext ctx;
     ff::Empty res;
 
-    GRPCUtils::setupCtx(ctx);
+    Utils::setupCtx(ctx);
     grpc::Status status = m_stub->Start(&ctx, req, &res);
     if (status.ok())
     {
         return ErrCode_OK;
     }
 
-    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
+    Utils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
     return ErrCode_OS_ERROR;
 }
 
-void GRPCQueue::stop()
+void Queue::stop()
 {
-    spdlog::debug("{}:{} GRPCQueue::stop", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::stop", LOG_FILE_PATH(__FILE__), __LINE__);
 
     ff::QueueReq req;
     req.set_name(m_queueName);
@@ -410,20 +418,20 @@ void GRPCQueue::stop()
     grpc::ClientContext ctx;
     ff::Empty res;
 
-    GRPCUtils::setupCtx(ctx);
+    Utils::setupCtx(ctx);
     grpc::Status status = m_stub->Stop(&ctx, req, &res);
     if (status.ok())
     {
         return;
     }
 
-    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
+    Utils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
 }
 
 // private member functions
-void GRPCQueue::buildTask(ff::TaskDetailsRes &res, Proc::Task &task)
+void Queue::buildTask(ff::TaskDetailsRes &res, Proc::Task &task)
 {
-    spdlog::debug("{}:{} GRPCQueue::buildTask", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::buildTask", LOG_FILE_PATH(__FILE__), __LINE__);
 
     task.workDir = res.workdir();
     task.execName = res.execname();
@@ -437,6 +445,8 @@ void GRPCQueue::buildTask(ff::TaskDetailsRes &res, Proc::Task &task)
     task.exitCode = res.exitcode();
     task.ID = res.id();
 }
+
+} // end namespace GRPC
 
 } // end namespace DAO
 

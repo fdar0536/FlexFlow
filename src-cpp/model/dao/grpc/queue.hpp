@@ -21,14 +21,13 @@
  * SOFTWARE.
  */
 
-#ifndef _MODEL_DAO_SQLITECONNECT_HPP_
-#define _MODEL_DAO_SQLITECONNECT_HPP_
+#ifndef _MODEL_DAO_GRPC_QUEUE_HPP_
+#define _MODEL_DAO_GRPC_QUEUE_HPP_
 
-#include <mutex>
+#include "queue.grpc.pb.h"
 
-#include "sqlite3.h"
-
-#include "iconnect.hpp"
+#include "model/proc/task.hpp"
+#include "model/dao/iqueue.hpp"
 
 namespace Model
 {
@@ -36,37 +35,64 @@ namespace Model
 namespace DAO
 {
 
-class SQLiteToken
+namespace GRPC
 {
+
+class Queue : public IQueue
+{
+
 public:
 
-    ~SQLiteToken();
+    Queue();
 
-    sqlite3 *db = nullptr;
+    ~Queue();
 
-    sqlite3_stmt *stmt = nullptr;
+    u8 init(IConnect *connect,
+            Proc::IProc *process,
+            const std::string &name) override;
 
-    std::mutex mutex;
+    u8 listPending(std::vector<int> &out) override;
 
-}; // end class SQLiteToken
+    u8 listFinished(std::vector<int> &out) override;
 
-class SQLiteConnect: public IConnect
-{
-public:
+    u8 pendingDetails(const int id,
+                      Proc::Task &out) override;
 
-    SQLiteConnect();
+    u8 finishedDetails(const int id,
+                       Proc::Task &out) override;
 
-    ~SQLiteConnect();
+    u8 clearPending() override;
 
-    u8 init() override;
+    u8 clearFinished() override;
 
-    u8 startConnect(const std::string &target,
-                    const i32 port = 0) override;
+    u8 currentTask(Proc::Task &out) override;
 
-}; // end class DirConnect
+    u8 addTask(Proc::Task &in) override;
+
+    u8 removeTask(const i32 in) override;
+
+    bool isRunning() const override;
+
+    void readCurrentOutput(std::vector<std::string> &out) override;
+
+    u8 start() override;
+
+    void stop() override;
+
+private:
+
+    std::unique_ptr<ff::Queue::Stub> m_stub;
+
+    std::string m_queueName;
+
+    static void buildTask(ff::TaskDetailsRes &res, Proc::Task &task);
+
+}; // end class Queue
+
+} // end namespace GRPC
 
 } // end namespace DAO
 
 } // end namespace Model
 
-#endif // _MODEL_DAO_SQLITECONNECT_HPP_
+#endif // _MODEL_DAO_GRPC_QUEUE_HPP_

@@ -21,12 +21,10 @@
  * SOFTWARE.
  */
 
-#ifndef _CONTROLLER_GLOBAL_DEFINES_H_
-#define _CONTROLLER_GLOBAL_DEFINES_H_
+#ifndef _MODEL_DEFINES_H_
+#define _MODEL_DEFINES_H_
 
-#include <inttypes.h>
-
-#include "config.h"
+#include <stdint.h>
 
 /**
  * @brief the wrapper for suppress compiler's warning
@@ -61,11 +59,6 @@ typedef float  f32;
 typedef double f64;
 /**@}*/
 
-/**
- * @brief Define handle type for C API
- */
-typedef uint32_t Handle;
-
 #if defined _WIN32 || defined __CYGWIN__
 #ifdef __MINGW32__
 #define FF_MODEL_API __attribute__((dllexport))
@@ -76,4 +69,4 @@ typedef uint32_t Handle;
 #define FF_MODEL_API __attribute__((visibility("default")))
 #endif
 
-#endif // _CONTROLLER_GLOBAL_DEFINES_H_
+#endif // _MODEL_DEFINES_H_

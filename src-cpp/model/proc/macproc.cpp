@@ -28,7 +28,7 @@
 
 #include "spdlog/spdlog.h"
 
-#include "controller/global/global.hpp"
+#include "model/utils.hpp"
 
 #include "macproc.hpp"
 

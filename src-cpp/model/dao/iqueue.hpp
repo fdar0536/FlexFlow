@@ -24,7 +24,6 @@
 #ifndef _MODEL_DAO_IQUEUE_HPP_
 #define _MODEL_DAO_IQUEUE_HPP_
 
-#include <memory>
 #include <vector>
 
 #include "model/proc/iproc.hpp"

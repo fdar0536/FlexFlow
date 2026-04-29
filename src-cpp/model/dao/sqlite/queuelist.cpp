@@ -26,12 +26,11 @@
 
 #include "spdlog/spdlog.h"
 
-#include "controller/global/global.hpp"
+#include "model/utils.hpp"
 #include "model/errmsg.hpp"
 
-#include "sqlitequeue.hpp"
-#include "sqlitequeuelist.hpp"
-#include "dirutils.hpp"
+#include "queue.hpp"
+#include "queuelist.hpp"
 
 #ifdef _WIN32
 #include "model/proc/winproc.hpp"
@@ -47,20 +46,23 @@ namespace Model
 namespace DAO
 {
 
-SQLiteQueueList::SQLiteQueueList()
+namespace SQLite
+{
+
+QueueList::QueueList()
 {
     m_conn =nullptr;
 }
 
-SQLiteQueueList::~SQLiteQueueList()
+QueueList::~QueueList()
 {
     if (m_conn) delete m_conn;
 }
 
 u8
-SQLiteQueueList::init(IConnect *connect)
+QueueList::init(IConnect *connect)
 {
-    spdlog::debug("{}:{} SQLiteQueueList::init", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} QueueList::init", LOG_FILE_PATH(__FILE__), __LINE__);
 
     if (!connect)
     {
@@ -68,7 +70,7 @@ SQLiteQueueList::init(IConnect *connect)
         return ErrCode_INVALID_ARGUMENT;
     }
 
-    if (DirUtils::verifyDir(connect->targetPath()))
+    if (Utils::verifyDir(connect->targetPath()))
     {
         spdlog::error("{}:{} Fail to verify target path.", LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_INVALID_ARGUMENT;
@@ -98,7 +100,7 @@ SQLiteQueueList::init(IConnect *connect)
 
         // regular file
         fileName = entry.path().string();
-        DirUtils::convertPath(fileName);
+        Utils::convertPath(fileName);
         size_t index = fileName.find_last_of("/");
         std::string name = fileName.substr(index + 1);
         index = name.find_last_of(".");
@@ -124,9 +126,9 @@ SQLiteQueueList::init(IConnect *connect)
     return ErrCode_OK;
 }
 
-u8 SQLiteQueueList::createQueue(const std::string &name)
+u8 QueueList::createQueue(const std::string &name)
 {
-    spdlog::debug("{}:{} SQLiteQueueList::createQueue", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} QueueList::createQueue", LOG_FILE_PATH(__FILE__), __LINE__);
     spdlog::debug("{}:{} name: {}", LOG_FILE_PATH(__FILE__), __LINE__, name.c_str());
 
     if (m_queueList.find(name) != m_queueList.end())
@@ -155,7 +157,7 @@ u8 SQLiteQueueList::createQueue(const std::string &name)
         return ErrCode_OS_ERROR;
     }
 
-    SQLiteQueue *queue = new (std::nothrow) SQLiteQueue();
+    Queue *queue = new (std::nothrow) Queue();
     if (!queue)
     {
         delete proc;
@@ -174,9 +176,9 @@ u8 SQLiteQueueList::createQueue(const std::string &name)
     return ErrCode_OK;
 }
 
-u8 SQLiteQueueList::listQueue(std::vector<std::string> &out)
+u8 QueueList::listQueue(std::vector<std::string> &out)
 {
-    spdlog::debug("{}:{} SQLiteQueueList::listQueue", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} QueueList::listQueue", LOG_FILE_PATH(__FILE__), __LINE__);
 
     out.clear();
     out.reserve(m_queueList.size());
@@ -190,9 +192,9 @@ u8 SQLiteQueueList::listQueue(std::vector<std::string> &out)
     return ErrCode_OK;
 }
 
-u8 SQLiteQueueList::deleteQueue(const std::string &name)
+u8 QueueList::deleteQueue(const std::string &name)
 {
-    spdlog::debug("{}:{} SQLiteQueueList::deleteQueue", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} QueueList::deleteQueue", LOG_FILE_PATH(__FILE__), __LINE__);
 
     if (!m_queueList.erase(name))
     {
@@ -206,10 +208,10 @@ u8 SQLiteQueueList::deleteQueue(const std::string &name)
 }
 
 u8
-SQLiteQueueList::renameQueue(const std::string &oldName,
+QueueList::renameQueue(const std::string &oldName,
                              const std::string &newName)
 {
-    spdlog::debug("{}:{} SQLiteQueueList::renameQueue", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} QueueList::renameQueue", LOG_FILE_PATH(__FILE__), __LINE__);
     spdlog::debug("{}:{} oldName: {}", LOG_FILE_PATH(__FILE__), __LINE__, oldName.c_str());
     spdlog::debug("{}:{} newName: {}", LOG_FILE_PATH(__FILE__), __LINE__, newName.c_str());
 
@@ -217,7 +219,7 @@ SQLiteQueueList::renameQueue(const std::string &oldName,
     {
         if (it.first == oldName)
         {
-            SQLiteQueue *queue = static_cast<SQLiteQueue *>(it.second.get());
+            Queue *queue = static_cast<Queue *>(it.second.get());
             if (queue->rename(newName, oldName))
             {
                 spdlog::error("{}:{} Fail to rename", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -235,15 +237,17 @@ SQLiteQueueList::renameQueue(const std::string &oldName,
     return ErrCode_NOT_FOUND;
 }
 
-std::shared_ptr<IQueue> SQLiteQueueList::getQueue(const std::string &name)
+std::shared_ptr<IQueue> QueueList::getQueue(const std::string &name)
 {
-    spdlog::debug("{}:{} SQLiteQueueList::getQueue", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} QueueList::getQueue", LOG_FILE_PATH(__FILE__), __LINE__);
     spdlog::debug("{}:{} name: {}", LOG_FILE_PATH(__FILE__), __LINE__, name.c_str());
 
     auto it = m_queueList.find(name);
     if (it == m_queueList.end()) return nullptr;
     return it->second;
 }
+
+} // end namespace SQLite
 
 } // end namespace DAO
 

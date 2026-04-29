@@ -27,11 +27,9 @@
 
 #include <string>
 
-#include "config.h"
-
 #include "grpcpp/grpcpp.h"
 
-#include "controller/global/defines.h"
+#include "model/defines.h"
 
 #define ErrCode_OK               0
 #define ErrCode_INVALID_ARGUMENT 1

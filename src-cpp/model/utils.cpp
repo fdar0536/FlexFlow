@@ -21,6 +21,7 @@
  * SOFTWARE.
  */
 
+#include <filesystem>
 #include <regex>
 #include <mutex>
 
@@ -29,6 +30,8 @@
 
 #ifdef _WIN32
 #include "windows.h"
+#else
+#include "unistd.h"
 #endif
 
 #include "utils.hpp"
@@ -89,6 +92,131 @@ u8 verifyIP(const std::string &in)
     }
 
     return 0;
+}
+
+bool isAdmin()
+{
+    spdlog::debug("{}:{} isAdmin", LOG_FILE_PATH(__FILE__), __LINE__);
+#ifdef _WIN32
+    PSID sid;
+    SID_IDENTIFIER_AUTHORITY auth = SECURITY_NT_AUTHORITY;
+    if (!AllocateAndInitializeSid(&auth,
+                                  2,
+                                  SECURITY_BUILTIN_DOMAIN_RID,
+                                  DOMAIN_ALIAS_RID_ADMINS,
+                                  0, 0, 0, 0, 0, 0,
+                                  &sid))
+    {
+        return true;
+    }
+
+    BOOL res;
+    if (!CheckTokenMembership(nullptr, sid, &res))
+    {
+        return true;
+    }
+
+    FreeSid(sid);
+    return res;
+#else
+    if (!system("sudo -v -n &>/dev/null"))
+    {
+        // system("sudo -v -n &>/dev/null") == 0
+        return true;
+    }
+
+    return (geteuid() == 0);
+#endif
+}
+
+// for dir
+u8 verifyDir(const std::string &in)
+{
+    spdlog::debug("{}:{} verifyDir", LOG_FILE_PATH(__FILE__), __LINE__);
+
+    if (in.empty())
+    {
+        spdlog::error("{}:{} \"in\" is empty.", LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
+
+    std::error_code ec;
+    if (!std::filesystem::exists(in, ec))
+    {
+        if (!std::filesystem::create_directory(in, ec))
+        {
+            spdlog::error("{}:{} Fail to create directory {}.",
+                          LOG_FILE_PATH(__FILE__), __LINE__, in);
+            return 1;
+        }
+
+        return 0;
+    }
+
+    if (!std::filesystem::is_directory(in, ec))
+    {
+        spdlog::error("{}:{} {} is not directory.",
+                      LOG_FILE_PATH(__FILE__), __LINE__, in);
+        return 1;
+    }
+
+    return 0;
+}
+
+u8 verifyFile(const std::string &in)
+{
+    spdlog::debug("{}:{} verifyFile", LOG_FILE_PATH(__FILE__), __LINE__);
+
+    if (in.empty())
+    {
+        spdlog::error("{}:{} \"in\" is empty.", LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
+
+    std::error_code ec;
+    if (!std::filesystem::exists(in, ec))
+    {
+        spdlog::error("{}:{} {} is not exist.",
+            LOG_FILE_PATH(__FILE__), __LINE__, in);
+        return 1;
+    }
+
+    if (!std::filesystem::is_regular_file(in, ec))
+    {
+        spdlog::error("{}:{} {} is not regular file.",
+                      LOG_FILE_PATH(__FILE__), __LINE__, in);
+        return 1;
+    }
+
+    return 0;
+}
+
+void deleteDirectoryContents(const std::string& dir_path)
+{
+    spdlog::debug("{}:{} deleteDirectoryContents",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
+    std::error_code ec;
+    for (const auto& entry : std::filesystem::directory_iterator(dir_path))
+        std::filesystem::remove_all(entry.path(), ec);
+}
+
+void convertPath(std::string &toConvert)
+{
+    spdlog::debug("{}:{} convertPath", LOG_FILE_PATH(__FILE__), __LINE__);
+
+#ifdef _WIN32
+    std::string from = "\\";
+    std::string to = "/";
+    size_t start_pos = 0;
+    while((start_pos = toConvert.find(from, start_pos)) != std::string::npos)
+    {
+        toConvert.replace(start_pos, from.length(), to);
+        start_pos += to.length();
+    }
+#else
+    static_cast<void>(toConvert);
+#endif
 }
 
 } // end namespace Utils

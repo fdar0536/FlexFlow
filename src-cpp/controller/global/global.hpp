@@ -26,7 +26,7 @@
 
 #include <string>
 
-#include "defines.h"
+#include "model/defines.h"
 
 namespace Model
 {
@@ -35,20 +35,6 @@ namespace Model
         class IQueueList;
     }
 } // namespace Model
-
-constexpr
-std::string_view relative_path(std::string_view path, std::string_view prefix)
-{
-    if (path.starts_with(prefix))
-    {
-        path.remove_prefix(prefix.length());
-    }
-
-    return path;
-}
-
-// Your logging macro uses this function:
-#define LOG_FILE_PATH(x) relative_path(x, PROJECT_ROOT_DIR)
 
 namespace Controller
 {
@@ -60,15 +46,13 @@ u8 consoleInit();
 
 void consoleFin();
 
-bool isAdmin();
-
 u8 spdlogInit(const std::string &);
 
 u8 sqliteInit(Model::DAO::IQueueList **out, const std::string &target);
 
 u8 grpcInit(Model::DAO::IQueueList **out, const std::string &target, const i32 port);
 
-} // end namesapce Global
+} // end namespace Global
 
 } // end namespace Controller
 

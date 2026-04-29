@@ -24,7 +24,6 @@
 #include "spdlog/spdlog.h"
 
 #include "model/errmsg.hpp"
-#include "model/dao/sqliteconnect.hpp"
 
 #include "controller/global/global.hpp"
 

@@ -1,6 +1,6 @@
 /*
  * Flex Flow
- * Copyright (c) 2023-2024 fdar0536
+ * Copyright (c) 2023-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,12 +21,12 @@
  * SOFTWARE.
  */
 
-#ifndef _MODEL_DAO_DIRUTILS_HPP_
-#define _MODEL_DAO_DIRUTILS_HPP_
+#ifndef _MODEL_DAO_SQLITE_QUEUELIST_HPP_
+#define _MODEL_DAO_SQLITE_QUEUELIST_HPP_
 
-#include <string>
+#include <unordered_map>
 
-#include "controller/global/defines.h"
+#include "model/dao/iqueuelist.hpp"
 
 namespace Model
 {
@@ -34,21 +34,41 @@ namespace Model
 namespace DAO
 {
 
-namespace DirUtils
+namespace SQLite
 {
 
-u8 verifyDir(const std::string &path);
+class QueueList: public IQueueList
+{
+public:
 
-u8 verifyFile(const std::string &path);
+    QueueList();
 
-void deleteDirectoryContents(const std::string& dir_path);
+    ~QueueList();
 
-void convertPath(std::string &toConvert);
+    u8 init(IConnect *connect) override;
 
-} // end namespace DirUtils
+    u8 createQueue(const std::string &name) override;
+
+    u8 listQueue(std::vector<std::string> &out) override;
+
+    u8 deleteQueue(const std::string &name) override;
+
+    u8 renameQueue(const std::string &oldName,
+                   const std::string &newName) override;
+
+    std::shared_ptr<IQueue> getQueue(const std::string &name) override;
+
+private:
+
+    std::unordered_map<std::string,
+    std::shared_ptr<IQueue>> m_queueList;
+};
+
+} // end namespace SQLite
 
 } // end namespace DAO
 
 } // end namespace Model
 
-#endif // _MODEL_DAO_DIRUTILS_HPP_
+#endif // _MODEL_DAO_SQLITE_QUEUELIST_HPP_
+

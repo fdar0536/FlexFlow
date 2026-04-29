@@ -2,7 +2,7 @@
 
 if(ENABLE_TEST)
     add_executable(testproc
-        controller/global/defines.h
+        model/defines.h
         model/test/testproc.cpp
     )
 
@@ -15,7 +15,7 @@ if(ENABLE_TEST)
         ffmodel
     )
 
-    set(TEST_FFMODEL_SRC
+    set(TEST_MODEL_SRC
         ffmodel_ut_main.cpp
 
         model/test/param.cpp
@@ -24,13 +24,13 @@ if(ENABLE_TEST)
         model/test/grpcmodel_ut.cpp
     )
 
-    add_executable(TestFFModel
-        ${TEST_FFMODEL_SRC}
+    add_executable(TestModel
+        ${TEST_MODEL_SRC}
     )
 
-    add_dependencies(TestFFModel ffmodel)
+    add_dependencies(TestModel ffmodel)
 
-    target_link_libraries(TestFFModel
+    target_link_libraries(TestModel
         PRIVATE
 
         GTest::gtest
@@ -41,10 +41,10 @@ if(ENABLE_TEST)
         ffmodel
     )
 
-    add_test(TestingFFModel TestFFModel)
+    add_test(TestingModel TestModel)
 
     if (MSVC AND WIN32 AND NOT MSVC_VERSION VERSION_LESS 142)
-        target_link_options(TestFFModel PRIVATE $<$<CONFIG:Debug>:/INCREMENTAL>)
-        target_compile_options(TestFFModel PRIVATE $<$<CONFIG:Debug>:/ZI>)
+        target_link_options(TestModel PRIVATE $<$<CONFIG:Debug>:/INCREMENTAL>)
+        target_compile_options(TestModel PRIVATE $<$<CONFIG:Debug>:/ZI>)
     endif()
 endif(ENABLE_TEST)

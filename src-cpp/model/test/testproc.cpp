@@ -33,7 +33,7 @@
 #include "unistd.h"
 #endif
 
-#include "controller/global/defines.h"
+#include "model/defines.h"
 
 typedef struct Params
 {

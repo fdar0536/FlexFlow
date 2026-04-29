@@ -87,7 +87,7 @@ public:
      * @brief Get the Queue object
      * 
      * @param name the queue's name you want to get
-     * @return IQueue* return nullptr if failed
+     * @return std::shared_ptr<IQueue> return nullptr if failed
      */
     virtual std::shared_ptr<IQueue> getQueue(const std::string &name) = 0;
 

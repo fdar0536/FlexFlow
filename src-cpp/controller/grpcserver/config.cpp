@@ -31,8 +31,6 @@
 #include "cxxopts.hpp"
 #include "yaml-cpp/yaml.h"
 
-#include "controller/global/global.hpp"
-#include "model/dao/dirutils.hpp"
 #include "model/utils.hpp"
 #include "config.hpp"
 
@@ -115,7 +113,7 @@ u8 Config::parse(Config *in, int argc, char **argv)
 
         if (!configFile.empty())
         {
-            if (Model::DAO::DirUtils::verifyFile(configFile))
+            if (Model::Utils::verifyFile(configFile))
             {
                 spdlog::error("{}:{} Fail to verify config file", LOG_FILE_PATH(__FILE__), __LINE__);
                 return 1;
@@ -124,8 +122,8 @@ u8 Config::parse(Config *in, int argc, char **argv)
 
         if (!in->logPath.empty())
         {
-            Model::DAO::DirUtils::convertPath(in->logPath);
-            if (Model::DAO::DirUtils::verifyDir(in->logPath))
+            Model::Utils::convertPath(in->logPath);
+            if (Model::Utils::verifyDir(in->logPath))
             {
                 spdlog::error("{}:{} fail to verify log path", LOG_FILE_PATH(__FILE__), __LINE__);
                 return 1;
@@ -176,8 +174,8 @@ uint_fast8_t Config::parse(Config *obj, const std::string &path)
         obj->dbPath = config["db path"].as<std::string>();
         obj->logPath = config["log path"].as<std::string>();
 
-        Model::DAO::DirUtils::convertPath(obj->logPath);
-        if (Model::DAO::DirUtils::verifyDir(obj->logPath))
+        Model::Utils::convertPath(obj->logPath);
+        if (Model::Utils::verifyDir(obj->logPath))
         {
             spdlog::error("{}:{} fail to verify log path", LOG_FILE_PATH(__FILE__), __LINE__);
             return 1;

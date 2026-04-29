@@ -25,8 +25,7 @@
 
 #include "spdlog/spdlog.h"
 
-#include "controller/global/global.hpp"
-
+#include "utils.hpp"
 #include "errmsg.hpp"
 
 namespace Model

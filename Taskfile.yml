@@ -20,7 +20,6 @@ vars:
   CPP_BUILD_DIR: '{{ .CPP_BUILD_DIR | default (printf "%s/build-cpp" .TMP_DIR) }}'
   CMAKE_GENERATOR: '{{ .CMAKE_GENERATOR | default "Ninja" }}'
   ENABLE_SERVER: '{{ .ENABLE_SERVER | default 1 }}'
-  ENABLE_GUI: '{{ .ENABLE_GUI | default 1 }}' 
   ENABLE_MODEL_TEST: '{{ .ENABLE_MODEL_TEST | default 1 }}'
   CMAKE_EXTRA_ARGS: '{{ .CMAKE_EXTRA_ARGS | default "" }}'
   JOBS: '{{ .JOBS | default 1 }}'
@@ -77,7 +76,6 @@ tasks:
       - >
         cmake -S src-cpp -B "{{.CPP_BUILD_DIR}}" -G "{{.CMAKE_GENERATOR}}" 
         -DENABLE_SERVER={{.ENABLE_SERVER}} 
-        -DENABLE_GUI={{.ENABLE_GUI}} 
         -DENABLE_TEST={{.ENABLE_MODEL_TEST}} 
         -DCMAKE_BUILD_TYPE={{.BUILD_TYPE}} 
         -DFF_VERSION={{.FF_VERSION}} 
@@ -121,18 +119,15 @@ tasks:
 
   # clean
   clean-buf:
-    internal: true
     cmds:
       - >
         cmake -E rm -rf 
         src-cpp/protos src-go/protos src-openapi
 
   clean-cmake:
-    internal: true
     cmds:
       - cmake -E rm -rf "{{.CPP_BUILD_DIR}}"
   
   clean-webui:
-    internal: true
     cmds:
       - cmake -E rm -rf "{{.WEBUI_BUILD_DIR}}" src-web/model/config.ts

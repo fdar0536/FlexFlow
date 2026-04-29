@@ -21,12 +21,12 @@
  * SOFTWARE.
  */
 
-#ifndef _MODEL_DAO_GRPCCONNECT_HPP_
-#define _MODEL_DAO_GRPCCONNECT_HPP_
+#ifndef _MODEL_DAO_GRPC_QUEUELIST_HPP_
+#define _MODEL_DAO_GRPC_QUEUELIST_HPP_
 
-#include "access.grpc.pb.h"
+#include "model/dao/iqueuelist.hpp"
 
-#include "iconnect.hpp"
+#include "queuelist.grpc.pb.h"
 
 namespace Model
 {
@@ -34,35 +34,41 @@ namespace Model
 namespace DAO
 {
 
-class GRPCToken
+namespace GRPC
 {
-public:
 
-    GRPCToken();
-
-    ~GRPCToken();
-
-    std::shared_ptr<grpc::ChannelInterface> channel;
-};
-
-class GRPCConnect : public IConnect
+class QueueList : public IQueueList
 {
 
 public:
 
-    GRPCConnect();
+    QueueList();
 
-    ~GRPCConnect();
+    ~QueueList();
 
-    u8 init() override;
+    u8 init(IConnect *connect) override;
 
-    u8 startConnect(const std::string &target,
-                    const i32 port = 0) override;
+    u8 createQueue(const std::string &name) override;
 
-}; // end class GRPCConnect
+    u8 listQueue(std::vector<std::string> &out) override;
+
+    u8 deleteQueue(const std::string &name) override;
+
+    u8 renameQueue(const std::string &oldName,
+                   const std::string &newName) override;
+
+    std::shared_ptr<IQueue> getQueue(const std::string &name) override;
+
+private:
+
+    std::unique_ptr<ff::QueueList::Stub> m_stub;
+
+}; // end class QueueList
+
+} // end namespace GRPC
 
 } // end namespace DAO
 
 } // end namespace Model
 
-#endif // _MODEL_DAO_GRPCCONNECT_HPP_
+#endif // _MODEL_DAO_GRPC_QUEUELIST_HPP_

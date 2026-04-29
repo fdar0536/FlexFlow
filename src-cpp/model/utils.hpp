@@ -26,7 +26,22 @@
 
 #include <string>
 
-#include "controller/global/defines.h"
+#include "defines.h"
+#include "config.h"
+
+constexpr
+std::string_view relative_path(std::string_view path, std::string_view prefix)
+{
+    if (path.starts_with(prefix))
+    {
+        path.remove_prefix(prefix.length());
+    }
+
+    return path;
+}
+
+// Your logging macro uses this function:
+#define LOG_FILE_PATH(x) relative_path(x, PROJECT_ROOT_DIR)
 
 namespace Model
 {
@@ -39,6 +54,17 @@ void writeLastError(const std::string_view &file, int line);
 void writeConsole(const std::string &in);
 
 u8 verifyIP(const std::string &);
+
+bool isAdmin();
+
+// for dir
+u8 verifyDir(const std::string &path);
+
+u8 verifyFile(const std::string &path);
+
+void deleteDirectoryContents(const std::string& dir_path);
+
+void convertPath(std::string &toConvert);
 
 } // end namespace Utils
 

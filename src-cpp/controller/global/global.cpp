@@ -23,10 +23,10 @@
 
 #include <cstdio>
 
-#include "model/dao/grpcconnect.hpp"
-#include "model/dao/grpcqueuelist.hpp"
-#include "model/dao/sqliteconnect.hpp"
-#include "model/dao/sqlitequeuelist.hpp"
+#include "model/dao/grpc/connect.hpp"
+#include "model/dao/grpc/queuelist.hpp"
+#include "model/dao/sqlite/connect.hpp"
+#include "model/dao/sqlite/queuelist.hpp"
 
 #ifdef _WIN32
 #include "windows.h"
@@ -117,41 +117,6 @@ void consoleFin()
 #endif
 }
 
-bool isAdmin()
-{
-    spdlog::debug("{}:{} isAdmin", LOG_FILE_PATH(__FILE__), __LINE__);
-#ifdef _WIN32
-    PSID sid;
-    SID_IDENTIFIER_AUTHORITY auth = SECURITY_NT_AUTHORITY;
-    if (!AllocateAndInitializeSid(&auth,
-                                  2,
-                                  SECURITY_BUILTIN_DOMAIN_RID,
-                                  DOMAIN_ALIAS_RID_ADMINS,
-                                  0, 0, 0, 0, 0, 0,
-                                  &sid))
-    {
-        return true;
-    }
-
-    BOOL res;
-    if (!CheckTokenMembership(nullptr, sid, &res))
-    {
-        return true;
-    }
-
-    FreeSid(sid);
-    return res;
-#else
-    if (!system("sudo -v -n &>/dev/null"))
-    {
-        // system("sudo -v -n &>/dev/null") == 0
-        return true;
-    }
-
-    return (geteuid() == 0);
-#endif
-}
-
 u8 spdlogInit(const std::string &path)
 {
     spdlog::debug("{}:{} spdlogInit", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -182,8 +147,8 @@ u8 sqliteInit(Model::DAO::IQueueList **out, const std::string &target)
     spdlog::debug("{}:{} sqliteInit", LOG_FILE_PATH(__FILE__), __LINE__);
     spdlog::debug("{}:{} target is: {}", LOG_FILE_PATH(__FILE__), __LINE__, target);
 
-    Model::DAO::SQLiteConnect *conn(nullptr);
-    conn = new (std::nothrow) Model::DAO::SQLiteConnect();
+    Model::DAO::SQLite::Connect *conn(nullptr);
+    conn = new (std::nothrow) Model::DAO::SQLite::Connect();
     if (!conn)
     {
         spdlog::error("{}:{} Fail to allocate memory",
@@ -199,10 +164,10 @@ u8 sqliteInit(Model::DAO::IQueueList **out, const std::string &target)
         return 1;
     }
 
-    Model::DAO::SQLiteQueueList *sqlPtr;
+    Model::DAO::SQLite::QueueList *sqlPtr;
     try
     {
-        sqlPtr = new Model::DAO::SQLiteQueueList;
+        sqlPtr = new Model::DAO::SQLite::QueueList;
     }
     catch (...)
     {
@@ -230,7 +195,7 @@ u8 grpcInit(Model::DAO::IQueueList **out, const std::string &target, const i32 p
     spdlog::debug("{}:{} target is: {}", LOG_FILE_PATH(__FILE__), __LINE__, target);
     spdlog::debug("{}:{} port is: {}", LOG_FILE_PATH(__FILE__), __LINE__, port);
     
-    Model::DAO::GRPCConnect *conn = new (std::nothrow) Model::DAO::GRPCConnect;
+    Model::DAO::GRPC::Connect *conn = new (std::nothrow) Model::DAO::GRPC::Connect;
     if (!conn)
     {
         spdlog::error("{}:{} Fail to allocate memory",
@@ -253,7 +218,7 @@ u8 grpcInit(Model::DAO::IQueueList **out, const std::string &target, const i32 p
         return 1;
     }
 
-    Model::DAO::GRPCQueueList *queueList = new (std::nothrow) Model::DAO::GRPCQueueList;
+    Model::DAO::GRPC::QueueList *queueList = new (std::nothrow) Model::DAO::GRPC::QueueList;
     if (!queueList)
     {
         delete conn;
@@ -273,6 +238,6 @@ u8 grpcInit(Model::DAO::IQueueList **out, const std::string &target, const i32 p
     return 0;
 }
 
-} // end namesapce Global
+} // end namespace Global
 
 } // end namespace Controller

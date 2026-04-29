@@ -24,11 +24,9 @@
 
 #include "spdlog/spdlog.h"
 
-#include "controller/global/global.hpp"
+#include "model/utils.hpp"
 
-#include "grpcutils.hpp"
-
-#include "config.h"
+#include "utils.hpp"
 
 namespace Model
 {
@@ -36,7 +34,10 @@ namespace Model
 namespace DAO
 {
 
-namespace GRPCUtils
+namespace GRPC
+{
+
+namespace Utils
 {
 
 void setupCtx(grpc::ClientContext &ctx)
@@ -55,7 +56,9 @@ void buildErrMsg(const std::string_view &file, i32 line, grpc::Status &status)
                   static_cast<i32>(status.error_code()), status.error_message());
 }
 
-} // end namespace GRPCUtils
+} // end namespace Utils
+
+} // end namespace GRPC
 
 } // end namespace DAO
 

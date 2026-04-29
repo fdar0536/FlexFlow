@@ -21,15 +21,15 @@
  * SOFTWARE.
  */
 
-#ifndef _MODEL_DAO_SQLITEQUEUE_HPP_
-#define _MODEL_DAO_SQLITEQUEUE_HPP_
+#ifndef _MODEL_DAO_SQLITE_QUEUE_HPP_
+#define _MODEL_DAO_SQLITE_QUEUE_HPP_
 
 #include <atomic>
 #include <mutex>
 #include <thread>
 
-#include "sqliteconnect.hpp"
-#include "iqueue.hpp"
+#include "connect.hpp"
+#include "model/dao/iqueue.hpp"
 
 namespace Model
 {
@@ -37,13 +37,16 @@ namespace Model
 namespace DAO
 {
 
-class SQLiteQueue: public IQueue
+namespace SQLite
+{
+
+class Queue: public IQueue
 {
 public:
 
-    SQLiteQueue();
+    Queue();
 
-    ~SQLiteQueue();
+    ~Queue();
 
     virtual u8 init(IConnect *connect,
                     Proc::IProc *process,
@@ -81,7 +84,7 @@ public:
 
 private:
 
-    std::shared_ptr<SQLiteToken> m_token;
+    std::shared_ptr<Token> m_token;
 
     std::mutex m_currentTaskMutex;
 
@@ -129,10 +132,12 @@ private:
 
     void stopImpl();
 
-}; // end class DirToken
+}; // end class Queue
 
-} //end namepsace DAO
+} // end namespace SQLite
+
+} //end namespace DAO
 
 } // end namespace Model
 
-#endif // _MODEL_DAO_SQLITEQUEUE_HPP_
+#endif // _MODEL_DAO_SQLITE_QUEUE_HPP_

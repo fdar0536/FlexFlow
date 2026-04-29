@@ -1,4 +1,4 @@
-set(FF_MODEL_LIBS
+set(FF_model_LIBS
     protobuf::libprotobuf
     gRPC::grpc++
     SQLite::SQLite3
@@ -9,42 +9,44 @@ set(FF_MODEL_LIBS
 
 set(MODEL_SRC
 
+
+    # model
+    model/errmsg.cpp
+    model/errmsg.hpp
+    model/utils.cpp
+    model/utils.hpp
+    model/defines.h
+
+    # global
+    controller/global/global.cpp
+    controller/global/global.hpp
+
     # DAO
     model/dao/iconnect.cpp
     model/dao/iconnect.hpp
     model/dao/iqueuelist.hpp
     model/dao/iqueue.hpp
 
-    model/errmsg.cpp
-    model/errmsg.hpp
+    #sqlite
+    model/dao/sqlite/connect.cpp
+    model/dao/sqlite/connect.hpp
+    model/dao/sqlite/queuelist.cpp
+    model/dao/sqlite/queue.hpp
+    model/dao/sqlite/queue.cpp
+    model/dao/sqlite/queuelist.hpp
+    
+    #grpc
+    model/dao/grpc/connect.cpp
+    model/dao/grpc/connect.hpp
+    model/dao/grpc/queue.cpp
+    model/dao/grpc/queue.hpp
+    model/dao/grpc/queuelist.cpp
+    model/dao/grpc/queuelist.hpp
+    model/dao/grpc/utils.cpp
+    model/dao/grpc/utils.hpp
+
     model/utils.cpp
     model/utils.hpp
-
-    # global
-    controller/global/defines.h
-    controller/global/global.cpp
-    controller/global/global.hpp
-
-    model/dao/dirutils.cpp
-    model/dao/dirutils.hpp
-
-    #sqlite
-    model/dao/sqliteconnect.cpp
-    model/dao/sqliteconnect.hpp
-    model/dao/sqlitequeuelist.cpp
-    model/dao/sqlitequeuelist.hpp
-    model/dao/sqlitequeue.cpp
-    model/dao/sqlitequeue.hpp
-
-    #grpc
-    model/dao/grpcconnect.cpp
-    model/dao/grpcconnect.hpp
-    model/dao/grpcqueue.cpp
-    model/dao/grpcqueue.hpp
-    model/dao/grpcqueuelist.cpp
-    model/dao/grpcqueuelist.hpp
-    model/dao/grpcutils.cpp
-    model/dao/grpcutils.hpp
 
     # proc
     model/proc/iproc.cpp
@@ -86,7 +88,7 @@ add_dependencies(ffmodel grpc_common)
 target_link_libraries(ffmodel
     PRIVATE
 
-    ${FF_MODEL_LIBS}
+    ${FF_model_LIBS}
 )
 
 set_property(TARGET ffmodel PROPERTY POSITION_INDEPENDENT_CODE ON)

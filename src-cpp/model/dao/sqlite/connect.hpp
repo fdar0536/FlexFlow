@@ -21,13 +21,14 @@
  * SOFTWARE.
  */
 
-#ifndef _MODEL_DAO_GRPCQUEUE_HPP_
-#define _MODEL_DAO_GRPCQUEUE_HPP_
+#ifndef _MODEL_DAO_SQLITE_CONNECT_HPP_
+#define _MODEL_DAO_SQLITE_CONNECT_HPP_
 
-#include "queue.grpc.pb.h"
+#include <mutex>
 
-#include "model/proc/task.hpp"
-#include "iqueue.hpp"
+#include "sqlite3.h"
+
+#include "model/dao/iconnect.hpp"
 
 namespace Model
 {
@@ -35,59 +36,42 @@ namespace Model
 namespace DAO
 {
 
-class GRPCQueue : public IQueue
+namespace SQLite
 {
 
+class Token
+{
 public:
 
-    GRPCQueue();
+    ~Token();
 
-    ~GRPCQueue();
+    sqlite3 *db = nullptr;
 
-    u8 init(IConnect *connect,
-            Proc::IProc *process,
-            const std::string &name) override;
+    sqlite3_stmt *stmt = nullptr;
 
-    u8 listPending(std::vector<int> &out) override;
+    std::mutex mutex;
 
-    u8 listFinished(std::vector<int> &out) override;
+}; // end class Token
 
-    u8 pendingDetails(const int id,
-                      Proc::Task &out) override;
+class Connect: public IConnect
+{
+public:
 
-    u8 finishedDetails(const int id,
-                       Proc::Task &out) override;
+    Connect();
 
-    u8 clearPending() override;
+    ~Connect();
 
-    u8 clearFinished() override;
+    u8 init() override;
 
-    u8 currentTask(Proc::Task &out) override;
+    u8 startConnect(const std::string &target,
+                    const i32 port = 0) override;
 
-    u8 addTask(Proc::Task &in) override;
+}; // end class Connect
 
-    u8 removeTask(const i32 in) override;
-
-    bool isRunning() const override;
-
-    void readCurrentOutput(std::vector<std::string> &out) override;
-
-    u8 start() override;
-
-    void stop() override;
-
-private:
-
-    std::unique_ptr<ff::Queue::Stub> m_stub;
-
-    std::string m_queueName;
-
-    static void buildTask(ff::TaskDetailsRes &res, Proc::Task &task);
-
-}; // end class GRPCQueue
+}
 
 } // end namespace DAO
 
 } // end namespace Model
 
-#endif // _MODEL_DAO_GRPCQUEUE_HPP_
+#endif // _MODEL_DAO_SQLITE_CONNECT_HPP_

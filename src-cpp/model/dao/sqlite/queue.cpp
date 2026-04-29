@@ -31,12 +31,15 @@
 
 #include "controller/global/global.hpp"
 #include "model/errmsg.hpp"
-#include "sqlitequeue.hpp"
+#include "queue.hpp"
 
 namespace Model
 {
 
 namespace DAO
+{
+
+namespace SQLite
 {
 
 static std::unordered_map<std::string, std::string> dbColumnName;
@@ -45,24 +48,24 @@ static std::mutex dbColumnNameMutex;
 
 static bool isDBColumnNameInit = false;
 
-SQLiteQueue::SQLiteQueue() :
+Queue::Queue() :
     m_token(nullptr)
 {
     m_proc = nullptr;
 }
 
-SQLiteQueue::~SQLiteQueue()
+Queue::~Queue()
 {
     stopImpl();
     if (m_proc) delete m_proc;
 }
 
 u8
-SQLiteQueue::init(IConnect *connect,
-                  Proc::IProc *process,
-                  const std::string &name)
+Queue::init(IConnect *connect,
+            Proc::IProc *process,
+            const std::string &name)
 {
-    spdlog::debug("{}:{} SQLiteQueue::init", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::init", LOG_FILE_PATH(__FILE__), __LINE__);
 
     UNUSED(connect);
     if (!process)
@@ -79,7 +82,7 @@ SQLiteQueue::init(IConnect *connect,
 
     try
     {
-        m_token = std::make_shared<SQLiteToken>();
+        m_token = std::make_shared<Token>();
     }
     catch (...)
     {
@@ -116,62 +119,62 @@ SQLiteQueue::init(IConnect *connect,
     return ErrCode_OK;
 }
 
-u8 SQLiteQueue::listPending(std::vector<int> &out)
+u8 Queue::listPending(std::vector<int> &out)
 {
-    spdlog::debug("{}:{} SQLiteQueue::listPending", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::listPending", LOG_FILE_PATH(__FILE__), __LINE__);
 
     std::unique_lock<std::mutex> lock(m_token->mutex);
     return listIDInTable("pending", out);
 }
 
-u8 SQLiteQueue::listFinished(std::vector<int> &out)
+u8 Queue::listFinished(std::vector<int> &out)
 {
-    spdlog::debug("{}:{} SQLiteQueue::listFinished", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::listFinished", LOG_FILE_PATH(__FILE__), __LINE__);
 
     std::unique_lock<std::mutex> lock(m_token->mutex);
     return listIDInTable("done", out);
 }
 
 u8
-SQLiteQueue::pendingDetails(const int id,
+Queue::pendingDetails(const int id,
                             Proc::Task &out)
 {
-    spdlog::debug("{}:{} SQLiteQueue::pendingDetails", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::pendingDetails", LOG_FILE_PATH(__FILE__), __LINE__);
 
     std::unique_lock<std::mutex> lock(m_token->mutex);
     return taskDetails("pending", id, out);
 }
 
 u8
-SQLiteQueue::finishedDetails(const int id,
+Queue::finishedDetails(const int id,
                              Proc::Task &out)
 {
-    spdlog::debug("{}:{} SQLiteQueue::finishedDetails", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::finishedDetails", LOG_FILE_PATH(__FILE__), __LINE__);
 
     std::unique_lock<std::mutex> lock(m_token->mutex);
     return taskDetails("done", id, out);
 }
 
-u8 SQLiteQueue::clearPending()
+u8 Queue::clearPending()
 {
-    spdlog::debug("{}:{} SQLiteQueue::clearPending", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::clearPending", LOG_FILE_PATH(__FILE__), __LINE__);
 
     std::unique_lock<std::mutex> lock(m_token->mutex);
     std::unique_lock<std::mutex> lock2(m_currentTaskMutex);
     return clearTable("pending");
 }
 
-u8 SQLiteQueue::clearFinished()
+u8 Queue::clearFinished()
 {
-    spdlog::debug("{}:{} SQLiteQueue::clearFinished", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::clearFinished", LOG_FILE_PATH(__FILE__), __LINE__);
 
     std::unique_lock<std::mutex> lock(m_token->mutex);
     return clearTable("done");
 }
 
-u8 SQLiteQueue::currentTask(Proc::Task &out)
+u8 Queue::currentTask(Proc::Task &out)
 {
-    spdlog::debug("{}:{} SQLiteQueue::currentTask", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::currentTask", LOG_FILE_PATH(__FILE__), __LINE__);
 
     if (!isRunning())
     {
@@ -184,9 +187,9 @@ u8 SQLiteQueue::currentTask(Proc::Task &out)
     return ErrCode_OK;
 }
 
-u8 SQLiteQueue::addTask(Proc::Task &in)
+u8 Queue::addTask(Proc::Task &in)
 {
-    spdlog::debug("{}:{} SQLiteQueue::addTask", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::addTask", LOG_FILE_PATH(__FILE__), __LINE__);
 
     std::unique_lock<std::mutex> lock(m_token->mutex);
     u8 code;
@@ -200,32 +203,32 @@ u8 SQLiteQueue::addTask(Proc::Task &in)
     return addTaskToTable("pending", in);
 }
 
-u8 SQLiteQueue::removeTask(const i32 in)
+u8 Queue::removeTask(const i32 in)
 {
-    spdlog::debug("{}:{} SQLiteQueue::removeTask", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::removeTask", LOG_FILE_PATH(__FILE__), __LINE__);
 
     std::unique_lock<std::mutex> lock(m_token->mutex);
     return removeTaskFromPending(in, true);
 }
 
-bool SQLiteQueue::isRunning() const
+bool Queue::isRunning() const
 {
-    spdlog::debug("{}:{} SQLiteQueue::isRunning", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::isRunning", LOG_FILE_PATH(__FILE__), __LINE__);
 
     return m_isRunning.load(std::memory_order_relaxed);
 }
 
-void SQLiteQueue::readCurrentOutput(std::vector<std::string> &out)
+void Queue::readCurrentOutput(std::vector<std::string> &out)
 {
-    spdlog::debug("{}:{} SQLiteQueue::readCurrentOutput", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::readCurrentOutput", LOG_FILE_PATH(__FILE__), __LINE__);
 
     out.clear();
     m_proc->readCurrentOutput(out);
 }
 
-u8 SQLiteQueue::start()
+u8 Queue::start()
 {
-    spdlog::debug("{}:{} SQLiteQueue::start", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::start", LOG_FILE_PATH(__FILE__), __LINE__);
 
     if (isRunning())
     {
@@ -235,18 +238,18 @@ u8 SQLiteQueue::start()
 
     m_isRunning.store(true, std::memory_order_relaxed);
     m_start.store(true, std::memory_order_relaxed);
-    m_thread = std::jthread(&SQLiteQueue::mainLoop, this);
+    m_thread = std::jthread(&Queue::mainLoop, this);
     return ErrCode_OK;
 }
 
-void SQLiteQueue::stop()
+void Queue::stop()
 {
     stopImpl();
 }
 
-u8 SQLiteQueue::rename(const std::string &newName, const std::string &oldName)
+u8 Queue::rename(const std::string &newName, const std::string &oldName)
 {
-    spdlog::debug("{}:{} SQLiteQueue::rename", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::rename", LOG_FILE_PATH(__FILE__), __LINE__);
 
     std::string newPath = m_targetPath + "/" + newName + ".db";
     std::string oldPath = m_targetPath + "/" + oldName + ".db";
@@ -255,9 +258,9 @@ u8 SQLiteQueue::rename(const std::string &newName, const std::string &oldName)
 }
 
 // private member functions
-u8 SQLiteQueue::connectToDB(const std::string &path, const std::string &oldPath)
+u8 Queue::connectToDB(const std::string &path, const std::string &oldPath)
 {
-    spdlog::debug("{}:{} SQLiteQueue::connectToDB", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::connectToDB", LOG_FILE_PATH(__FILE__), __LINE__);
     spdlog::debug("{}:{} path: {}", LOG_FILE_PATH(__FILE__), __LINE__, path.c_str());
     spdlog::debug("{}:{} oldPath: {}", LOG_FILE_PATH(__FILE__), __LINE__, oldPath.c_str());
 
@@ -336,9 +339,9 @@ u8 SQLiteQueue::connectToDB(const std::string &path, const std::string &oldPath)
     return 0;
 }
 
-u8 SQLiteQueue::createTable(const std::string &name)
+u8 Queue::createTable(const std::string &name)
 {
-    spdlog::debug("{}:{} SQLiteQueue::createTable", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::createTable", LOG_FILE_PATH(__FILE__), __LINE__);
     spdlog::debug("{}:{} name: {}", LOG_FILE_PATH(__FILE__), __LINE__, name.c_str());
 
     u8 ret(2);
@@ -378,9 +381,9 @@ exit:
     return ret;
 }
 
-u8 SQLiteQueue::verifyTable(const std::string &name)
+u8 Queue::verifyTable(const std::string &name)
 {
-    spdlog::debug("{}:{} SQLiteQueue::verifyTable", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::verifyTable", LOG_FILE_PATH(__FILE__), __LINE__);
     spdlog::debug("{}:{} name: {}", LOG_FILE_PATH(__FILE__), __LINE__, name.c_str());
 
     u8 ret(0);
@@ -507,9 +510,9 @@ exit:
     return ret;
 }
 
-u8 SQLiteQueue::verifyID()
+u8 Queue::verifyID()
 {
-    spdlog::debug("{}:{} SQLiteQueue::verifyID", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::verifyID", LOG_FILE_PATH(__FILE__), __LINE__);
 
     u8 ret(0);
     i32 rowCount(0);
@@ -720,9 +723,9 @@ exit:
     return ret;
 }
 
-u8 SQLiteQueue::clearTable(const std::string &name)
+u8 Queue::clearTable(const std::string &name)
 {
-    spdlog::debug("{}:{} SQLiteQueue::clearTable", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::clearTable", LOG_FILE_PATH(__FILE__), __LINE__);
     spdlog::debug("{}:{} name: {}", LOG_FILE_PATH(__FILE__), __LINE__, name.c_str());
 
     std::string sql = "";
@@ -756,10 +759,10 @@ exit:
     return ret;
 }
 
-u8 SQLiteQueue::listIDInTable(const std::string &name,
+u8 Queue::listIDInTable(const std::string &name,
                               std::vector<int> &out)
 {
-    spdlog::debug("{}:{} SQLiteQueue::listIDInTable", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::listIDInTable", LOG_FILE_PATH(__FILE__), __LINE__);
     spdlog::debug("{}:{} name: {}", LOG_FILE_PATH(__FILE__), __LINE__, name.c_str());
 
     out.clear();
@@ -809,11 +812,11 @@ exit:
     return ret;
 }
 
-u8 SQLiteQueue::taskDetails(const std::string &name,
+u8 Queue::taskDetails(const std::string &name,
                             const i32 id,
                             Proc::Task &out)
 {
-    spdlog::debug("{}:{} SQLiteQueue::taskDetails", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::taskDetails", LOG_FILE_PATH(__FILE__), __LINE__);
     spdlog::debug("{}:{} name: {}, id: {}", LOG_FILE_PATH(__FILE__), __LINE__,
         name, id);
 
@@ -888,10 +891,10 @@ exit:
     return ret;
 }
 
-u8 SQLiteQueue::addTaskToTable(const std::string &name,
+u8 Queue::addTaskToTable(const std::string &name,
                                const Proc::Task &in)
 {
-    spdlog::debug("{}:{} SQLiteQueue::addTaskToTable", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::addTaskToTable", LOG_FILE_PATH(__FILE__), __LINE__);
     spdlog::debug("{}:{} name: {}", LOG_FILE_PATH(__FILE__), __LINE__, name);
 
     std::string args = "";
@@ -980,10 +983,10 @@ exit:
     return ret;
 }
 
-u8 SQLiteQueue::removeTaskFromPending(const i32 id,
+u8 Queue::removeTaskFromPending(const i32 id,
                                       const bool needCheckCurrentTask)
 {
-    spdlog::debug("{}:{} SQLiteQueue::removeTaskFromPending",
+    spdlog::debug("{}:{} Queue::removeTaskFromPending",
         LOG_FILE_PATH(__FILE__), __LINE__);
     spdlog::debug("{}:{} id: {}", LOG_FILE_PATH(__FILE__), __LINE__, id);
     spdlog::debug("{}:{} needCheckCurrentTask: {}", LOG_FILE_PATH(__FILE__), __LINE__,
@@ -1034,9 +1037,9 @@ exit:
     return ret;
 }
 
-void SQLiteQueue::splitString(const std::string &in, std::vector<std::string> &out)
+void Queue::splitString(const std::string &in, std::vector<std::string> &out)
 {
-    spdlog::debug("{}:{} SQLiteQueue::splitString", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::splitString", LOG_FILE_PATH(__FILE__), __LINE__);
     spdlog::debug("{}:{} in: {}", LOG_FILE_PATH(__FILE__), __LINE__, in.c_str());
 
     std::string s = in;
@@ -1055,9 +1058,9 @@ void SQLiteQueue::splitString(const std::string &in, std::vector<std::string> &o
     out.push_back(s);
 }
 
-std::string SQLiteQueue::concatString(const std::vector<std::string> &in)
+std::string Queue::concatString(const std::vector<std::string> &in)
 {
-    spdlog::debug("{}:{} SQLiteQueue::concatString", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::concatString", LOG_FILE_PATH(__FILE__), __LINE__);
 
     std::string out = "";
     size_t last(0);
@@ -1077,9 +1080,9 @@ exit:
     return out;
 }
 
-u8 SQLiteQueue::getID(i32 &out)
+u8 Queue::getID(i32 &out)
 {
-    spdlog::debug("{}:{} SQLiteQueue::getID", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::getID", LOG_FILE_PATH(__FILE__), __LINE__);
 
     i32 rc(0);
     i32 rowCount(0);
@@ -1173,9 +1176,9 @@ exit:
     return ret;
 }
 
-void SQLiteQueue::mainLoop()
+void Queue::mainLoop()
 {
-    spdlog::debug("{}:{} SQLiteQueue::mainLoop", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::mainLoop", LOG_FILE_PATH(__FILE__), __LINE__);
 
     while (m_start.load(std::memory_order_relaxed))
     {
@@ -1204,9 +1207,9 @@ void SQLiteQueue::mainLoop()
     m_isRunning.store(false, std::memory_order_relaxed);
 } // end void DirQueue::mainLoop()
 
-u8 SQLiteQueue::mainLoopInit()
+u8 Queue::mainLoopInit()
 {
-    spdlog::debug("{}:{} SQLiteQueue::mainLoopInit", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::mainLoopInit", LOG_FILE_PATH(__FILE__), __LINE__);
 
     // find the task in pending list
     std::unique_lock<std::mutex> lock(m_token->mutex);
@@ -1268,9 +1271,9 @@ exit:
     return ret;
 }
 
-void SQLiteQueue::mainLoopFin()
+void Queue::mainLoopFin()
 {
-    spdlog::debug("{}:{} SQLiteQueue::mainLoopFin", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Queue::mainLoopFin", LOG_FILE_PATH(__FILE__), __LINE__);
 
     std::unique_lock<std::mutex> lock(m_currentTaskMutex);
     if (m_proc->exitCode(m_currentTask.exitCode))
@@ -1308,10 +1311,8 @@ void SQLiteQueue::mainLoopFin()
     m_currentTask = Proc::Task();
 }
 
-void SQLiteQueue::stopImpl()
+void Queue::stopImpl()
 {
-    spdlog::debug("{}:{} SQLiteQueue::stopImpl", LOG_FILE_PATH(__FILE__), __LINE__);
-
     if (!m_isRunning.load(std::memory_order_relaxed))
     {
         spdlog::debug("{}:{} Queue is not running.",
@@ -1323,6 +1324,8 @@ void SQLiteQueue::stopImpl()
     m_proc->stop();
     m_isRunning.store(false, std::memory_order_relaxed);
 }
+
+} // end namespace SQLite
 
 } // end namespace DAO
 

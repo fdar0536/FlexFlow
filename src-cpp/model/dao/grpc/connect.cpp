@@ -28,8 +28,8 @@
 #include "controller/global/global.hpp"
 #include "model/errmsg.hpp"
 
-#include "grpcconnect.hpp"
-#include "grpcutils.hpp"
+#include "connect.hpp"
+#include "utils.hpp"
 
 namespace Model
 {
@@ -37,32 +37,35 @@ namespace Model
 namespace DAO
 {
 
-GRPCToken::GRPCToken() :
+namespace GRPC
+{
+
+Token::Token() :
     channel(nullptr)
 {}
 
-GRPCToken::~GRPCToken()
+Token::~Token()
 {}
 
-GRPCConnect::GRPCConnect()
+Connect::Connect()
 {}
 
-GRPCConnect::~GRPCConnect()
+Connect::~Connect()
 {
-    freeConnectToken<GRPCToken>();
+    freeConnectToken<Token>();
 }
 
-u8 GRPCConnect::init()
+u8 Connect::init()
 {
     return ErrCode_OK;
 }
 
-u8 GRPCConnect::startConnect(const std::string &target,
+u8 Connect::startConnect(const std::string &target,
                              const i32 port)
 {
     spdlog::debug("{}:{} startConnect", LOG_FILE_PATH(__FILE__), __LINE__);
 
-    GRPCToken *token = new (std::nothrow) GRPCToken;
+    Token *token = new (std::nothrow) Token;
     if (!token)
     {
         spdlog::error("{}:{} Fail to allocate memory",
@@ -109,7 +112,7 @@ u8 GRPCConnect::startConnect(const std::string &target,
     ff::EchoRes res;
     grpc::ClientContext ctx;
 
-    GRPCUtils::setupCtx(ctx);
+    Utils::setupCtx(ctx);
     grpc::Status status = stub->Echo(&ctx, req, &res);
     if (status.ok())
     {
@@ -119,9 +122,12 @@ u8 GRPCConnect::startConnect(const std::string &target,
 
     delete token;
     m_connectToken = nullptr;
-    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
+    Utils::buildErrMsg(
+        LOG_FILE_PATH(__FILE__), __LINE__, status);
     return ErrCode_OS_ERROR;
 }
+
+} // end namespace GRPC
 
 } // end namespace DAO
 

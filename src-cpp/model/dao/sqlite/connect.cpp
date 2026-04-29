@@ -26,8 +26,7 @@
 #include "controller/global/global.hpp"
 #include "model/errmsg.hpp"
 
-#include "sqliteconnect.hpp"
-#include "dirutils.hpp"
+#include "connect.hpp"
 
 namespace Model
 {
@@ -35,7 +34,10 @@ namespace Model
 namespace DAO
 {
 
-SQLiteToken::~SQLiteToken()
+namespace SQLite
+{
+
+Token::~Token()
 {
     std::unique_lock<std::mutex> lock(mutex);
 
@@ -52,27 +54,27 @@ SQLiteToken::~SQLiteToken()
     }
 }
 
-SQLiteConnect::SQLiteConnect()
+Connect::Connect()
 {}
 
-SQLiteConnect::~SQLiteConnect()
+Connect::~Connect()
 {
-    freeConnectToken<SQLiteToken>();
+    freeConnectToken<Token>();
 }
 
-u8 SQLiteConnect::init()
+u8 Connect::init()
 {
-    spdlog::debug("{}:{} SQLiteConnect::init", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} Connect::init", LOG_FILE_PATH(__FILE__), __LINE__);
 
     m_connectToken = nullptr;
     return ErrCode_OK;
 }
 
 u8
-SQLiteConnect::startConnect(const std::string &target,
+Connect::startConnect(const std::string &target,
                             const i32 port)
 {
-    spdlog::debug("{}:{} SQLiteConnect::startConnect",
+    spdlog::debug("{}:{} Connect::startConnect",
         LOG_FILE_PATH(__FILE__), __LINE__);
     spdlog::debug("target: {}, port: {}", target, port);
 
@@ -85,13 +87,13 @@ SQLiteConnect::startConnect(const std::string &target,
     }
 
     std::string basePath = target;
-    DirUtils::convertPath(basePath);
+    Utils::convertPath(basePath);
     if (basePath.at(basePath.length() - 1) == '/')
     {
         basePath = basePath.substr(0, basePath.length() - 1);
     }
 
-    if (DirUtils::verifyDir(basePath))
+    if (Utils::verifyDir(basePath))
     {
         spdlog::error("{}:{} Fail to verify basePath.",
             LOG_FILE_PATH(__FILE__), __LINE__);
@@ -101,6 +103,8 @@ SQLiteConnect::startConnect(const std::string &target,
     m_targetPath = basePath;
     return ErrCode_OK;
 }
+
+} // end namespace SQLite
 
 } // end namespace DAO
 

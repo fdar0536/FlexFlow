@@ -1,6 +1,6 @@
 /*
  * Flex Flow
- * Copyright (c) 2023-present fdar0536
+ * Copyright (c) 2023-2024 fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,12 +21,12 @@
  * SOFTWARE.
  */
 
-#ifndef _MODEL_DAO_SQLITEQUEUELIST_HPP_
-#define _MODEL_DAO_SQLITEQUEUELIST_HPP_
+#ifndef _MODEL_DAO_GRPC_CONNECT_HPP_
+#define _MODEL_DAO_GRPC_CONNECT_HPP_
 
-#include <unordered_map>
+#include "access.grpc.pb.h"
 
-#include "iqueuelist.hpp"
+#include "model/dao/iconnect.hpp"
 
 namespace Model
 {
@@ -34,36 +34,40 @@ namespace Model
 namespace DAO
 {
 
-class SQLiteQueueList: public IQueueList
+namespace GRPC
+{
+
+class Token
 {
 public:
 
-    SQLiteQueueList();
+    Token();
 
-    ~SQLiteQueueList();
+    ~Token();
 
-    u8 init(IConnect *connect) override;
-
-    u8 createQueue(const std::string &name) override;
-
-    u8 listQueue(std::vector<std::string> &out) override;
-
-    u8 deleteQueue(const std::string &name) override;
-
-    u8 renameQueue(const std::string &oldName,
-                   const std::string &newName) override;
-
-    std::shared_ptr<IQueue> getQueue(const std::string &name) override;
-
-private:
-
-    std::unordered_map<std::string,
-    std::shared_ptr<IQueue>> m_queueList;
+    std::shared_ptr<grpc::ChannelInterface> channel;
 };
+
+class Connect : public IConnect
+{
+
+public:
+
+    Connect();
+
+    ~Connect();
+
+    u8 init() override;
+
+    u8 startConnect(const std::string &target,
+                    const i32 port = 0) override;
+
+}; // end class Connect
+
+} // end namespace GRPC
 
 } // end namespace DAO
 
 } // end namespace Model
 
-#endif // _MODEL_DAO_SQLITEQUEUELIST_HPP_
-
+#endif // _MODEL_DAO_GRPC_CONNECT_HPP_

@@ -21,12 +21,12 @@
  * SOFTWARE.
  */
 
-#ifndef _MODEL_DAO_GRPCQUEUELIST_HPP_
-#define _MODEL_DAO_GRPCQUEUELIST_HPP_
+#ifndef _MODEL_DAO_GRPC_UTILS_HPP_
+#define _MODEL_DAO_GRPC_UTILS_HPP_
 
-#include "iqueuelist.hpp"
+#include "grpcpp/grpcpp.h"
 
-#include "queuelist.grpc.pb.h"
+#include "model/defines.h"
 
 namespace Model
 {
@@ -34,36 +34,22 @@ namespace Model
 namespace DAO
 {
 
-class GRPCQueueList : public IQueueList
+namespace GRPC
 {
 
-public:
+namespace Utils
+{
 
-    GRPCQueueList();
+void setupCtx(grpc::ClientContext &ctx);
 
-    ~GRPCQueueList();
+void buildErrMsg(const std::string_view &, i32, grpc::Status &);
 
-    u8 init(IConnect *connect) override;
+} // end namespace Utils
 
-    u8 createQueue(const std::string &name) override;
-
-    u8 listQueue(std::vector<std::string> &out) override;
-
-    u8 deleteQueue(const std::string &name) override;
-
-    u8 renameQueue(const std::string &oldName,
-                   const std::string &newName) override;
-
-    std::shared_ptr<IQueue> getQueue(const std::string &name) override;
-
-private:
-
-    std::unique_ptr<ff::QueueList::Stub> m_stub;
-
-}; // end class GRPCQueueList
+} // end namespace GRPC
 
 } // end namespace DAO
 
 } // end namespace Model
 
-#endif // _MODEL_DAO_GRPCQUEUELIST_HPP_
+#endif // _MODEL_DAO_GRPC_UTILS_HPP_

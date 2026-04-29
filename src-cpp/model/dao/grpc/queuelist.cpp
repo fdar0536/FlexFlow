@@ -26,11 +26,10 @@
 #include "controller/global/global.hpp"
 #include "model/errmsg.hpp"
 
-#include "grpcconnect.hpp"
-#include "grpcqueue.hpp"
-#include "grpcqueuelist.hpp"
-#include "grpcutils.hpp"
-#include <memory>
+#include "connect.hpp"
+#include "queue.hpp"
+#include "queuelist.hpp"
+#include "utils.hpp"
 
 namespace Model
 {
@@ -38,18 +37,21 @@ namespace Model
 namespace DAO
 {
 
-GRPCQueueList::GRPCQueueList() :
+namespace GRPC
+{
+
+QueueList::QueueList() :
     m_stub(nullptr)
 {}
 
-GRPCQueueList::~GRPCQueueList()
+QueueList::~QueueList()
 {
     if (m_conn) delete m_conn;
 }
 
-u8 GRPCQueueList::init(IConnect *connect)
+u8 QueueList::init(IConnect *connect)
 {
-    spdlog::debug("{}:{} GRPCQueueList::init", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} QueueList::init", LOG_FILE_PATH(__FILE__), __LINE__);
 
     if (!connect)
     {
@@ -64,7 +66,7 @@ u8 GRPCQueueList::init(IConnect *connect)
         return ErrCode_INVALID_ARGUMENT;
     }
 
-    GRPCToken *token = reinterpret_cast<GRPCToken *>(connect->connectToken());
+    Token *token = reinterpret_cast<Token *>(connect->connectToken());
     try
     {
         m_stub = ff::QueueList::NewStub(token->channel);
@@ -85,9 +87,9 @@ u8 GRPCQueueList::init(IConnect *connect)
     return ErrCode_OK;
 }
 
-u8 GRPCQueueList::createQueue(const std::string &name)
+u8 QueueList::createQueue(const std::string &name)
 {
-    spdlog::debug("{}:{} GRPCQueueList::createQueue",
+    spdlog::debug("{}:{} QueueList::createQueue",
         LOG_FILE_PATH(__FILE__), __LINE__);
 
     ff::QueueReq req;
@@ -96,20 +98,20 @@ u8 GRPCQueueList::createQueue(const std::string &name)
     ff::Empty res;
     grpc::ClientContext ctx;
 
-    GRPCUtils::setupCtx(ctx);
+    Utils::setupCtx(ctx);
     grpc::Status status = m_stub->Create(&ctx, req, &res);
     if (status.ok())
     {
         return ErrCode_OK;
     }
 
-    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
+    Utils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
     return ErrCode_OS_ERROR;
 }
 
-u8 GRPCQueueList::listQueue(std::vector<std::string> &out)
+u8 QueueList::listQueue(std::vector<std::string> &out)
 {
-    spdlog::debug("{}:{} GRPCQueueList::listQueue",
+    spdlog::debug("{}:{} QueueList::listQueue",
         LOG_FILE_PATH(__FILE__), __LINE__);
 
     out.clear();
@@ -119,7 +121,7 @@ u8 GRPCQueueList::listQueue(std::vector<std::string> &out)
     ff::ListQueueRes res;
     grpc::ClientContext ctx;
 
-    GRPCUtils::setupCtx(ctx);
+    Utils::setupCtx(ctx);
     auto reader = m_stub->List(&ctx, req);
     if (reader == nullptr)
     {
@@ -138,13 +140,13 @@ u8 GRPCQueueList::listQueue(std::vector<std::string> &out)
         return ErrCode_OK;
     }
 
-    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
+    Utils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
     return ErrCode_OS_ERROR;
 }
 
-u8 GRPCQueueList::deleteQueue(const std::string &name)
+u8 QueueList::deleteQueue(const std::string &name)
 {
-    spdlog::debug("{}:{} GRPCQueueList::deleteQueue",
+    spdlog::debug("{}:{} QueueList::deleteQueue",
         LOG_FILE_PATH(__FILE__), __LINE__);
 
     ff::QueueReq req;
@@ -153,21 +155,21 @@ u8 GRPCQueueList::deleteQueue(const std::string &name)
     ff::Empty res;
     grpc::ClientContext ctx;
 
-    GRPCUtils::setupCtx(ctx);
+    Utils::setupCtx(ctx);
     grpc::Status status = m_stub->Delete(&ctx, req, &res);
     if (status.ok())
     {
         return ErrCode_OK;
     }
 
-    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
+    Utils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
     return ErrCode_OS_ERROR;
 }
 
-u8 GRPCQueueList::renameQueue(const std::string &oldName,
+u8 QueueList::renameQueue(const std::string &oldName,
                               const std::string &newName)
 {
-    spdlog::debug("{}:{} GRPCQueueList::renameQueue",
+    spdlog::debug("{}:{} QueueList::renameQueue",
         LOG_FILE_PATH(__FILE__), __LINE__);
 
     ff::RenameQueueReq req;
@@ -177,20 +179,20 @@ u8 GRPCQueueList::renameQueue(const std::string &oldName,
     ff::Empty res;
     grpc::ClientContext ctx;
 
-    GRPCUtils::setupCtx(ctx);
+    Utils::setupCtx(ctx);
     grpc::Status status = m_stub->Rename(&ctx, req, &res);
     if (status.ok())
     {
         return ErrCode_OK;
     }
 
-    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
+    Utils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
     return ErrCode_OS_ERROR;
 }
 
-std::shared_ptr<IQueue> GRPCQueueList::getQueue(const std::string &name)
+std::shared_ptr<IQueue> QueueList::getQueue(const std::string &name)
 {
-    spdlog::debug("{}:{} GRPCQueueList::getQueue",
+    spdlog::debug("{}:{} QueueList::getQueue",
         LOG_FILE_PATH(__FILE__), __LINE__);
 
     ff::QueueReq req;
@@ -199,11 +201,11 @@ std::shared_ptr<IQueue> GRPCQueueList::getQueue(const std::string &name)
     ff::Empty res;
     grpc::ClientContext ctx;
 
-    GRPCUtils::setupCtx(ctx);
+    Utils::setupCtx(ctx);
     grpc::Status status = m_stub->GetQueue(&ctx, req, &res);
     if (status.ok())
     {
-        GRPCQueue *queue = new (std::nothrow) GRPCQueue;
+        Queue *queue = new (std::nothrow) Queue;
         if (!queue)
         {
             spdlog::error("{}:{} Fail to allocate memory",
@@ -222,9 +224,11 @@ std::shared_ptr<IQueue> GRPCQueueList::getQueue(const std::string &name)
         return std::shared_ptr<IQueue>(queue);
     }
 
-    GRPCUtils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
+    Utils::buildErrMsg(LOG_FILE_PATH(__FILE__), __LINE__, status);
     return nullptr;
 }
+
+} // end namespace GRPC
 
 } // end namespace DAO
 
