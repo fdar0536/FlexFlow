@@ -21,11 +21,14 @@
  * SOFTWARE.
  */
 
+#include "spdlog/cfg/env.h" 
 #include "gtest/gtest.h"
 
 int main(int argc, char **argv)
 {
+    spdlog::cfg::load_env_levels();
     ::testing::InitGoogleTest(&argc, argv);
+    testing::GTEST_FLAG(break_on_failure) = true;
     int ret(0);
     try
     {

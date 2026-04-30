@@ -1,6 +1,6 @@
 /*
  * Flex Flow
- * Copyright (c) 2023 fdar0536
+ * Copyright (c) 2023-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@
 #include "spdlog/spdlog.h"
 
 #include "model/utils.hpp"
+#include <config.h>
 
 #include "accessimpl.hpp"
 
@@ -41,6 +42,19 @@ grpc::Status AccessImpl::Echo(grpc::ServerContext *context,
     UNUSED(context);
     UNUSED(request);
     UNUSED(response);
+    return grpc::Status::OK;
+}
+
+grpc::Status AccessImpl::Info(grpc::ServerContext *ctx,
+                              const ff::Empty *req,
+                              ff::InfoRes *res)
+{
+    spdlog::debug("{}:{} AccessImpl::Info", LOG_FILE_PATH(__FILE__), __LINE__);
+    UNUSED(ctx);
+    UNUSED(req);
+    res->set_branch(FF_BRANCH);
+    res->set_commit(FF_COMMIT);
+    res->set_version(FF_VERSION);
     return grpc::Status::OK;
 }
 

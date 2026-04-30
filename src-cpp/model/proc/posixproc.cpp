@@ -48,9 +48,7 @@ namespace Proc
 
 // implement public member functions
 PosixProc::~PosixProc()
-{
-    stopImpl();
-}
+{}
 
 u8 PosixProc::init()
 {
@@ -295,15 +293,47 @@ char **PosixProc::buildChildArgv(const Task &task)
 void PosixProc::stopImpl()
 {
     spdlog::debug("{}:{} PosixProc::stopImpl", LOG_FILE_PATH(__FILE__), __LINE__);
+
+    if (!isRunning()) return;
     
-    if (kill(m_pid, SIGKILL) == -1)
+    if (kill(m_pid, SIGTERM) == -1)
     {
-        spdlog::error("{}:{} kill failed: {}",
-            LOG_FILE_PATH(__FILE__), __LINE__, strerror(errno));
+        spdlog::error("sent sigterm failed: {}", strerror(errno));
         return;
     }
 
-    sleep(2);
+    int status;
+    int timeout_ms = 2000;
+    int elapsed = 0;
+    int interval = 100;
+
+    bool exited = false;
+    while (elapsed < timeout_ms)
+    {
+        pid_t result = waitpid(m_pid, &status, WNOHANG);
+        
+        if (result == m_pid)
+        {
+            exited = true;
+            break;
+        }
+        else if (result == -1)
+        {
+            spdlog::error("waitpid error: {}", strerror(errno));
+            break;
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(interval));
+        elapsed += interval;
+    }
+
+    // timeout, send sigkill
+    if (!exited) {
+        spdlog::warn("Child process {} cannot stop in {}ms, send sigkill",
+            m_pid, timeout_ms);
+        kill(m_pid, SIGKILL);
+        waitpid(m_pid, &status, 0);
+    }
 }
 
 void PosixProc::closeFile(int *fd)

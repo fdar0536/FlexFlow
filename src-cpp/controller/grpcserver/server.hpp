@@ -1,6 +1,6 @@
 /*
  * Flex Flow
- * Copyright (c) 2023 fdar0536
+ * Copyright (c) 2023-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,16 +26,12 @@
 
 #include <thread>
 
-#include <cinttypes>
-
 #include "grpcpp/server.h"
 
 #include "model/defines.h"
 #include "accessimpl.hpp"
 #include "queueimpl.hpp"
 #include "queuelistimpl.hpp"
-
-#include <future>
 
 namespace Controller
 {
@@ -59,9 +55,11 @@ private:
 
     std::jthread m_thread;
 
-    std::promise<void> m_exitRequested;
+    std::condition_variable m_cv;
 
-    std::future<void> m_future;
+    std::mutex m_cvMutex;
+
+    bool m_done = false;
 
     std::unique_ptr<grpc::Server> m_server = nullptr;
 
@@ -70,7 +68,6 @@ private:
     QueueImpl m_queueImpl;
 
     QueueListImpl m_queueListImpl;
-
 };
 
 } // end namespace GRPCServer

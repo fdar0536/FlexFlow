@@ -1,6 +1,6 @@
 /*
  * Flex Flow
- * Copyright (c) 2024 fdar0536
+ * Copyright (c) 2024-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -117,7 +117,7 @@ void consoleFin()
 #endif
 }
 
-u8 spdlogInit(const std::string &path)
+u8 spdlogInit(const std::string &path, const i32 logLevel)
 {
     spdlog::debug("{}:{} spdlogInit", LOG_FILE_PATH(__FILE__), __LINE__);
     spdlog::debug("{}:{} path is: {}", LOG_FILE_PATH(__FILE__), __LINE__, path);
@@ -130,6 +130,7 @@ u8 spdlogInit(const std::string &path)
     {
         auto daily_logger = spdlog::daily_logger_mt(
             "STQLog", path);
+        daily_logger->set_level(static_cast<spdlog::level::level_enum>(logLevel));
         spdlog::set_default_logger(daily_logger);
     }
     catch (...)

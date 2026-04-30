@@ -1,6 +1,6 @@
 /*
  * Flex Flow
- * Copyright (c) 2024 fdar0536
+ * Copyright (c) 2024-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -46,7 +46,7 @@ u8 consoleInit();
 
 void consoleFin();
 
-u8 spdlogInit(const std::string &);
+u8 spdlogInit(const std::string &, const i32 logLevel);
 
 u8 sqliteInit(Model::DAO::IQueueList **out, const std::string &target);
 

@@ -26,6 +26,7 @@
 
 #include <atomic>
 #include <deque>
+#include <thread>
 
 #include "iproc.hpp"
 
@@ -79,6 +80,9 @@ protected:
     virtual void asioFin() = 0;
 
     virtual void readOutputLoop() = 0;
+
+    // for reading current output
+    std::jthread m_thread;
 };
 
 } // end namespace Proc

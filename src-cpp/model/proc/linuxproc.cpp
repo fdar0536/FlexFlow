@@ -27,13 +27,10 @@
 #include <string.h>
 
 #include "model/proc/posixproc.hpp"
-#include "fcntl.h"
 
 #include "spdlog/spdlog.h"
 
-#include "controller/global/global.hpp"
-
-#include "config.h"
+#include "model/utils.hpp"
 
 #include "linuxproc.hpp"
 
@@ -48,7 +45,9 @@ LinuxProc::LinuxProc() :
 {}
 
 LinuxProc::~LinuxProc()
-{}
+{
+    stopImpl();
+}
 
 // protected member functions
 u8 LinuxProc::asioInit()

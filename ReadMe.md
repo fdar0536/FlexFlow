@@ -34,7 +34,7 @@ This is a simple tool that allow you can manage the task flow by remote or in lo
   - [pnpm](https://pnpm.io)
 - Server
   - Model
-  - [cxxopts](https://github.com/jarro2783/cxxopts)
+  - [CLI11](https://github.com/CLIUtils/CLI11)
   - [yaml-cpp](https://github.com/jbeder/yaml-cpp)
 
 ### Environment variable for build

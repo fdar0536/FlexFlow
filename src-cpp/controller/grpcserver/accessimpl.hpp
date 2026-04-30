@@ -1,6 +1,6 @@
 /*
  * Flex Flow
- * Copyright (c) 2023 fdar0536
+ * Copyright (c) 2023-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@
 #define _CONTROLLER_GRPCSERVER_ACCESSIMPL_HPP_
 
 #include "access.grpc.pb.h"
+#include <grpcpp/support/status.h>
 
 namespace Controller
 {
@@ -39,6 +40,10 @@ public:
     grpc::Status Echo(grpc::ServerContext *context,
                       const ff::Empty *request,
                       ff::EchoRes *response) override;
+    
+    grpc::Status Info(grpc::ServerContext *context,
+                      const ff::Empty *request,
+                      ff::InfoRes *response) override;
 };
 
 } // end namespace GRPCServer

@@ -43,7 +43,9 @@ MacProc::MacProc():
 {}
 
 MacProc::~MacProc()
-{}
+{
+    stopImpl();
+}
 
 // protected member functions
 u8 MacProc::asioInit()
@@ -59,6 +61,7 @@ u8 MacProc::asioInit()
     }
 
     EV_SET(&m_change_event, m_masterFD, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
+    m_thread = std::jthread(&MacProc::readOutputLoop, this);
     return 0;
 }
 

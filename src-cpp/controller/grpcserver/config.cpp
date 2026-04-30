@@ -28,7 +28,7 @@
 #endif
 
 #include "spdlog/spdlog.h"
-#include "cxxopts.hpp"
+#include "CLI/CLI.hpp"
 #include "yaml-cpp/yaml.h"
 
 #include "model/utils.hpp"
@@ -78,67 +78,65 @@ u8 Config::parse(Config *in, int argc, char **argv)
     {
         spdlog::warn("{}:{} use default config", LOG_FILE_PATH(__FILE__), __LINE__);
         in->dbPath = std::string(buf);
-        in->logPath = std::string(buf);
         return 0;
     }
 
     std::string configFile("");
+    
+    CLI::App app("Flex Flow Server");
+    app.set_help_flag();
+    
+    app.add_option("-c,--config-file", configFile, 
+        "path to config file")->default_str("");
+    app.add_option("-d,--db-path", in->dbPath, 
+        "path to config file")->default_str(std::string(buf));
+    app.add_option("-l,--log-path", in->logPath, 
+        "path to config file")->default_str(std::string(buf));
+    app.add_option("-L,--log-level", in->logLevel, 
+        "log level for spdlog")->default_val(2);
+    app.add_option("-a, --address", in->listenIP, 
+        "which address will listen")->default_val("127.0.0.1");
+    app.add_option("-p,--port", in->listenPort, 
+        "which port will listen")->default_val(12345);
+    app.add_flag("-v,--version","print version info");
+    app.add_flag("-h,--help","print help info");
 
-    try
+    CLI11_PARSE(app, argc, argv);
+
+    if (app.count("-v"))
     {
-        cxxopts::Options options("FFSERVER", "FF Server");
-        options.add_options()
-            ("c,config-file", "path to config file", cxxopts::value<std::string>(configFile)->default_value(""))
-            ("d,db-path", "path to config file", cxxopts::value<std::string>(in->dbPath)->default_value(std::string(buf)))
-            ("l,log-path", "path for output log", cxxopts::value<std::string>(in->logPath)->default_value(""))
-            ("L,log-level", "log level for spdlog", cxxopts::value<i32>(in->logLevel)->default_value("2"))
-            ("a,address", "which addess will listen", cxxopts::value<std::string>(in->listenIP)->default_value("127.0.0.1"))
-            ("p,port", "which port will listen", cxxopts::value<u16>(in->listenPort)->default_value("12345"))
-            ("v,version", "print version")
-            ("h,help", "print help")
-            ;
+        printVersion();
+        return 2;
+    }
 
-        auto result = options.parse(argc, argv);
-        if (result.count("help"))
-        {
-            fmt::print("{}", options.help());
-            return 2;
-        }
+    if (app.count("-h"))
+    {
+        fmt::println("{}", app.help());
+        return 2;
+    }
 
-        if (result.count("version"))
+    if (!configFile.empty())
+    {
+        if (Model::Utils::verifyFile(configFile))
         {
-            printVersion();
-            return 2;
-        }
-
-        if (!configFile.empty())
-        {
-            if (Model::Utils::verifyFile(configFile))
-            {
-                spdlog::error("{}:{} Fail to verify config file", LOG_FILE_PATH(__FILE__), __LINE__);
-                return 1;
-            }
-        }
-
-        if (!in->logPath.empty())
-        {
-            Model::Utils::convertPath(in->logPath);
-            if (Model::Utils::verifyDir(in->logPath))
-            {
-                spdlog::error("{}:{} fail to verify log path", LOG_FILE_PATH(__FILE__), __LINE__);
-                return 1;
-            }
-        }
-
-        if (Model::Utils::verifyIP(in->listenIP))
-        {
-            spdlog::error("{}:{} Invalid ip", LOG_FILE_PATH(__FILE__), __LINE__);
+            spdlog::error("{}:{} Fail to verify config file", LOG_FILE_PATH(__FILE__), __LINE__);
             return 1;
         }
     }
-    catch(const cxxopts::exceptions::exception &e)
+
+    if (!in->logPath.empty())
     {
-        spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__, e.what());
+        Model::Utils::convertPath(in->logPath);
+        if (Model::Utils::verifyDir(in->logPath))
+        {
+            spdlog::error("{}:{} fail to verify log path", LOG_FILE_PATH(__FILE__), __LINE__);
+            return 1;
+        }
+    }
+
+    if (Model::Utils::verifyIP(in->listenIP))
+    {
+        spdlog::error("{}:{} Invalid ip", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 

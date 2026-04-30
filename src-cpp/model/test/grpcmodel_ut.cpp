@@ -43,6 +43,9 @@ public:
 
     u8 setupConn() override
     {
+        printLog(LOG_FILE_PATH(__FILE__), __LINE__,
+        "GRPCModelTesting::setupConn");
+
 #ifdef _WIN32
         m_proc = new (std::nothrow) Model::Proc::WinProc();
 #elif defined(	__linux__)
@@ -53,14 +56,16 @@ public:
 
         if (!m_proc)
         {
-            printLog(LOG_FILE_PATH(__FILE__), __LINE__, "Fail to allocate memory");
+            printLog(LOG_FILE_PATH(__FILE__), __LINE__,
+            "Fail to allocate memory");
             stop();
             return 1;
         }
 
         if (m_proc->init())
         {
-            printLog(LOG_FILE_PATH(__FILE__), __LINE__, "proc init failed");
+            printLog(LOG_FILE_PATH(__FILE__), __LINE__,
+            "proc init failed");
             stop();
             return 1;
         }
@@ -72,7 +77,8 @@ public:
 
         if (m_proc->start(task))
         {
-            printLog(LOG_FILE_PATH(__FILE__), __LINE__, "Fail to start Flex Flow server");
+            printLog(LOG_FILE_PATH(__FILE__), __LINE__,
+            "Fail to start Flex Flow server");
             stop();
             return 1;
         }
@@ -91,16 +97,17 @@ public:
         if (conn->init())
         {
             printLog(LOG_FILE_PATH(__FILE__), __LINE__, "Conn init failed");
-            stop();
             delete conn;
+            stop();
             return 1;
         }
 
         if (conn->startConnect("127.0.0.1", 12345))
         {
-            printLog(LOG_FILE_PATH(__FILE__), __LINE__, "Fail to connect to Flex Flow server");
-            stop();
+            printLog(LOG_FILE_PATH(__FILE__), __LINE__,
+            "Fail to connect to Flex Flow server");
             delete conn;
+            stop();
             return 1;
         }
 
@@ -108,8 +115,8 @@ public:
         if (!list)
         {
             printLog(LOG_FILE_PATH(__FILE__), __LINE__, "Fail to allocate memory");
-            stop();
             delete conn;
+            stop();
             return 1;
         }
 
@@ -117,8 +124,8 @@ public:
         if (m_list->init(conn))
         {
             printLog(LOG_FILE_PATH(__FILE__), __LINE__, "Fail to allocate memory");
-            stop();
             delete conn;
+            stop();
             return 1;
         }
 
@@ -146,6 +153,7 @@ private:
 
     void stop()
     {
+        printLog(LOG_FILE_PATH(__FILE__), __LINE__, "GRPCModelTesting::stop");
         m_keepRunning.store(false, std::memory_order_relaxed);
         cleanUp();
 

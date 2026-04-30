@@ -1,6 +1,6 @@
 /*
  * Flex Flow
- * Copyright (c) 2022-2024 fdar0536
+ * Copyright (c) 2022-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@
 #include <csignal>
 
 #include "spdlog/spdlog.h"
+#include "spdlog/cfg/env.h" 
 
 #include "controller/grpcserver/init.hpp"
 #include "model/utils.hpp"
@@ -36,6 +37,7 @@ static BOOL eventHandler(DWORD dwCtrlType);
 
 int main(int argc, char **argv)
 {
+    spdlog::cfg::load_env_levels();
     spdlog::debug("{}:{} main", LOG_FILE_PATH(__FILE__), __LINE__);
     if (Model::Utils::isAdmin())
     {
@@ -80,13 +82,13 @@ int main(int argc, char **argv)
     }
 
     Controller::GRPCServer::fin();
+    spdlog::info("{}", "Goodbye!");
     return ret;
 }
 
 static void sighandler(int signum)
 {
-    spdlog::info("{}:{} Signaled: {}", LOG_FILE_PATH(__FILE__), __LINE__, signum);
-    spdlog::info("{}:{} Good Bye!", LOG_FILE_PATH(__FILE__), __LINE__);
+    UNUSED(signum);
     Controller::GRPCServer::server.stop();
 }
 

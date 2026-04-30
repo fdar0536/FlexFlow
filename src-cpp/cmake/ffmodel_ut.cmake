@@ -11,7 +11,7 @@ if(ENABLE_TEST)
     target_link_libraries(testproc
         PRIVATE
 
-        cxxopts::cxxopts
+        CLI11::CLI11
         ffmodel
     )
 

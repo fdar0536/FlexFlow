@@ -1,6 +1,6 @@
 /*
  * Flex Flow
- * Copyright (c) 2023-2024 fdar0536
+ * Copyright (c) 2023-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -74,11 +74,11 @@ u8 init(int argc, char **argv)
     Model::ErrMsg::init();
     if (config.logPath.empty())
     {
-        ret = Global::spdlogInit(config.logPath);
+        ret = 0;
     }
     else
     {
-        ret = Global::spdlogInit(config.logPath + "/STQLog.log");
+        ret = Global::spdlogInit(config.logPath + "/STQLog.log", config.logLevel);
     }
 
     if (ret)

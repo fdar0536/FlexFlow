@@ -2,7 +2,7 @@ if(ENABLE_SERVER)
     set(FF_SERVER_LIBS
         protobuf::libprotobuf
         gRPC::grpc++
-        cxxopts::cxxopts
+        CLI11::CLI11
 
         grpc_common
         spdlog::spdlog

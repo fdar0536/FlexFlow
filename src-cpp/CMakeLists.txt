@@ -8,14 +8,22 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 if (UNIX)
-    add_compile_options(-Wall -Werror -Wextra -fvisibility=hidden)
+    add_compile_options(-Wall -Werror -Wextra -fvisibility=hidden -ffunction-sections -fdata-sections -flto)
+    add_link_options(-flto)
+
+    if(APPLE)
+        add_link_options(-Wl,-dead_strip)
+    else()
+        add_link_options(-Wl,--gc-sections)
+    endif()
 
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         add_compile_options(-Weffc++)
     endif ()
 else () # Windows
     if (MINGW)
-        add_compile_options(-Wall -Werror -Wextra -fvisibility=hidden)
+        add_compile_options(-Wall -Werror -Wextra -fvisibility=hidden -ffunction-sections -fdata-sections -flto)
+        add_link_options(-flto -Wl,--gc-sections)
 
         if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
             add_compile_options(-Weffc++)
@@ -28,7 +36,6 @@ endif (UNIX) # end if (UNIX)
 # options
 if(ENABLE_TEST)
     enable_testing()
-    set(ENABLE_SERVER on)
 endif(ENABLE_TEST)
 
 # variables
@@ -64,7 +71,7 @@ find_package(spdlog REQUIRED)
 find_package(SQLite3 REQUIRED)
 
 if (ENABLE_SERVER)
-    find_package(cxxopts REQUIRED)
+    find_package(CLI11 REQUIRED)
     find_package(yaml-cpp REQUIRED)
 endif (ENABLE_SERVER)
 

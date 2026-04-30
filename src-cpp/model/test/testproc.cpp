@@ -24,7 +24,7 @@
 #include <iostream>
 #include <csignal>
 
-#include "cxxopts.hpp"
+#include "CLI/CLI.hpp"
 
 #ifdef _WIN32
 #include "windows.h"
@@ -67,28 +67,17 @@ int main(int argc, char **argv)
     SetConsoleCtrlHandler(eventHandler, TRUE);
 #endif
 
-    try
-    {
-        cxxopts::Options options("FFSERVER", "FF Server");
-        options.add_options()
-            ("e,exitcode", "the exit code for this program", cxxopts::value<int>(params.exitCode)->default_value("0"))
-            ("l,loop-times", "what times will the program loop, zero or negative means loop forever", cxxopts::value<i32>(params.loopTimes)->default_value("5"))
-            ("s,sleep-time", "time for sleep in seconds", cxxopts::value<int>(params.sleepTime)->default_value("1"))
-            ("h,help", "print help")
-            ;
+    CLI::App app;
+    app.description("A simple program for testing the model layer.");
+    app.add_option("-e,--exitcode", params.exitCode,
+        "set the exit code for this program")->default_val(0);
+    app.add_option("-l,--loop-times", params.loopTimes,
+        "what times will the program loop, zero or negative means loop forever")
+        ->default_val(5);
+    app.add_option("-s,--sleep-time", params.sleepTime,
+        "time for sleep in seconds")->default_val(1);
 
-        auto result = options.parse(argc, argv);
-        if (result.count("help"))
-        {
-            std::cout << options.help();
-            return 0;
-        }
-    }
-    catch (const cxxopts::exceptions::exception &e)
-    {
-        std::cerr << e.what() << std::endl;
-        return 1;
-    }
+    CLI11_PARSE(app, argc, argv);
 
     if (params.loopTimes <= 0)
     {

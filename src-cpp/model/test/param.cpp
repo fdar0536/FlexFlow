@@ -56,6 +56,8 @@ void Param::printLog(const std::string_view &file, int line, const char *log)
 
 void Param::cleanUp()
 {
+    printLog(LOG_FILE_PATH(__FILE__), __LINE__, "Param::cleanUp");
+
     if (m_proc)
     {
         delete m_proc;

@@ -13,7 +13,19 @@ service Access {
       get: "/echo"
     };
   }
+
+  rpc Info(Empty) returns (InfoRes) {
+    option (google.api.http) = {
+      get: "/info"
+    };
+  }
 }
 
 message EchoRes {
+}
+
+message InfoRes {
+  string branch = 1;
+  string commit = 2;
+  string version = 3;
 }

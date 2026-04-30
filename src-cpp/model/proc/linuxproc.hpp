@@ -24,8 +24,6 @@
 #ifndef _MODEL_PROC_LINUXPROC_HPP_
 #define _MODEL_PROC_LINUXPROC_HPP_
 
-#include <thread>
-
 #include "sys/epoll.h"
 
 #include "posixproc.hpp"
@@ -62,9 +60,6 @@ private:
     u8 epollInit();
 
     void epollFin();
-
-    // for reading current output
-    std::jthread m_thread;
 };
 
 } // end namespace Proc

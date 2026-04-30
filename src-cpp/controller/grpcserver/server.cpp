@@ -1,6 +1,6 @@
 /*
  * Flex Flow
- * Copyright (c) 2023 fdar0536
+ * Copyright (c) 2023-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -59,8 +59,9 @@ uint_fast8_t Server::start()
         builder.RegisterService(&m_queueImpl);
         builder.RegisterService(&m_queueListImpl);
         m_server = builder.BuildAndStart();
-        spdlog::info("{}:{} Server is listening on {}", LOG_FILE_PATH(__FILE__), __LINE__,
-                     listenAddr);
+        spdlog::info("{}:{} Server is listening on {}",
+            LOG_FILE_PATH(__FILE__), __LINE__,
+            listenAddr);
 
         auto serveFn = [this]()
         {
@@ -68,8 +69,10 @@ uint_fast8_t Server::start()
         };
 
         m_thread = std::jthread(serveFn);
-        m_future = m_exitRequested.get_future();
-        m_future.wait();
+
+        std::unique_lock<std::mutex> lock(m_cvMutex);
+        m_cv.wait(lock, [this]{ return m_done; });
+
         m_server->Shutdown();
         m_thread = std::jthread();
         m_server = nullptr;
@@ -87,7 +90,12 @@ uint_fast8_t Server::start()
 
 void Server::stop()
 {
-    m_exitRequested.set_value();
+    {
+        std::lock_guard<std::mutex> lock(m_cvMutex);
+        m_done = true;
+    }
+
+    m_cv.notify_one();
 }
 
 } // end namespace GRPCServer
