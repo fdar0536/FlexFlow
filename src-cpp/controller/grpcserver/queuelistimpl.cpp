@@ -25,6 +25,7 @@
 
 #include "controller/global/global.hpp"
 #include "model/errmsg.hpp"
+#include "model/utils.hpp"
 #include "init.hpp"
 
 #include "queuelistimpl.hpp"

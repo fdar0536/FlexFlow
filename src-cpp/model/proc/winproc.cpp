@@ -27,7 +27,6 @@
 
 #include "winproc.hpp"
 
-#include "controller/global/global.hpp"
 #include "model/utils.hpp"
 
 namespace Model
@@ -70,7 +69,7 @@ u8 WinProc::start(const Task &task)
         return 1;
     }
 
-    if (Controller::Global::isAdmin())
+    if (Utils::isAdmin())
     {
         spdlog::error("{}:{} Refuse to run as administrator", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;

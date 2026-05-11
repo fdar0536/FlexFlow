@@ -30,6 +30,7 @@ This is a simple tool that allow you can manage the task flow by remote or in lo
   - [SQLite](https://www.sqlite.org)
   - [gRPC](https://grpc.io)
   - [spdlog](https://github.com/gabime/spdlog)
+  - [OpenSSL](https://www.openssl.org)
 - Webui
   - [pnpm](https://pnpm.io)
 - Server

@@ -23,9 +23,10 @@
 
 #include "spdlog/spdlog.h"
 
-#include "model/errmsg.hpp"
-
 #include "controller/global/global.hpp"
+
+#include "model/utils.hpp"
+#include "model/errmsg.hpp"
 
 #include "init.hpp"
 

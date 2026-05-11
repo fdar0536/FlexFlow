@@ -21,6 +21,7 @@
  * SOFTWARE.
  */
 
+#include <memory>
 #ifdef _WIN32
 #define sleep(x) Sleep(x * 1000)
 #else
@@ -29,8 +30,9 @@
 
 #include "spdlog/spdlog.h"
 
-#include "controller/global/global.hpp"
 #include "model/errmsg.hpp"
+#include "model/utils.hpp"
+
 #include "queue.hpp"
 
 namespace Model
@@ -57,20 +59,20 @@ Queue::Queue() :
 Queue::~Queue()
 {
     stopImpl();
-    if (m_proc) delete m_proc;
 }
 
 u8
-Queue::init(IConnect *connect,
-            Proc::IProc *process,
+Queue::init(std::shared_ptr<Connect::SQLite::Token> &token,
+            const std::string &target,
+            std::shared_ptr<Proc::IProc> &process,
             const std::string &name)
 {
     spdlog::debug("{}:{} Queue::init", LOG_FILE_PATH(__FILE__), __LINE__);
 
-    UNUSED(connect);
     if (!process)
     {
-        spdlog::error("{}:{} process is nullptr.", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} process is nullptr.",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_INVALID_ARGUMENT;
     }
 
@@ -80,16 +82,14 @@ Queue::init(IConnect *connect,
         return ErrCode_INVALID_ARGUMENT;
     }
 
-    try
+    if (token == nullptr || process == nullptr)
     {
-        m_token = std::make_shared<Token>();
+        spdlog::error("{}:{} token or process is nullptr.",
+            LOG_FILE_PATH(__FILE__), __LINE__);
+        return ErrCode_INVALID_ARGUMENT;
     }
-    catch (...)
-    {
-        m_token = nullptr;
-        spdlog::error("{}:{} Fail to allocate memory.", LOG_FILE_PATH(__FILE__), __LINE__);
-        return ErrCode_OS_ERROR;
-    }
+
+    m_token = token;
 
     {
         std::unique_lock<std::mutex> lock(dbColumnNameMutex);
@@ -105,7 +105,7 @@ Queue::init(IConnect *connect,
         }
     }
 
-    if (connectToDB(connect->targetPath() + "/" + name + ".db"))
+    if (connectToDB(target + "/" + name + ".db"))
     {
         spdlog::error("{}:{} Fail to connect to SQLite.", LOG_FILE_PATH(__FILE__), __LINE__);
         m_token = nullptr;
@@ -115,7 +115,7 @@ Queue::init(IConnect *connect,
     m_proc = process;
     m_isRunning.store(false, std::memory_order_relaxed);
     m_start.store(false, std::memory_order_relaxed);
-    m_targetPath = connect->targetPath();
+    m_targetPath = target;
     return ErrCode_OK;
 }
 

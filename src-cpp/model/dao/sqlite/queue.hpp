@@ -28,8 +28,10 @@
 #include <mutex>
 #include <thread>
 
-#include "connect.hpp"
+#include "model/connect/sqlite/token.hpp"
+
 #include "model/dao/iqueue.hpp"
+#include "model/proc/iproc.hpp"
 
 namespace Model
 {
@@ -48,9 +50,10 @@ public:
 
     ~Queue();
 
-    virtual u8 init(IConnect *connect,
-                    Proc::IProc *process,
-                    const std::string &name) override;
+    u8 init(std::shared_ptr<Connect::SQLite::Token> &token,
+            const std::string &target,
+            std::shared_ptr<Proc::IProc> &process,
+            const std::string &name);
 
     virtual u8 listPending(std::vector<int> &out) override;
 
@@ -84,7 +87,7 @@ public:
 
 private:
 
-    std::shared_ptr<Token> m_token;
+    std::shared_ptr<Connect::SQLite::Token> m_token;
 
     std::mutex m_currentTaskMutex;
 

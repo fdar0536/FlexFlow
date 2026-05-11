@@ -47,9 +47,8 @@ public:
 
     ~Queue();
 
-    u8 init(IConnect *connect,
-            Proc::IProc *process,
-            const std::string &name) override;
+    u8 init(std::shared_ptr<grpc::ChannelInterface> &token,
+            const std::string &name);
 
     u8 listPending(std::vector<int> &out) override;
 

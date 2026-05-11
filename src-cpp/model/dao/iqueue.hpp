@@ -28,7 +28,6 @@
 
 #include "model/proc/iproc.hpp"
 #include "model/proc/task.hpp"
-#include "iconnect.hpp"
 
 namespace Model
 {
@@ -41,10 +40,6 @@ class IQueue
 public:
 
     virtual ~IQueue() {}
-
-    virtual u8 init(IConnect *connect,
-                    Proc::IProc *process,
-                    const std::string &name) = 0;
 
     virtual u8 listPending(std::vector<int> &out) = 0;
 
@@ -76,7 +71,7 @@ public:
 
 protected:
 
-    Model::Proc::IProc *m_proc;
+    std::shared_ptr<Proc::IProc> m_proc;
 
 }; // end class IQueue
 

@@ -24,53 +24,22 @@
 #ifndef _MODEL_DAO_SQLITE_CONNECT_HPP_
 #define _MODEL_DAO_SQLITE_CONNECT_HPP_
 
-#include <mutex>
-
-#include "sqlite3.h"
-
-#include "model/dao/iconnect.hpp"
+#include "token.hpp"
 
 namespace Model
 {
 
-namespace DAO
+namespace Connect
 {
 
 namespace SQLite
 {
 
-class Token
-{
-public:
+std::shared_ptr<Token> connect(std::string &target);
 
-    ~Token();
+} // end namespace SQLite
 
-    sqlite3 *db = nullptr;
-
-    sqlite3_stmt *stmt = nullptr;
-
-    std::mutex mutex;
-
-}; // end class Token
-
-class Connect: public IConnect
-{
-public:
-
-    Connect();
-
-    ~Connect();
-
-    u8 init() override;
-
-    u8 startConnect(const std::string &target,
-                    const i32 port = 0) override;
-
-}; // end class Connect
-
-}
-
-} // end namespace DAO
+} // end namespace Connect
 
 } // end namespace Model
 

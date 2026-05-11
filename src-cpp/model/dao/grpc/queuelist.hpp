@@ -46,7 +46,7 @@ public:
 
     ~QueueList();
 
-    u8 init(IConnect *connect) override;
+    u8 init(std::shared_ptr<grpc::ChannelInterface> &token);
 
     u8 createQueue(const std::string &name) override;
 
@@ -62,6 +62,8 @@ public:
 private:
 
     std::unique_ptr<ff::QueueList::Stub> m_stub;
+
+    std::shared_ptr<grpc::ChannelInterface> m_token;
 
 }; // end class QueueList
 

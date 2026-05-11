@@ -26,8 +26,10 @@
 
 #include "gtest/gtest.h"
 
-#include "controller/global/global.hpp"
-#include "model/dao/grpc/connect.hpp"
+#include "model/utils.hpp"
+
+#include "model/connect/grpc/connect.hpp"
+
 #include "model/dao/grpc/queuelist.hpp"
 
 #include "param.hpp"
@@ -86,27 +88,11 @@ public:
         m_keepRunning.store(true, std::memory_order_relaxed);
         m_thread = std::jthread(&GRPCModelTesting::readProcOutput, this);
 
-        Model::DAO::GRPC::Connect *conn = new (std::nothrow) Model::DAO::GRPC::Connect;
-        if (!conn)
+        auto conn = Model::Connect::GRPC::connect("127.0.0.1", 12345);
+        
+        if (conn == nullptr)
         {
-            printLog(LOG_FILE_PATH(__FILE__), __LINE__, "Fail to allocate memory");
-            stop();
-            return 1;
-        }
-
-        if (conn->init())
-        {
-            printLog(LOG_FILE_PATH(__FILE__), __LINE__, "Conn init failed");
-            delete conn;
-            stop();
-            return 1;
-        }
-
-        if (conn->startConnect("127.0.0.1", 12345))
-        {
-            printLog(LOG_FILE_PATH(__FILE__), __LINE__,
-            "Fail to connect to Flex Flow server");
-            delete conn;
+            printLog(LOG_FILE_PATH(__FILE__), __LINE__, "Fail to connect to server");
             stop();
             return 1;
         }
@@ -115,20 +101,19 @@ public:
         if (!list)
         {
             printLog(LOG_FILE_PATH(__FILE__), __LINE__, "Fail to allocate memory");
-            delete conn;
+            stop();
+            return 1;
+        }
+
+        if (list->init(conn))
+        {
+            printLog(LOG_FILE_PATH(__FILE__), __LINE__, "Fail to initialize queue list");
+            delete list;
             stop();
             return 1;
         }
 
         m_list = list;
-        if (m_list->init(conn))
-        {
-            printLog(LOG_FILE_PATH(__FILE__), __LINE__, "Fail to allocate memory");
-            delete conn;
-            stop();
-            return 1;
-        }
-
         return 0;
     }
 

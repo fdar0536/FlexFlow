@@ -21,15 +21,17 @@
  * SOFTWARE.
  */
 
+#include <memory>
+
 #include "spdlog/spdlog.h"
 
-#include "controller/global/global.hpp"
+#include "model/utils.hpp"
 #include "model/errmsg.hpp"
 
-#include "connect.hpp"
 #include "queue.hpp"
-#include "queuelist.hpp"
 #include "utils.hpp"
+
+#include "queuelist.hpp"
 
 namespace Model
 {
@@ -45,31 +47,22 @@ QueueList::QueueList() :
 {}
 
 QueueList::~QueueList()
-{
-    if (m_conn) delete m_conn;
-}
+{}
 
-u8 QueueList::init(IConnect *connect)
+u8 QueueList::init(std::shared_ptr<grpc::ChannelInterface> &token)
 {
     spdlog::debug("{}:{} QueueList::init", LOG_FILE_PATH(__FILE__), __LINE__);
 
-    if (!connect)
+    if (token == nullptr)
     {
-        spdlog::error("{}:{} connect is nullptr", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} token is nullptr", LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_INVALID_ARGUMENT;
     }
 
-    if (!connect->connectToken())
-    {
-        spdlog::error("{}:{} connect token is nullptr",
-            LOG_FILE_PATH(__FILE__), __LINE__);
-        return ErrCode_INVALID_ARGUMENT;
-    }
-
-    Token *token = reinterpret_cast<Token *>(connect->connectToken());
+    m_token = token;
     try
     {
-        m_stub = ff::QueueList::NewStub(token->channel);
+        m_stub = ff::QueueList::NewStub(m_token);
         if (m_stub == nullptr)
         {
             spdlog::error("{}:{} Fail to get stub",
@@ -83,7 +76,6 @@ u8 QueueList::init(IConnect *connect)
         return ErrCode_OS_ERROR;
     }
 
-    m_conn = connect;
     return ErrCode_OK;
 }
 
@@ -213,7 +205,7 @@ std::shared_ptr<IQueue> QueueList::getQueue(const std::string &name)
             return nullptr;
         }
 
-        if (queue->init(m_conn, nullptr, name))
+        if (queue->init(m_token, name))
         {
             spdlog::error("{}:{} Fail to initialize queue",
                 LOG_FILE_PATH(__FILE__), __LINE__);

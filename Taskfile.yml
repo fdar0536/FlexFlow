@@ -14,7 +14,7 @@ vars:
   # global settings
   TMP_DIR: '{{.TEMP | default .TMPDIR | default "/tmp" }}'
   BUILD_TYPE: '{{ .BUILD_TYPE | default "Release" }}'
-  PROTO_VERSION: '{{.PROTO_VERSION | default "v29.5"}}'
+  PROTO_VERSION: '{{.PROTO_VERSION | default "v33.4"}}'
 
   # for cpp
   CPP_BUILD_DIR: '{{ .CPP_BUILD_DIR | default (printf "%s/build-cpp" .TMP_DIR) }}'

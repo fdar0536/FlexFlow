@@ -23,11 +23,6 @@
 
 #include <cstdio>
 
-#include "model/dao/grpc/connect.hpp"
-#include "model/dao/grpc/queuelist.hpp"
-#include "model/dao/sqlite/connect.hpp"
-#include "model/dao/sqlite/queuelist.hpp"
-
 #ifdef _WIN32
 #include "windows.h"
 #include "io.h"
@@ -36,6 +31,14 @@
 
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/daily_file_sink.h"
+
+#include "model/utils.hpp"
+
+#include "model/connect/grpc/connect.hpp"
+#include "model/connect/sqlite/connect.hpp"
+
+#include "model/dao/grpc/queuelist.hpp"
+#include "model/dao/sqlite/queuelist.hpp"
 
 #include "global.hpp"
 
@@ -143,23 +146,15 @@ u8 spdlogInit(const std::string &path, const i32 logLevel)
     return 0;
 }
 
-u8 sqliteInit(Model::DAO::IQueueList **out, const std::string &target)
+u8 sqliteInit(Model::DAO::IQueueList **out, std::string &target)
 {
     spdlog::debug("{}:{} sqliteInit", LOG_FILE_PATH(__FILE__), __LINE__);
     spdlog::debug("{}:{} target is: {}", LOG_FILE_PATH(__FILE__), __LINE__, target);
 
-    Model::DAO::SQLite::Connect *conn(nullptr);
-    conn = new (std::nothrow) Model::DAO::SQLite::Connect();
-    if (!conn)
-    {
-        spdlog::error("{}:{} Fail to allocate memory",
-                      LOG_FILE_PATH(__FILE__), __LINE__);
-        return 1;
-    }
+    auto token = Model::Connect::SQLite::connect(target);
 
-    if (conn->startConnect(target))
+    if (token == nullptr)
     {
-        delete conn;
         spdlog::error("{}:{} Fail to connect to {}",
                       LOG_FILE_PATH(__FILE__), __LINE__, target);
         return 1;
@@ -177,12 +172,11 @@ u8 sqliteInit(Model::DAO::IQueueList **out, const std::string &target)
         return 1;
     }
 
-    if (sqlPtr->init(conn))
+    if (sqlPtr->init(token, target))
     {
         spdlog::error("{}:{} Fail to initialize sqlite queue list",
                       LOG_FILE_PATH(__FILE__), __LINE__);
         delete sqlPtr;
-        delete conn;
         return 1;
     }
 
@@ -195,26 +189,11 @@ u8 grpcInit(Model::DAO::IQueueList **out, const std::string &target, const i32 p
     spdlog::debug("{}:{} grpcInit", LOG_FILE_PATH(__FILE__), __LINE__);
     spdlog::debug("{}:{} target is: {}", LOG_FILE_PATH(__FILE__), __LINE__, target);
     spdlog::debug("{}:{} port is: {}", LOG_FILE_PATH(__FILE__), __LINE__, port);
-    
-    Model::DAO::GRPC::Connect *conn = new (std::nothrow) Model::DAO::GRPC::Connect;
-    if (!conn)
-    {
-        spdlog::error("{}:{} Fail to allocate memory",
-                      LOG_FILE_PATH(__FILE__), __LINE__);
-        return 1;
-    }
 
-    if (conn->init())
-    {
-        delete conn;
-        spdlog::error("{}:{} Fail to initialize conn",
-                      LOG_FILE_PATH(__FILE__), __LINE__);
-        return 1;
-    }
+    auto token = Model::Connect::GRPC::connect(target, port);
 
-    if (conn->startConnect(target, port))
+    if (token == nullptr)
     {
-        delete conn;
         spdlog::error("{}:{} Fail to connect to server", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
@@ -222,16 +201,14 @@ u8 grpcInit(Model::DAO::IQueueList **out, const std::string &target, const i32 p
     Model::DAO::GRPC::QueueList *queueList = new (std::nothrow) Model::DAO::GRPC::QueueList;
     if (!queueList)
     {
-        delete conn;
         spdlog::error("{}:{} Fail to allocate memory", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
-    if (queueList->init(conn))
+    if (queueList->init(token))
     {
         delete queueList;
         spdlog::error("{}:{} Fail to initialize queue list", LOG_FILE_PATH(__FILE__), __LINE__);
-        delete conn;
         return 1;
     }
 

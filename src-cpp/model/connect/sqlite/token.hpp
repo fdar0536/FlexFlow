@@ -21,73 +21,43 @@
  * SOFTWARE.
  */
 
-#ifndef _MODEL_PROC_POSIXPROC_HPP_
-#define _MODEL_PROC_POSIXPROC_HPP_
+#ifndef _MODEL_CONNECT_SQLITE_TOKEN_HPP_
+#define _MODEL_CONNECT_SQLITE_TOKEN_HPP_
 
-#include <atomic>
-#include <deque>
 #include <mutex>
-#include <thread>
 
-#include "iproc.hpp"
+#include "sqlite3.h"
 
 namespace Model
 {
 
-namespace Proc
+namespace Connect
 {
 
-class PosixProc : public IProc
+namespace SQLite
 {
+
+class Token
+{
+
 public:
 
-    ~PosixProc();
+    Token();
 
-    virtual u8 init() override;
+    ~Token();
 
-    virtual u8 start(const Task &task) override; 
+    sqlite3 *db = nullptr;
 
-    virtual void stop() override;
+    sqlite3_stmt *stmt = nullptr;
 
-    virtual bool isRunning() override;
+    std::mutex mutex;
 
-    virtual void readCurrentOutput(std::vector<std::string> &out) override;
+}; // end class Token
 
-    virtual u8 exitCode(i32 &out) override;
+} // end namespace SQLite
 
-protected:
-
-    pid_t m_pid = 0;
-
-    int m_masterFD = -1;
-
-    std::atomic<i32> m_exitCode;
-
-    void startChild(const Task &);
-
-    char **buildChildArgv(const Task &);
-
-    void stopImpl();
-
-    void closeFile(int *);
-
-    // for read child process' output
-    std::mutex m_mutex;
-
-    std::deque<std::string> m_deque;
-
-    virtual u8 asioInit() = 0;
-
-    virtual void asioFin() = 0;
-
-    virtual void readOutputLoop() = 0;
-
-    // for reading current output
-    std::jthread m_thread;
-};
-
-} // end namespace Proc
+} // end namespace Connect
 
 } // end namespace Model
 
-#endif // _MODEL_PROC_POSIXPROC_HPP_
+#endif // _MODEL_CONNECT_SQLITE_TOKEN_HPP_

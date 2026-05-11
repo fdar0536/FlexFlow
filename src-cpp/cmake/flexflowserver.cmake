@@ -3,11 +3,15 @@ if(ENABLE_SERVER)
         protobuf::libprotobuf
         gRPC::grpc++
         CLI11::CLI11
+        spdlog::spdlog
+        SQLite3::SQLite3
+        yaml-cpp::yaml-cpp
+
+        OpenSSL::Crypto
+        OpenSSL::SSL
+        OpenSSL::applink
 
         grpc_common
-        spdlog::spdlog
-        SQLite::SQLite3
-        yaml-cpp::yaml-cpp
     )
 
     set(SERVER_CONTROLLER_SRC

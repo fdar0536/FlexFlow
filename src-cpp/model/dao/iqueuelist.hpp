@@ -27,7 +27,6 @@
 #include <string>
 #include <vector>
 
-#include "iconnect.hpp"
 #include "iqueue.hpp"
 
 namespace Model
@@ -44,13 +43,6 @@ class IQueueList
 public:
 
     virtual ~IQueueList() {}
-
-    /**
-     * @brief initialize
-     * @param connect the connect object form IConnect
-     * @return u8 return 0 if success
-     */
-    virtual u8 init(IConnect *connect) = 0;
 
     /**
      * @brief Create a Queue
@@ -90,13 +82,6 @@ public:
      * @return std::shared_ptr<IQueue> return nullptr if failed
      */
     virtual std::shared_ptr<IQueue> getQueue(const std::string &name) = 0;
-
-protected:
-
-    /**
-     * @brief the IConnect object 
-     */
-    IConnect *m_conn;
 
 }; // end class IQueueList
 

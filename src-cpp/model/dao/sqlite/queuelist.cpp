@@ -22,6 +22,7 @@
  */
 
 #include <filesystem>
+#include <memory>
 #include <new>
 
 #include "spdlog/spdlog.h"
@@ -51,28 +52,34 @@ namespace SQLite
 
 QueueList::QueueList()
 {
-    m_conn =nullptr;
+    m_token = nullptr;
 }
 
 QueueList::~QueueList()
 {
-    if (m_conn) delete m_conn;
+    m_token = nullptr;
 }
 
 u8
-QueueList::init(IConnect *connect)
+QueueList::init(std::shared_ptr<Connect::SQLite::Token> &token,
+        const std::string &target)
 {
     spdlog::debug("{}:{} QueueList::init", LOG_FILE_PATH(__FILE__), __LINE__);
 
-    if (!connect)
+    if (token == nullptr)
     {
-        spdlog::error("{}:{} \"connect\" is nullptr.", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} token is nullptr.",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_INVALID_ARGUMENT;
     }
 
-    if (Utils::verifyDir(connect->targetPath()))
+    m_token = token;
+    m_target = target;
+
+    if (Utils::verifyDir(target))
     {
-        spdlog::error("{}:{} Fail to verify target path.", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} Fail to verify target path.",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_INVALID_ARGUMENT;
     }
 
@@ -80,8 +87,8 @@ QueueList::init(IConnect *connect)
     std::error_code ec;
     std::string fileName;
     m_queueList.clear();
-    m_conn = connect;
-    for (const auto& entry : std::filesystem::directory_iterator(connect->targetPath()))
+    for (const auto& entry :
+         std::filesystem::directory_iterator(target))
     {
         if (std::filesystem::is_directory(entry))
         {
@@ -117,7 +124,7 @@ QueueList::init(IConnect *connect)
         {
             spdlog::error("{}:{} Fail to create queue: {}", LOG_FILE_PATH(__FILE__), __LINE__,
                           name);
-            m_conn = nullptr;
+            m_token = nullptr;
             m_queueList.clear();
             return ErrCode_OS_ERROR;
         }
@@ -164,8 +171,10 @@ u8 QueueList::createQueue(const std::string &name)
         spdlog::error("{}:{} Fail to allocate memory", LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_OS_ERROR;
     }
+    
+    auto _proc = std::shared_ptr<Proc::IProc>(proc);
 
-    if (queue->init(m_conn, proc, name))
+    if (queue->init(m_token, m_target, _proc, name))
     {
         delete queue;
         spdlog::error("{}:{} Fail to initialize queue", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -203,7 +212,7 @@ u8 QueueList::deleteQueue(const std::string &name)
         return ErrCode_NOT_FOUND;
     }
 
-    std::remove((m_conn->targetPath() + "/" + name + ".db").c_str());
+    std::remove((m_target + "/" + name + ".db").c_str());
     return ErrCode_OK;
 }
 

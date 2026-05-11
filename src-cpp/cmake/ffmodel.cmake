@@ -1,14 +1,16 @@
 set(FF_model_LIBS
     protobuf::libprotobuf
     gRPC::grpc++
-    SQLite::SQLite3
+    SQLite3::SQLite3
     spdlog::spdlog
+    OpenSSL::Crypto
+    OpenSSL::SSL
+    OpenSSL::applink
 
     grpc_common
 )
 
 set(MODEL_SRC
-
 
     # model
     model/errmsg.cpp
@@ -21,23 +23,34 @@ set(MODEL_SRC
     controller/global/global.cpp
     controller/global/global.hpp
 
+    # auth
+    model/auth/crypto.cpp
+    model/auth/crypto.hpp
+    model/auth/iauth.hpp
+
+    # connect
+
+    # sqlite
+    model/connect/sqlite/connect.cpp
+    model/connect/sqlite/connect.hpp
+    model/connect/sqlite/token.cpp
+    model/connect/sqlite/token.hpp
+
+    # grpc
+    model/connect/grpc/connect.cpp
+    model/connect/grpc/connect.hpp
+
     # DAO
-    model/dao/iconnect.cpp
-    model/dao/iconnect.hpp
     model/dao/iqueuelist.hpp
     model/dao/iqueue.hpp
 
     #sqlite
-    model/dao/sqlite/connect.cpp
-    model/dao/sqlite/connect.hpp
     model/dao/sqlite/queuelist.cpp
     model/dao/sqlite/queue.hpp
     model/dao/sqlite/queue.cpp
     model/dao/sqlite/queuelist.hpp
     
     #grpc
-    model/dao/grpc/connect.cpp
-    model/dao/grpc/connect.hpp
     model/dao/grpc/queue.cpp
     model/dao/grpc/queue.hpp
     model/dao/grpc/queuelist.cpp
@@ -65,19 +78,19 @@ else ()
         model/proc/posixproc.cpp
         model/proc/posixproc.hpp
     )
+    
+    if (LINUX)
+        list(APPEND MODEL_SRC
+            model/proc/linuxproc.cpp
+            model/proc/linuxproc.hpp
+        )
+    else (APPLE)
+        list(APPEND MODEL_SRC
+            model/proc/macproc.cpp
+            model/proc/macproc.hpp
+        )
+    endif (LINUX)
 endif (WIN32)
-
-if (LINUX)
-    list(APPEND MODEL_SRC
-        model/proc/linuxproc.cpp
-        model/proc/linuxproc.hpp
-    )
-else (APPLE)
-    list(APPEND MODEL_SRC
-        model/proc/macproc.cpp
-        model/proc/macproc.hpp
-    )
-endif (LINUX)
 
 add_library(ffmodel STATIC
     ${MODEL_SRC}

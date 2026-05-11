@@ -22,7 +22,8 @@
  */
 
 #include <iostream>
-#include <new>
+
+#include "model/utils.hpp"
 
 #include "param.hpp"
 

@@ -26,6 +26,8 @@
 
 #include <unordered_map>
 
+#include "model/connect/sqlite/token.hpp"
+
 #include "model/dao/iqueuelist.hpp"
 
 namespace Model
@@ -45,7 +47,7 @@ public:
 
     ~QueueList();
 
-    u8 init(IConnect *connect) override;
+    u8 init(std::shared_ptr<Connect::SQLite::Token> &token, const std::string &target);
 
     u8 createQueue(const std::string &name) override;
 
@@ -62,6 +64,9 @@ private:
 
     std::unordered_map<std::string,
     std::shared_ptr<IQueue>> m_queueList;
+
+    std::shared_ptr<Connect::SQLite::Token> m_token;
+    std::string m_target;
 };
 
 } // end namespace SQLite

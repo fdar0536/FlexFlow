@@ -1,6 +1,6 @@
 /*
  * Flex Flow
- * Copyright (c) 2026-present fdar0536
+ * Copyright (c) 2026-presnet fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,73 +21,37 @@
  * SOFTWARE.
  */
 
-#ifndef _MODEL_PROC_POSIXPROC_HPP_
-#define _MODEL_PROC_POSIXPROC_HPP_
+#ifndef _MODEL_AUTH_UTILS_HPP_
+#define _MODEL_AUTH_UTILS_HPP_
 
-#include <atomic>
-#include <deque>
-#include <mutex>
-#include <thread>
+#include <vector>
+#include <string>
 
-#include "iproc.hpp"
+#include "model/defines.h"
+
 
 namespace Model
 {
 
-namespace Proc
+namespace Auth
 {
 
-class PosixProc : public IProc
+namespace Crypto
 {
-public:
 
-    ~PosixProc();
+void decodeBase32(const std::string &base32, std::vector<u8> &out);
 
-    virtual u8 init() override;
+std::string generateTotp(const std::vector<u8> &key,
+                         u64 time_step = 30);
 
-    virtual u8 start(const Task &task) override; 
+std::string sha512(const std::string &input);
 
-    virtual void stop() override;
+u8 genHexString(size_t length, std::string &out);
 
-    virtual bool isRunning() override;
+} // end namespace Utils
 
-    virtual void readCurrentOutput(std::vector<std::string> &out) override;
-
-    virtual u8 exitCode(i32 &out) override;
-
-protected:
-
-    pid_t m_pid = 0;
-
-    int m_masterFD = -1;
-
-    std::atomic<i32> m_exitCode;
-
-    void startChild(const Task &);
-
-    char **buildChildArgv(const Task &);
-
-    void stopImpl();
-
-    void closeFile(int *);
-
-    // for read child process' output
-    std::mutex m_mutex;
-
-    std::deque<std::string> m_deque;
-
-    virtual u8 asioInit() = 0;
-
-    virtual void asioFin() = 0;
-
-    virtual void readOutputLoop() = 0;
-
-    // for reading current output
-    std::jthread m_thread;
-};
-
-} // end namespace Proc
+} // end namespace Auth
 
 } // end namespace Model
 
-#endif // _MODEL_PROC_POSIXPROC_HPP_
+#endif // _MODEL_AUTH_UTILS_HPP_

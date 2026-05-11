@@ -21,73 +21,28 @@
  * SOFTWARE.
  */
 
-#ifndef _MODEL_PROC_POSIXPROC_HPP_
-#define _MODEL_PROC_POSIXPROC_HPP_
+#ifndef _MODEL_CONNECT_GRPC_CONNECT_HPP_
+#define _MODEL_CONNECT_GRPC_CONNECT_HPP_
 
-#include <atomic>
-#include <deque>
-#include <mutex>
-#include <thread>
+#include "access.grpc.pb.h"
 
-#include "iproc.hpp"
+#include "model/defines.h"
 
 namespace Model
 {
 
-namespace Proc
+namespace Connect
 {
 
-class PosixProc : public IProc
+namespace GRPC
 {
-public:
 
-    ~PosixProc();
+std::shared_ptr<grpc::ChannelInterface> connect(const std::string &target, const u16 port);
 
-    virtual u8 init() override;
+} // end namespace GRPC
 
-    virtual u8 start(const Task &task) override; 
-
-    virtual void stop() override;
-
-    virtual bool isRunning() override;
-
-    virtual void readCurrentOutput(std::vector<std::string> &out) override;
-
-    virtual u8 exitCode(i32 &out) override;
-
-protected:
-
-    pid_t m_pid = 0;
-
-    int m_masterFD = -1;
-
-    std::atomic<i32> m_exitCode;
-
-    void startChild(const Task &);
-
-    char **buildChildArgv(const Task &);
-
-    void stopImpl();
-
-    void closeFile(int *);
-
-    // for read child process' output
-    std::mutex m_mutex;
-
-    std::deque<std::string> m_deque;
-
-    virtual u8 asioInit() = 0;
-
-    virtual void asioFin() = 0;
-
-    virtual void readOutputLoop() = 0;
-
-    // for reading current output
-    std::jthread m_thread;
-};
-
-} // end namespace Proc
+} // end namespace Connect
 
 } // end namespace Model
 
-#endif // _MODEL_PROC_POSIXPROC_HPP_
+#endif // _MODEL_CONNECT_GRPC_CONNECT_HPP_

@@ -21,13 +21,15 @@
  * SOFTWARE.
  */
 
+#include <memory>
+
 #include "spdlog/spdlog.h"
 
+#include "model/utils.hpp"
 #include "model/errmsg.hpp"
-#include "connect.hpp"
 
-#include "controller/global/global.hpp"
 #include "utils.hpp"
+
 #include "queue.hpp"
 
 namespace Model
@@ -48,24 +50,15 @@ Queue::~Queue()
 {}
 
 u8
-Queue::init(IConnect *connect,
-                Proc::IProc *process,
-                const std::string &name)
+Queue::init(std::shared_ptr<grpc::ChannelInterface> &token,
+            const std::string &name)
 {
     spdlog::debug("{}:{} Queue::init", LOG_FILE_PATH(__FILE__), __LINE__);
 
-    UNUSED(process);
-    if (!connect)
+    if (token == nullptr)
     {
         spdlog::error(
-            "{}:{} connect is nullptr",
-            LOG_FILE_PATH(__FILE__), __LINE__);
-        return ErrCode_INVALID_ARGUMENT;
-    }
-
-    if (!connect->connectToken())
-    {
-        spdlog::error("{}:{} connect token is nullptr",
+            "{}:{} token is nullptr",
             LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_INVALID_ARGUMENT;
     }
@@ -76,11 +69,9 @@ Queue::init(IConnect *connect,
         return ErrCode_INVALID_ARGUMENT;
     }
 
-    Token *token = reinterpret_cast<Token *>(connect->connectToken());
-
     try
     {
-        m_stub = ff::Queue::NewStub(token->channel);
+        m_stub = ff::Queue::NewStub(token);
         if (m_stub == nullptr)
         {
             spdlog::error("{}:{} Fail to get stub",

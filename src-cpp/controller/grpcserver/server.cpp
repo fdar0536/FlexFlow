@@ -26,8 +26,9 @@
 
 #include "server.hpp"
 
-#include "controller/global/global.hpp"
 #include "controller/grpcserver/init.hpp"
+
+#include "model/utils.hpp"
 
 namespace Controller
 {

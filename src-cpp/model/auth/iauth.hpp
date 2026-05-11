@@ -1,6 +1,6 @@
 /*
  * Flex Flow
- * Copyright (c) 2026-present fdar0536
+ * Copyright (c) 2026-presnet fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,73 +21,45 @@
  * SOFTWARE.
  */
 
-#ifndef _MODEL_PROC_POSIXPROC_HPP_
-#define _MODEL_PROC_POSIXPROC_HPP_
+#ifndef _MODEL_AUTH_IAUTH_HPP_
+#define _MODEL_AUTH_IAUTH_HPP_
 
-#include <atomic>
-#include <deque>
-#include <mutex>
-#include <thread>
+#include <string>
 
-#include "iproc.hpp"
+#include "model/defines.h"
 
 namespace Model
 {
 
-namespace Proc
+namespace Auth
 {
 
-class PosixProc : public IProc
+/**
+ * @brief Define Auth
+ */
+class IAuth
 {
+
 public:
 
-    ~PosixProc();
+    virtual u8 login(const std::string &username,
+                     const std::string &password,
+                     const std::string &otp,
+                     std::string &token) = 0;
 
-    virtual u8 init() override;
+    virtual u8 logout(const std::string &username) = 0;
 
-    virtual u8 start(const Task &task) override; 
+    virtual u8 cannotAccess(const std::string &ip) = 0;
 
-    virtual void stop() override;
+    virtual u8 cannotAccess(const std::string &ip, const std::string &token) = 0;
 
-    virtual bool isRunning() override;
+    // remove banned ip is included in "cannotAccess"
+    virtual void addBannedIp(const std::string &ip) = 0;
 
-    virtual void readCurrentOutput(std::vector<std::string> &out) override;
+}; // end class IAuth
 
-    virtual u8 exitCode(i32 &out) override;
-
-protected:
-
-    pid_t m_pid = 0;
-
-    int m_masterFD = -1;
-
-    std::atomic<i32> m_exitCode;
-
-    void startChild(const Task &);
-
-    char **buildChildArgv(const Task &);
-
-    void stopImpl();
-
-    void closeFile(int *);
-
-    // for read child process' output
-    std::mutex m_mutex;
-
-    std::deque<std::string> m_deque;
-
-    virtual u8 asioInit() = 0;
-
-    virtual void asioFin() = 0;
-
-    virtual void readOutputLoop() = 0;
-
-    // for reading current output
-    std::jthread m_thread;
-};
-
-} // end namespace Proc
+} // end namespace Auth
 
 } // end namespace Model
 
-#endif // _MODEL_PROC_POSIXPROC_HPP_
+#endif // _MODEL_AUTH_IAUTH_HPP_

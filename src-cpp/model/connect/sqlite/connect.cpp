@@ -1,6 +1,6 @@
 /*
  * Flex Flow
- * Copyright (c) 2023-2024 fdar0536
+ * Copyright (c) 2023-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,33 +23,58 @@
 
 #include "spdlog/spdlog.h"
 
-#include "controller/global/global.hpp"
+#include "model/utils.hpp"
 
-#include "iconnect.hpp"
+#include "connect.hpp"
 
 namespace Model
 {
 
-namespace DAO
+namespace Connect
 {
 
-IConnect::~IConnect()
-{}
-
-void *IConnect::connectToken() const
+namespace SQLite
 {
-    spdlog::debug("{}:{} IConnect::connectToken", LOG_FILE_PATH(__FILE__), __LINE__);
 
-    return m_connectToken;
+std::shared_ptr<Token> connect(std::string &target)
+{
+    spdlog::debug("{}:{} Model::Connect::SQLite::connect",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+
+    if (target.empty())
+    {
+        spdlog::error("{}:{} target is empty.", LOG_FILE_PATH(__FILE__), __LINE__);
+        return nullptr;
+    }
+
+    std::string basePath = target;
+    Utils::convertPath(basePath);
+    if (basePath.at(basePath.length() - 1) == '/')
+    {
+        basePath = basePath.substr(0, basePath.length() - 1);
+    }
+
+    if (Utils::verifyDir(basePath))
+    {
+        spdlog::error("{}:{} Fail to verify basePath.",
+            LOG_FILE_PATH(__FILE__), __LINE__);
+        return nullptr;
+    }
+
+    target = basePath;
+    Token *token = new (std::nothrow) Token;
+    if (!token)
+    {
+        spdlog::error("{}:{} Fail to allocate memory",
+            LOG_FILE_PATH(__FILE__), __LINE__);
+        return nullptr;
+    }
+
+    return std::shared_ptr<Token>(token);
 }
 
-std::string IConnect::targetPath() const
-{
-    spdlog::debug("{}:{} IConnect::targetPath", LOG_FILE_PATH(__FILE__), __LINE__);
+} // end namespace SQLite
 
-    return m_targetPath;
-}
-
-} // end namespace DAO
+} // end namespace Connect
 
 } // end namespace Model
