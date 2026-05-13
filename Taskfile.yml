@@ -36,6 +36,16 @@ tasks:
     deps: [config-cmake]
     cmds:
       - cmake --build "{{.CPP_BUILD_DIR}}" -j {{.JOBS}}
+  
+  build-gateway:
+    dir: ./src-go
+    cmds:
+      - go mod tidy
+      - go build
+    sources:
+      - ./**/*.go
+    generates:
+      - FlexFlowGateway
 
   build-webui:
     deps: [config-webui]
@@ -43,7 +53,7 @@ tasks:
       - npx ng build --delete-output-path=false
   
   clean:
-    deps: [clean-cmake, clean-buf, clean-webui]
+    deps: [clean-cmake, clean-buf, clean-go, clean-webui]
     cmds:
       - echo "Clean done!"
   
@@ -128,6 +138,10 @@ tasks:
     cmds:
       - cmake -E rm -rf "{{.CPP_BUILD_DIR}}"
   
+  clean-go:
+    cmds:
+      - cmake -E rm -rf src-go/FlexFlowGateway
+
   clean-webui:
     cmds:
       - cmake -E rm -rf "{{.WEBUI_BUILD_DIR}}" src-web/model/config.ts

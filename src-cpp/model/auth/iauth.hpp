@@ -42,19 +42,22 @@ class IAuth
 
 public:
 
+    virtual ~IAuth() {}
+
     virtual u8 login(const std::string &username,
                      const std::string &password,
                      const std::string &otp,
                      std::string &token) = 0;
 
-    virtual u8 logout(const std::string &username) = 0;
+    virtual u8 logout(const std::string &username, const std::string &token) = 0;
 
     virtual u8 cannotAccess(const std::string &ip) = 0;
 
     virtual u8 cannotAccess(const std::string &ip, const std::string &token) = 0;
 
-    // remove banned ip is included in "cannotAccess"
     virtual void addBannedIp(const std::string &ip) = 0;
+
+    virtual void removeBannedIp(const std::string &ip) = 0;
 
 }; // end class IAuth
 

@@ -26,8 +26,6 @@
 
 #include <thread>
 
-#include "grpcpp/server.h"
-
 #include "model/defines.h"
 #include "accessimpl.hpp"
 #include "queueimpl.hpp"
@@ -60,8 +58,6 @@ private:
     std::mutex m_cvMutex;
 
     bool m_done = false;
-
-    std::unique_ptr<grpc::Server> m_server = nullptr;
 
     AccessImpl m_accessImpl;
 

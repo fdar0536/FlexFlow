@@ -28,6 +28,10 @@ set(MODEL_SRC
     model/auth/crypto.hpp
     model/auth/iauth.hpp
 
+    # Simple auth
+    model/auth/simple/auth.cpp
+    model/auth/simple/auth.hpp
+
     # connect
 
     # sqlite

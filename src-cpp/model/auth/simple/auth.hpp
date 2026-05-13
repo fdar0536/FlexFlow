@@ -60,13 +60,15 @@ public:
                      const std::string &otp,
                      std::string &token) override;
 
-    virtual u8 logout(const std::string &username) override;
+    virtual u8 logout(const std::string &username, const std::string &token) override;
 
     virtual u8 cannotAccess(const std::string &ip) override;
 
     virtual u8 cannotAccess(const std::string &ip, const std::string &token) override;
 
     virtual void addBannedIp(const std::string &ip) override;
+
+    virtual void removeBannedIp(const std::string &ip) override;
 
     std::string username = "test";
     
@@ -95,6 +97,10 @@ private:
     std::mutex m_mutex;
 
     u8 genToken();
+
+    void banUser();
+
+    u8 unBanUser();
 
 }; // class Auth
 

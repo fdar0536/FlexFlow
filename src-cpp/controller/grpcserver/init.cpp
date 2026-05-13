@@ -27,6 +27,7 @@
 
 #include "model/utils.hpp"
 #include "model/errmsg.hpp"
+#include "model/auth/simple/auth.hpp"
 
 #include "init.hpp"
 
@@ -40,7 +41,9 @@ Config config;
 
 GRPCServer::Server server;
 
-Model::DAO::IQueueList *sqliteQueueList = nullptr;
+Model::DAO::IQueueList *queueList = nullptr;
+
+Model::Auth::IAuth *auth = nullptr;
 
 u8 init(int argc, char **argv)
 {
@@ -49,6 +52,14 @@ u8 init(int argc, char **argv)
     if (Global::consoleInit())
     {
         spdlog::error("{}:{} initConsole failed", LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
+
+    auth = new (std::nothrow) Model::Auth::Simple::Auth;
+    if (!auth)
+    {
+        spdlog::error("{}:{} Fail to allocate memory",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
@@ -65,7 +76,7 @@ u8 init(int argc, char **argv)
         return 1;
     }
 
-    if (Controller::Global::sqliteInit(&sqliteQueueList, config.dbPath))
+    if (Controller::Global::sqliteInit(&queueList, config.dbPath))
     {
         spdlog::error("{}:{} Fail to initialize sqlite queue list",
             LOG_FILE_PATH(__FILE__), __LINE__);
@@ -97,7 +108,8 @@ void fin()
 {
     spdlog::debug("{}:{} fin", LOG_FILE_PATH(__FILE__), __LINE__);
     Global::consoleFin();
-    if (sqliteQueueList) delete sqliteQueueList;
+    if (queueList) delete queueList;
+    if (auth) delete auth;
 }
 
 } // end namespace GRPCServer

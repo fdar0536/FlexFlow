@@ -37,6 +37,8 @@ This is a simple tool that allow you can manage the task flow by remote or in lo
   - Model
   - [CLI11](https://github.com/CLIUtils/CLI11)
   - [yaml-cpp](https://github.com/jbeder/yaml-cpp)
+- Gateway
+  - [Go](https://go.dev)
 
 ### Environment variable for build
 
@@ -47,6 +49,7 @@ This is a simple tool that allow you can manage the task flow by remote or in lo
 
 - ```task build-cpp```: to build model and grpc server
 - ```task build-webui```: to build web ui
+- ```task build-gateway```: to build gateway
 - ```task clean```: to clean build
 
 ## License

@@ -47,18 +47,16 @@ namespace Proc
 {
 
 // implement public member functions
-PosixProc::~PosixProc()
-{}
-
-u8 PosixProc::init()
+PosixProc::PosixProc()
 {
-    spdlog::debug("{}:{} PosixProc::init", LOG_FILE_PATH(__FILE__), __LINE__);
-
+    spdlog::debug("{}:{} PosixProc::PosixProc", LOG_FILE_PATH(__FILE__), __LINE__);
     m_pid = 0;
     m_exitCode.store(0, std::memory_order_relaxed);
     m_deque.clear();
-    return 0;
 }
+
+PosixProc::~PosixProc()
+{}
 
 u8 PosixProc::start(const Task &task)
 {

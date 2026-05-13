@@ -61,7 +61,7 @@ QueueListImpl::Create(grpc::ServerContext *ctx,
                             "\"name\" is empty string");
     }
 
-    u8 code = sqliteQueueList->createQueue(req->name());
+    u8 code = queueList->createQueue(req->name());
     if (code)
     {
         spdlog::error("{}:{} Fail to create queue",
@@ -96,7 +96,7 @@ QueueListImpl::Rename(grpc::ServerContext *ctx,
                             "\"oldName\" or \"newName\" is empty string");
     }
 
-    u8 code = sqliteQueueList->renameQueue(req->oldname(), req->newname());
+    u8 code = queueList->renameQueue(req->oldname(), req->newname());
     if (code)
     {
         spdlog::error("{}:{} Fail to rename", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -131,7 +131,7 @@ QueueListImpl::Delete(grpc::ServerContext *ctx,
                             "\"name\" is empty string");
     }
 
-    u8 code = sqliteQueueList->deleteQueue(req->name());
+    u8 code = queueList->deleteQueue(req->name());
     if (code)
     {
         spdlog::error("{}:{} Fail to delete", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -159,7 +159,7 @@ QueueListImpl::List(grpc::ServerContext *ctx,
     }
 
     std::vector<std::string> out;
-    u8 code = sqliteQueueList->listQueue(out);
+    u8 code = queueList->listQueue(out);
     if (code)
     {
         spdlog::error("{}:{} Fail to list queue", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -193,7 +193,7 @@ QueueListImpl::GetQueue(grpc::ServerContext *ctx,
                             "Internal server error");
     }
 
-    auto queue = sqliteQueueList->getQueue(req->name());
+    auto queue = queueList->getQueue(req->name());
     if (queue == nullptr)
     {
         spdlog::error("{}:{} No such queue", LOG_FILE_PATH(__FILE__), __LINE__);

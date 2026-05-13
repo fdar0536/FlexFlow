@@ -33,33 +33,22 @@ namespace Model
 namespace Proc
 {
 
-Task::Task() :
-    execName(""),
-    args(std::vector<std::string>()),
-    workDir(""),
-    ID(0),
-    exitCode(0),
-    isSuccess(false)
+void printTask(const Task &task)
 {
-    args.clear();
-}
-
-void Task::print() const
-{
-    spdlog::debug("{}:{} Task::print", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} printTask", LOG_FILE_PATH(__FILE__), __LINE__);
     
-    fmt::println("execName: {}", execName);
+    fmt::println("execName: {}", task.execName);
     fmt::println("args: ");
-    for (auto it = args.begin(); it != args.end(); ++it)
+    for (auto it = task.args.begin(); it != task.args.end(); ++it)
     {
         fmt::println("{}", *it);
     }
     fmt::println("");
 
-    fmt::println("workDir: {}", workDir);
-    fmt::println("ID: {}", ID);
-    fmt::println("exitCode: {}", exitCode);
-    fmt::println("isSuccess: {}", std::to_string(isSuccess));
+    fmt::println("workDir: {}", task.workDir);
+    fmt::println("ID: {}", task.ID);
+    fmt::println("exitCode: {}", task.exitCode);
+    fmt::println("isSuccess: {}", std::to_string(task.isSuccess));
 }
 
 } // end namespace Proc

@@ -39,23 +39,19 @@ WinProc::WinProc() :
     m_childStdoutRead(nullptr),
     m_childStdoutWrite(nullptr),
     m_procInfo(PROCESS_INFORMATION())
-{}
-
-WinProc::~WinProc()
 {
-    stopImpl();
-}
-
-u8 WinProc::init()
-{
-    spdlog::debug("{}:{} WinProc::init", LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} WinProc::WinProc", LOG_FILE_PATH(__FILE__), __LINE__);
 
     m_exitCode.store(0, std::memory_order_relaxed);
     m_procInfo.hProcess = NULL;
     m_procInfo.hThread = NULL;
     resetHandle();
     m_deque.clear();
-    return 0;
+}
+
+WinProc::~WinProc()
+{
+    stopImpl();
 }
 
 u8 WinProc::start(const Task &task)

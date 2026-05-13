@@ -21,73 +21,31 @@
  * SOFTWARE.
  */
 
-#ifndef _MODEL_PROC_POSIXPROC_HPP_
-#define _MODEL_PROC_POSIXPROC_HPP_
+#ifndef _CONTROLLER_GRPCSERVER_UTILS_HPP_
+#define _CONTROLLER_GRPCSERVER_UTILS_HPP_
 
-#include <atomic>
-#include <deque>
-#include <mutex>
-#include <thread>
+#include "grpcpp/server_context.h"
 
-#include "iproc.hpp"
+#include "model/defines.h"
+#include <string>
 
-namespace Model
+namespace Controller
 {
 
-namespace Proc
+namespace GRPCServer
 {
 
-class PosixProc : public IProc
+namespace Utils
 {
-public:
 
-    PosixProc();
+std::string getIPFromContext(grpc::ServerContextBase *);
 
-    ~PosixProc();
+u8 getTokenFromContext(grpc::ServerContextBase *, std::string &);
 
-    virtual u8 start(const Task &task) override; 
+} // end namespace Utils
 
-    virtual void stop() override;
+} // end namespace GRPCServer
 
-    virtual bool isRunning() override;
+} // end namespace Controller
 
-    virtual void readCurrentOutput(std::vector<std::string> &out) override;
-
-    virtual u8 exitCode(i32 &out) override;
-
-protected:
-
-    pid_t m_pid = 0;
-
-    int m_masterFD = -1;
-
-    std::atomic<i32> m_exitCode;
-
-    void startChild(const Task &);
-
-    char **buildChildArgv(const Task &);
-
-    void stopImpl();
-
-    void closeFile(int *);
-
-    // for read child process' output
-    std::mutex m_mutex;
-
-    std::deque<std::string> m_deque;
-
-    virtual u8 asioInit() = 0;
-
-    virtual void asioFin() = 0;
-
-    virtual void readOutputLoop() = 0;
-
-    // for reading current output
-    std::jthread m_thread;
-};
-
-} // end namespace Proc
-
-} // end namespace Model
-
-#endif // _MODEL_PROC_POSIXPROC_HPP_
+#endif // _CONTROLLER_GRPCSERVER_UTILS_HPP_

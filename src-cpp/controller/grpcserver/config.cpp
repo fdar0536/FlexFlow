@@ -21,6 +21,7 @@
  * SOFTWARE.
  */
 
+#include "model/auth/crypto.hpp"
 #ifdef _WIN32
 #include "direct.h"
 #else
@@ -31,7 +32,10 @@
 #include "CLI/CLI.hpp"
 #include "yaml-cpp/yaml.h"
 
+#include "model/auth/simple/auth.hpp"
 #include "model/utils.hpp"
+#include "init.hpp"
+
 #include "config.hpp"
 
 namespace Controller
@@ -87,17 +91,7 @@ u8 Config::parse(Config *in, int argc, char **argv)
     app.set_help_flag();
     
     app.add_option("-c,--config-file", configFile, 
-        "path to config file")->default_str("");
-    app.add_option("-d,--db-path", in->dbPath, 
-        "path to config file")->default_str(std::string(buf));
-    app.add_option("-l,--log-path", in->logPath, 
-        "path to config file")->default_str(std::string(buf));
-    app.add_option("-L,--log-level", in->logLevel, 
-        "log level for spdlog")->default_val(2);
-    app.add_option("-a, --address", in->listenIP, 
-        "which address will listen")->default_val("127.0.0.1");
-    app.add_option("-p,--port", in->listenPort, 
-        "which port will listen")->default_val(12345);
+        "path to config file")->default_str("config.yaml");
     app.add_flag("-v,--version","print version info");
     app.add_flag("-h,--help","print help info");
 
@@ -115,35 +109,16 @@ u8 Config::parse(Config *in, int argc, char **argv)
         return 2;
     }
 
-    if (!configFile.empty())
+    if (configFile.empty())
     {
-        if (Model::Utils::verifyFile(configFile))
-        {
-            spdlog::error("{}:{} Fail to verify config file", LOG_FILE_PATH(__FILE__), __LINE__);
-            return 1;
-        }
-    }
-
-    if (!in->logPath.empty())
-    {
-        Model::Utils::convertPath(in->logPath);
-        if (Model::Utils::verifyDir(in->logPath))
-        {
-            spdlog::error("{}:{} fail to verify log path", LOG_FILE_PATH(__FILE__), __LINE__);
-            return 1;
-        }
-    }
-
-    if (Model::Utils::verifyIP(in->listenIP))
-    {
-        spdlog::error("{}:{} Invalid ip", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} no config file", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
-    if (configFile.empty())
+    if (Model::Utils::verifyFile(configFile))
     {
-        spdlog::warn("{}:{} no config file", LOG_FILE_PATH(__FILE__), __LINE__);
-        return 0;
+        spdlog::error("{}:{} Fail to verify config file", LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
     }
 
     if (parse(in, configFile))
@@ -164,6 +139,15 @@ uint_fast8_t Config::parse(Config *obj, const std::string &path)
         spdlog::warn("{}:{} input is nullptr", LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
+
+    if (!auth)
+    {
+        spdlog::error("{}:{} auth is nullptr", LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
+
+    auto simpleAuth =
+        dynamic_cast<Model::Auth::Simple::Auth *>(auth);
 
     try
     {
@@ -191,6 +175,15 @@ uint_fast8_t Config::parse(Config *obj, const std::string &path)
         u8 level(0);
         level = config["log level"].as<u8>();
         obj->logLevel = static_cast<spdlog::level::level_enum>(level);
+
+        // for auth
+        YAML::Node authConfig = config["auth"];
+        simpleAuth->username = authConfig["username"].as<std::string>();
+        simpleAuth->password = authConfig["password"].as<std::string>();
+        Model::Auth::Crypto::decodeBase32(authConfig["key"].as<std::string>(), simpleAuth->key);
+        simpleAuth->banTime = authConfig["ban time"].as<u64>();
+        simpleAuth->maxRetry = authConfig["max retry"].as<u8>();
+        simpleAuth->tokenTimeout = authConfig["token timeout"].as<u64>();
     }
     catch (...)
     {

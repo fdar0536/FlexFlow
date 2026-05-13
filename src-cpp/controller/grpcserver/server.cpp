@@ -23,18 +23,31 @@
 
 #include "spdlog/spdlog.h"
 #include "grpcpp/server_builder.h"
-
-#include "server.hpp"
+#include "grpcpp/server.h"
 
 #include "controller/grpcserver/init.hpp"
 
 #include "model/utils.hpp"
+
+#include "authinterceptor.hpp"
+#include "server.hpp"
 
 namespace Controller
 {
 
 namespace GRPCServer
 {
+
+class AuthInterceptorFactory :
+    public grpc::experimental::ServerInterceptorFactoryInterface
+{
+public:
+    grpc::experimental::Interceptor
+    *CreateServerInterceptor(grpc::experimental::ServerRpcInfo *info) override
+    {
+        return new AuthInterceptor(info);
+    }
+};
 
 Server::Server()
 {}
@@ -59,14 +72,22 @@ uint_fast8_t Server::start()
         builder.RegisterService(&m_accessImpl);
         builder.RegisterService(&m_queueImpl);
         builder.RegisterService(&m_queueListImpl);
-        m_server = builder.BuildAndStart();
+
+        std::vector<std::unique_ptr<grpc::experimental::ServerInterceptorFactoryInterface>>
+            creators;
+        creators.reserve(1);
+        creators.push_back(std::make_unique<AuthInterceptorFactory>());
+        builder.experimental()
+            .SetInterceptorCreators(std::move(creators));
+        
+        auto server = builder.BuildAndStart();
         spdlog::info("{}:{} Server is listening on {}",
             LOG_FILE_PATH(__FILE__), __LINE__,
             listenAddr);
 
-        auto serveFn = [this]()
+        auto serveFn = [&]()
         {
-            this->m_server->Wait();
+            server->Wait();
         };
 
         m_thread = std::jthread(serveFn);
@@ -74,15 +95,13 @@ uint_fast8_t Server::start()
         std::unique_lock<std::mutex> lock(m_cvMutex);
         m_cv.wait(lock, [this]{ return m_done; });
 
-        m_server->Shutdown();
+        server->Shutdown();
         m_thread = std::jthread();
-        m_server = nullptr;
     }
     catch (...)
     {
-        spdlog::error("{}:{} Fail to start server",
+        spdlog::error("{}:{} Server failed",
             LOG_FILE_PATH(__FILE__), __LINE__);
-        m_server = nullptr;
         return 1;
     }
 

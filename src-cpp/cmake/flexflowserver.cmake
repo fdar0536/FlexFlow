@@ -25,12 +25,16 @@ if(ENABLE_SERVER)
         # grpc
         controller/grpcserver/accessimpl.cpp
         controller/grpcserver/accessimpl.hpp
+        controller/grpcserver/authinterceptor.cpp
+        controller/grpcserver/authinterceptor.hpp
         controller/grpcserver/queueimpl.cpp
         controller/grpcserver/queueimpl.hpp
         controller/grpcserver/queuelistimpl.cpp
         controller/grpcserver/queuelistimpl.hpp
         controller/grpcserver/server.cpp
         controller/grpcserver/server.hpp
+        controller/grpcserver/utils.cpp
+        controller/grpcserver/utils.hpp
     )
 
     add_executable(FlexFlowServer

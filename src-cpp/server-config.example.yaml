@@ -1,0 +1,23 @@
+# set your database path
+db path: /path/to/your/database/folder
+# set your log path
+log path: /path/to/your/log/folder
+# the ip for server listen
+ip: 127.0.0.1
+# the port for server listen
+port: 12345
+# log level for server, it's spdlog's log level
+log level: 3
+# the auth config for server
+auth:
+  username: test
+  # the sha512 hashed password, this example is "12345"
+  password: 3627909a29c31381a071ec27f7c9ca97726182aed29a7ddd2e54353322cfb30abb9e3a6df2ac2c20fe23436311d678564d0c8d305930575f60e2d3d048184d79
+  # TOTP key
+  key: SSZFZVMUF42GZCBK7HPNDN7PXIHYHRQT
+  # how long will be banned when login failed in seconds
+  ban time: 600
+  # how many time can be failed to try
+  max retry: 3
+  # how long will token expire in seconds
+  token timeout: 86400

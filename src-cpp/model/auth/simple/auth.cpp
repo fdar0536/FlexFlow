@@ -55,16 +55,24 @@ u8 Auth::login(const std::string &username,
     spdlog::debug("password: {}", password);
     spdlog::debug("otp: {}", otp);
 
+    if (unBanUser())
+    {
+        spdlog::error("{}:{} user is banned", LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
+
     // verify totp first
     if (otp.empty())
     {
         spdlog::error("{}:{} otp is empty", LOG_FILE_PATH(__FILE__), __LINE__);
+        banUser();
         return 1;
     }
 
     if (Crypto::generateTotp(key) != otp)
     {
         spdlog::error("{}:{} otp is invalid", LOG_FILE_PATH(__FILE__), __LINE__);
+        banUser();
         return 1;
     }
 
@@ -79,6 +87,7 @@ u8 Auth::login(const std::string &username,
     {
         spdlog::error("{}:{} username or password is invalid",
             LOG_FILE_PATH(__FILE__), __LINE__);
+        banUser();
         return 1;
     }
 
@@ -89,23 +98,34 @@ u8 Auth::login(const std::string &username,
     }
 
     token = m_currentToken;
+    m_retry = 0;
+    m_lastAccess = std::time(nullptr);
     return 0;
 }
 
-u8 Auth::logout(const std::string &username)
+u8 Auth::logout(const std::string &username, const std::string &token)
 {
     spdlog::debug("{}:{} Model::Auth::Simple::Auth::logout",
         LOG_FILE_PATH(__FILE__), __LINE__);
     spdlog::debug("username: {}", username);
+    spdlog::debug("token: {}", token);
 
-    if (username.empty())
+    if (username.empty() || token.empty())
     {
-        spdlog::error("{}:{} token is empty", LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} username or token is empty",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
     {
         std::unique_lock<std::mutex> lock(m_mutex);
+
+        if (username != this->username)
+        {
+            spdlog::error("{}:{} username is invalid",
+                LOG_FILE_PATH(__FILE__), __LINE__);
+            return 1;
+        }
 
         if (m_currentToken.empty())
         {
@@ -113,7 +133,7 @@ u8 Auth::logout(const std::string &username)
             return 0; // already logout
         }
 
-        if (username != this->username)
+        if (token != m_currentToken)
         {
             spdlog::error("{}:{} token is invalid",
                 LOG_FILE_PATH(__FILE__), __LINE__);
@@ -179,10 +199,10 @@ u8 Auth::cannotAccess(const std::string &ip, const std::string &token)
         return 1;
     }
 
-    if (token.empty())
+    if (m_currentToken.empty())
     {
         addBannedIp(ip);
-        spdlog::error("{}:{} token is empty",
+        spdlog::error("{}:{} client is not login and access the server",
             LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
@@ -192,6 +212,14 @@ u8 Auth::cannotAccess(const std::string &ip, const std::string &token)
         addBannedIp(ip);
         spdlog::error("{}:{} token is invalid",
             LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
+
+    u64 now = std::time(nullptr);
+    if ((now - m_lastAccess) > tokenTimeout)
+    {
+        // token expired
+        m_currentToken = "";
         return 1;
     }
 
@@ -216,6 +244,12 @@ void Auth::addBannedIp(const std::string &ip)
     auto it = m_ipBanList.find(ip);
     if (it != m_ipBanList.end())
     {
+        if (it->second.isNotBaned == false)
+        {
+            it->second.lastAccess = std::time(nullptr);
+            return;
+        }
+
         ++it->second.retry;
         if (it->second.retry > maxRetry)
         {
@@ -227,6 +261,21 @@ void Auth::addBannedIp(const std::string &ip)
     }
 
     m_ipBanList[ip].retry = 1;
+}
+
+void Auth::removeBannedIp(const std::string &ip)
+{
+    spdlog::debug("{}:{} Model::Auth::Simple::Auth::removeBannedIp",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("ip: {}", ip);
+
+    std::unique_lock<std::mutex> lock(m_mutex);
+
+    auto it = m_ipBanList.find(ip);
+    if (it != m_ipBanList.end())
+    {
+        m_ipBanList.erase(it);
+    }
 }
 
 // private member functions
@@ -247,7 +296,41 @@ u8 Auth::genToken()
     return 0;
 }
 
+void Auth::banUser()
+{
+    spdlog::debug("{}:{} Model::Auth::Simple::Auth::banUser",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+    
+    ++m_retry;
+    if (m_retry > maxRetry)
+    {
+        m_baned = true;
+        m_lastAccess = std::time(nullptr);
+    }
+}
 
+u8 Auth::unBanUser()
+{
+    spdlog::debug("{}:{} Model::Auth::Simple::Auth::unBanUser",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+    
+    if (m_baned)
+    {
+        u64 now = std::time(nullptr);
+        if ((now - m_lastAccess) <= banTime)
+        {
+            m_lastAccess = now;
+            spdlog::error("{}:{} user is banned",
+                LOG_FILE_PATH(__FILE__), __LINE__);
+            return 1;
+        }
+
+        m_baned = false;
+        m_retry = 0;
+    }
+
+    return 0;
+}
 
 } // end namespace Simple
 

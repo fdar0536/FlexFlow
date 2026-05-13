@@ -35,21 +35,17 @@ namespace Model
 namespace Proc
 {
 
-class Task
+typedef struct Task
 {
-public:
+    std::string execName = "";
+    std::vector<std::string> args = std::vector<std::string>();
+    std::string workDir = "";
+    i32 ID = 0;
+    i32 exitCode = 0;
+    bool isSuccess = false;
+} Task; // end class Task
 
-    Task();
-
-    std::string execName;
-    std::vector<std::string> args;
-    std::string workDir;
-    i32 ID;
-    i32 exitCode;
-    bool isSuccess;
-
-    void print() const;
-}; // end class Task
+void printTask(const Task &task);
 
 } // end namespace Proc
 

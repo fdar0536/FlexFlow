@@ -51,8 +51,6 @@ public:
 
     ~WinProc();
 
-    virtual u8 init() override;
-
     virtual u8 start(const Task &task) override;
 
     virtual void stop() override;

@@ -76,20 +76,7 @@ std::shared_ptr<grpc::ChannelInterface> connect(const std::string &target, const
         return nullptr;
     }
 
-    ff::Empty req;
-    ff::EchoRes res;
-    grpc::ClientContext ctx;
-
-    Model::DAO::GRPC::Utils::setupCtx(ctx);
-    grpc::Status status = stub->Echo(&ctx, req, &res);
-    if (status.ok())
-    {
-        return token;
-    }
-
-    Model::DAO::GRPC::Utils::buildErrMsg(
-        LOG_FILE_PATH(__FILE__), __LINE__, status);
-    return nullptr;
+    return token;
 }
 
 } // end namespace GRPC

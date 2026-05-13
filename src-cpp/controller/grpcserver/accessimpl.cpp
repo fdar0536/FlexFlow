@@ -21,10 +21,16 @@
  * SOFTWARE.
  */
 
+#include <string>
+
 #include "spdlog/spdlog.h"
 
 #include "model/utils.hpp"
-#include <config.h>
+
+#include "config.h"
+
+#include "init.hpp"
+#include "utils.hpp"
 
 #include "accessimpl.hpp"
 
@@ -33,17 +39,6 @@ namespace Controller
 
 namespace GRPCServer
 {
-
-grpc::Status AccessImpl::Echo(grpc::ServerContext *context,
-                              const ff::Empty *request,
-                              ff::EchoRes *response)
-{
-    spdlog::debug("{}:{} AccessImpl::Echo", LOG_FILE_PATH(__FILE__), __LINE__);
-    UNUSED(context);
-    UNUSED(request);
-    UNUSED(response);
-    return grpc::Status::OK;
-}
 
 grpc::Status AccessImpl::Info(grpc::ServerContext *ctx,
                               const ff::Empty *req,
@@ -55,6 +50,58 @@ grpc::Status AccessImpl::Info(grpc::ServerContext *ctx,
     res->set_branch(FF_BRANCH);
     res->set_commit(FF_COMMIT);
     res->set_version(FF_VERSION);
+    return grpc::Status::OK;
+}
+
+grpc::Status AccessImpl::Login(grpc::ServerContext *ctx,
+                               const ff::LoginReq *req,
+                               ff::LoginRes *res)
+{
+    spdlog::debug("{}:{} AccessImpl::Login", LOG_FILE_PATH(__FILE__), __LINE__);
+    
+    if (!ctx || !req || !res)
+    {
+        spdlog::error("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
+        return grpc::Status(grpc::StatusCode::INTERNAL, "Invalid input");
+    }
+
+    std::string token;
+
+    if (auth->login(req->username(),
+    req->password(), req->otp(), token))
+    {
+        spdlog::error("{}:{} Fail to login", LOG_FILE_PATH(__FILE__), __LINE__);
+        std::string ip = Utils::getIPFromContext(ctx);
+        auth->addBannedIp(ip);
+        return grpc::Status(grpc::StatusCode::UNAUTHENTICATED,
+            "Fail to login");
+    }
+
+    res->set_token(token);
+    return grpc::Status::OK;
+}
+    
+grpc::Status AccessImpl::Logout(grpc::ServerContext *ctx,
+                                const ff::LogoutReq *req,
+                                ff::Empty *res)
+{
+    if (!ctx || !req || !res)
+    {
+        spdlog::error("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
+        return grpc::Status(grpc::StatusCode::INTERNAL, "Invalid input");
+    }
+
+    auto it = ctx->client_metadata().find("x-auth-token");
+    std::string token = std::string(it->second.data(), it->second.length());
+    if (auth->logout(req->username(), token))
+    {
+        spdlog::error("{}:{} Fail to logout", LOG_FILE_PATH(__FILE__), __LINE__);
+        std::string ip = Utils::getIPFromContext(ctx);
+        auth->addBannedIp(ip);
+        return grpc::Status(grpc::StatusCode::UNAUTHENTICATED,
+            "Fail to logout");
+    }
+
     return grpc::Status::OK;
 }
 

@@ -25,6 +25,7 @@
 #define _CONTROLLER_GRPCSERVER_ACCESSIMPL_HPP_
 
 #include "access.grpc.pb.h"
+#include <access.pb.h>
 #include <grpcpp/support/status.h>
 
 namespace Controller
@@ -36,14 +37,19 @@ namespace GRPCServer
 class AccessImpl : public ff::Access::Service
 {
 public:
-
-    grpc::Status Echo(grpc::ServerContext *context,
-                      const ff::Empty *request,
-                      ff::EchoRes *response) override;
     
     grpc::Status Info(grpc::ServerContext *context,
                       const ff::Empty *request,
                       ff::InfoRes *response) override;
+    
+    grpc::Status Login(grpc::ServerContext *context,
+                       const ff::LoginReq *request,
+                       ff::LoginRes *response) override;
+    
+    grpc::Status Logout(grpc::ServerContext *context,
+                        const ff::LogoutReq *request,
+                        ff::Empty *response) override;
+
 };
 
 } // end namespace GRPCServer

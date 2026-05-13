@@ -8,24 +8,41 @@ import "types.proto";
 import "google/api/annotations.proto";
 
 service Access {
-  rpc Echo(Empty) returns (EchoRes) {
-    option (google.api.http) = {
-      get: "/echo"
-    };
-  }
-
   rpc Info(Empty) returns (InfoRes) {
     option (google.api.http) = {
       get: "/info"
     };
   }
-}
 
-message EchoRes {
+  rpc Login(LoginReq) returns (LoginRes) {
+    option (google.api.http) = {
+      post: "/login"
+    };
+  }
+
+  rpc Logout(LogoutReq) returns (Empty) {
+    option (google.api.http) = {
+      post: "/logout"
+    };
+  }
 }
 
 message InfoRes {
   string branch = 1;
   string commit = 2;
   string version = 3;
+}
+
+message LoginReq {
+  string username = 1;
+  string password = 2;
+  string otp = 3;
+}
+
+message LoginRes {
+  string token = 1;
+}
+
+message LogoutReq {
+  string username = 1;
 }

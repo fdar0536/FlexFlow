@@ -151,16 +151,10 @@ u8 QueueList::createQueue(const std::string &name)
 #else
     Proc::MacProc *proc = new (std::nothrow) Proc::MacProc();
 #endif
+
     if (!proc)
     {
         spdlog::error("{}:{} Fail to allocate memory", LOG_FILE_PATH(__FILE__), __LINE__);
-        return ErrCode_OS_ERROR;
-    }
-
-    if (proc->init())
-    {
-        delete proc;
-        spdlog::error("{}:{} Fail to initialize process", LOG_FILE_PATH(__FILE__), __LINE__);
         return ErrCode_OS_ERROR;
     }
 

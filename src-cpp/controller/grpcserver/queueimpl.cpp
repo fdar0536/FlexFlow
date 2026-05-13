@@ -51,7 +51,7 @@ QueueImpl::ListPending(grpc::ServerContext *ctx,
         return grpc::Status(grpc::StatusCode::INTERNAL, "Invalid input");
     }
 
-    auto queue = sqliteQueueList->getQueue(req->name());
+    auto queue = queueList->getQueue(req->name());
     if (!queue)
     {
         spdlog::error("{}:{} Fail to get queue", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -93,7 +93,7 @@ QueueImpl::ListFinished(grpc::ServerContext *ctx,
         return grpc::Status(grpc::StatusCode::INTERNAL, "Invalid input");
     }
 
-    auto queue = sqliteQueueList->getQueue(req->name());
+    auto queue = queueList->getQueue(req->name());
     if (!queue)
     {
         spdlog::error("{}:{} Fail to get queue", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -155,7 +155,7 @@ QueueImpl::PendingDetails(grpc::ServerContext *ctx,
         return grpc::Status(grpc::StatusCode::INTERNAL, "Invalid input");
     }
 
-    auto queue = sqliteQueueList->getQueue(req->name());
+    auto queue = queueList->getQueue(req->name());
     if (!queue)
     {
         spdlog::error("{}:{} Fail to get queue", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -191,7 +191,7 @@ QueueImpl::FinishedDetails(grpc::ServerContext *ctx,
         return grpc::Status(grpc::StatusCode::INTERNAL, "Invalid input");
     }
 
-    auto queue = sqliteQueueList->getQueue(req->name());
+    auto queue = queueList->getQueue(req->name());
     if (!queue)
     {
         spdlog::error("{}:{} Fail to get queue", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -227,7 +227,7 @@ QueueImpl::ClearPending(grpc::ServerContext *ctx,
         return grpc::Status(grpc::StatusCode::INTERNAL, "Invalid input");
     }
 
-    auto queue = sqliteQueueList->getQueue(req->name());
+    auto queue = queueList->getQueue(req->name());
     if (!queue)
     {
         spdlog::error("{}:{} Fail to get queue", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -260,7 +260,7 @@ QueueImpl::ClearFinished(grpc::ServerContext *ctx,
         return grpc::Status(grpc::StatusCode::INTERNAL, "Invalid input");
     }
 
-    auto queue = sqliteQueueList->getQueue(req->name());
+    auto queue = queueList->getQueue(req->name());
     if (!queue)
     {
         spdlog::error("{}:{} Fail to get queue", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -292,7 +292,7 @@ QueueImpl::CurrentTask(grpc::ServerContext *ctx,
         return grpc::Status(grpc::StatusCode::INTERNAL, "Invalid input");
     }
 
-    auto queue = sqliteQueueList->getQueue(req->name());
+    auto queue = queueList->getQueue(req->name());
     if (!queue)
     {
         spdlog::error("{}:{} Fail to get queue", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -326,7 +326,7 @@ QueueImpl::AddTask(grpc::ServerContext *ctx,
         return grpc::Status(grpc::StatusCode::INTERNAL, "Invalid input");
     }
 
-    auto queue = sqliteQueueList->getQueue(req->name());
+    auto queue = queueList->getQueue(req->name());
     if (!queue)
     {
         spdlog::error("{}:{} Fail to get queue", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -368,7 +368,7 @@ QueueImpl::RemoveTask(grpc::ServerContext *ctx,
         return grpc::Status(grpc::StatusCode::INTERNAL, "Invalid input");
     }
 
-    auto queue = sqliteQueueList->getQueue(req->name());
+    auto queue = queueList->getQueue(req->name());
     if (!queue)
     {
         spdlog::error("{}:{} Fail to get queue", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -399,7 +399,7 @@ QueueImpl::IsRunning(grpc::ServerContext *ctx,
         return grpc::Status(grpc::StatusCode::INTERNAL, "Invalid input");
     }
 
-    auto queue = sqliteQueueList->getQueue(req->name());
+    auto queue = queueList->getQueue(req->name());
     if (!queue)
     {
         spdlog::error("{}:{} Fail to get queue", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -425,7 +425,7 @@ QueueImpl::ReadCurrentOutput(grpc::ServerContext *ctx,
         return grpc::Status(grpc::StatusCode::INTERNAL, "Invalid input");
     }
 
-    auto queue = sqliteQueueList->getQueue(req->name());
+    auto queue = queueList->getQueue(req->name());
     if (!queue)
     {
         spdlog::error("{}:{} Fail to get queue", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -460,7 +460,7 @@ QueueImpl::Start(grpc::ServerContext *ctx,
         return grpc::Status(grpc::StatusCode::INTERNAL, "Invalid input");
     }
 
-    auto queue = sqliteQueueList->getQueue(req->name());
+    auto queue = queueList->getQueue(req->name());
     if (!queue)
     {
         spdlog::error("{}:{} Fail to get queue", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -492,7 +492,7 @@ QueueImpl::Stop(grpc::ServerContext *ctx,
         return grpc::Status(grpc::StatusCode::INTERNAL, "Invalid input");
     }
 
-    auto queue = sqliteQueueList->getQueue(req->name());
+    auto queue = queueList->getQueue(req->name());
     if (!queue)
     {
         spdlog::error("{}:{} Fail to get queue", LOG_FILE_PATH(__FILE__), __LINE__);

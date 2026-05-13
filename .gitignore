@@ -9,6 +9,7 @@
 /src-go/protos
 /src-openapi
 /src-web/model/config.ts
+/src-go/FlexFlowGateway
 
 # Node
 /node_modules

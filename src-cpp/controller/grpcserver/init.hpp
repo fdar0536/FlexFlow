@@ -1,6 +1,6 @@
 /*
  * Flex Flow
- * Copyright (c) 2023-2024 fdar0536
+ * Copyright (c) 2023-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,12 +24,12 @@
 #ifndef _CONTROLLER_GRPCSERVER_INIT_HPP_
 #define _CONTROLLER_GRPCSERVER_INIT_HPP_
 
-#include <inttypes.h>
-
-#include "config.hpp"
 #include "model/defines.h"
 
+#include "config.hpp"
+
 #include "controller/grpcserver/server.hpp"
+#include "model/auth/iauth.hpp"
 #include "model/dao/iqueuelist.hpp"
 
 namespace Controller
@@ -42,7 +42,9 @@ extern Config config;
 
 extern GRPCServer::Server server;
 
-extern Model::DAO::IQueueList *sqliteQueueList;
+extern Model::DAO::IQueueList *queueList;
+
+extern Model::Auth::IAuth *auth;
 
 u8 init(int argc, char **argv);
 

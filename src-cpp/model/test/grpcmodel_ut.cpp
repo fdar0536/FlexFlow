@@ -64,14 +64,6 @@ public:
             return 1;
         }
 
-        if (m_proc->init())
-        {
-            printLog(LOG_FILE_PATH(__FILE__), __LINE__,
-            "proc init failed");
-            stop();
-            return 1;
-        }
-
         Model::Proc::Task task;
 
         task.execName = "FlexFlowServer";
