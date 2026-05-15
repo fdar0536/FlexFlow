@@ -40,7 +40,7 @@ namespace GRPC
 namespace Utils
 {
 
-void setupCtx(grpc::ClientContext &ctx);
+void setupCtx(grpc::ClientContext &ctx, const std::string &token = "");
 
 void buildErrMsg(const std::string_view &, i32, grpc::Status &);
 

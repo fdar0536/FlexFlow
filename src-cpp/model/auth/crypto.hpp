@@ -41,12 +41,20 @@ namespace Crypto
 
 void decodeBase32(const std::string &base32, std::vector<u8> &out);
 
+void encodeBase32(const std::vector<u8> &in, std::string &out);
+
+void decodeBase64(const std::string &base64, std::vector<u8> &out);
+
+void encodeBase64(const std::vector<u8> &in, std::string &out);
+
 std::string generateTotp(const std::vector<u8> &key,
                          u64 time_step = 30);
 
 std::string sha512(const std::string &input);
 
-u8 genHexString(size_t length, std::string &out);
+u8 argon2id(const std::string& password, 
+            const std::vector<uint8_t>& salt, 
+            std::vector<uint8_t>& out_hash);
 
 } // end namespace Utils
 

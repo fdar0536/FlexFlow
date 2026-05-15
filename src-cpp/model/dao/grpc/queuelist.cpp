@@ -49,7 +49,7 @@ QueueList::QueueList() :
 QueueList::~QueueList()
 {}
 
-u8 QueueList::init(std::shared_ptr<grpc::ChannelInterface> &token)
+u8 QueueList::init(std::shared_ptr<Connect::GRPC::Token> &token)
 {
     spdlog::debug("{}:{} QueueList::init", LOG_FILE_PATH(__FILE__), __LINE__);
 
@@ -62,7 +62,7 @@ u8 QueueList::init(std::shared_ptr<grpc::ChannelInterface> &token)
     m_token = token;
     try
     {
-        m_stub = ff::QueueList::NewStub(m_token);
+        m_stub = ff::QueueList::NewStub(m_token->channel);
         if (m_stub == nullptr)
         {
             spdlog::error("{}:{} Fail to get stub",
@@ -90,7 +90,7 @@ u8 QueueList::createQueue(const std::string &name)
     ff::Empty res;
     grpc::ClientContext ctx;
 
-    Utils::setupCtx(ctx);
+    Utils::setupCtx(ctx, m_token->token);
     grpc::Status status = m_stub->Create(&ctx, req, &res);
     if (status.ok())
     {
@@ -113,7 +113,7 @@ u8 QueueList::listQueue(std::vector<std::string> &out)
     ff::ListQueueRes res;
     grpc::ClientContext ctx;
 
-    Utils::setupCtx(ctx);
+    Utils::setupCtx(ctx, m_token->token);
     auto reader = m_stub->List(&ctx, req);
     if (reader == nullptr)
     {
@@ -147,7 +147,7 @@ u8 QueueList::deleteQueue(const std::string &name)
     ff::Empty res;
     grpc::ClientContext ctx;
 
-    Utils::setupCtx(ctx);
+    Utils::setupCtx(ctx, m_token->token);
     grpc::Status status = m_stub->Delete(&ctx, req, &res);
     if (status.ok())
     {
@@ -171,7 +171,7 @@ u8 QueueList::renameQueue(const std::string &oldName,
     ff::Empty res;
     grpc::ClientContext ctx;
 
-    Utils::setupCtx(ctx);
+    Utils::setupCtx(ctx, m_token->token);
     grpc::Status status = m_stub->Rename(&ctx, req, &res);
     if (status.ok())
     {
@@ -193,7 +193,7 @@ std::shared_ptr<IQueue> QueueList::getQueue(const std::string &name)
     ff::Empty res;
     grpc::ClientContext ctx;
 
-    Utils::setupCtx(ctx);
+    Utils::setupCtx(ctx, m_token->token);
     grpc::Status status = m_stub->GetQueue(&ctx, req, &res);
     if (status.ok())
     {

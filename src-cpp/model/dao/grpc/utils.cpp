@@ -40,12 +40,18 @@ namespace GRPC
 namespace Utils
 {
 
-void setupCtx(grpc::ClientContext &ctx)
+void setupCtx(grpc::ClientContext &ctx, const std::string &token)
 {
     spdlog::debug("{}:{} setupCtx", LOG_FILE_PATH(__FILE__), __LINE__);
     
     ctx.set_deadline(std::chrono::system_clock::now() +
                      std::chrono::milliseconds(FF_CLIENT_TIMEOUT * 1000));
+    if (token.empty())
+    {
+        return;
+    }
+
+    ctx.AddMetadata("x-auth-token", token);
 }
 
 void buildErrMsg(const std::string_view &file, i32 line, grpc::Status &status)

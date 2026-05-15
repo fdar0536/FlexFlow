@@ -21,10 +21,12 @@
  * SOFTWARE.
  */
 
+#include <memory>
 #include "spdlog/spdlog.h"
 
 #include "model/utils.hpp"
 #include "model/dao/grpc/utils.hpp"
+#include "access.pb.h"
 
 #include "connect.hpp"
 
@@ -37,35 +39,75 @@ namespace Connect
 namespace GRPC
 {
 
-std::shared_ptr<grpc::ChannelInterface> connect(const std::string &target, const u16 port)
+std::shared_ptr<Token> connect(
+    const std::string &target,
+    const u16 port,
+    const std::string username,
+    const std::string password,
+    const std::string otp)
 {
     spdlog::debug("{}:{} Model::Connect::GRPC::connect",
         LOG_FILE_PATH(__FILE__), __LINE__);
 
-    auto token = std::shared_ptr<grpc::ChannelInterface>();
+    auto channel = std::shared_ptr<grpc::ChannelInterface>();
 
     std::string ip = target;
     ip += ":";
     ip += std::to_string(port);
     std::unique_ptr<ff::Access::Stub> stub;
 
+    Token *token = new (std::nothrow) Token;
+    if (!token)
+    {
+        spdlog::error("{}:{} Fail to allocate memory",
+            LOG_FILE_PATH(__FILE__), __LINE__);
+        return nullptr;
+    }
+
+    auto ret = std::shared_ptr<Token>(token);
+
     try
     {
-        token = grpc::CreateChannel(ip, 
+        // connect to server
+        channel = grpc::CreateChannel(ip, 
             grpc::InsecureChannelCredentials());
 
-        if (token == nullptr)
+        if (channel == nullptr)
         {
             spdlog::error("{}:{} Fail to create channel",
                 LOG_FILE_PATH(__FILE__), __LINE__);
             return nullptr;
         }
 
-        stub = ff::Access::NewStub(token);
+        // get "access" node
+        stub = ff::Access::NewStub(channel);
         if (stub == nullptr)
         {
             spdlog::error("{}:{} Fail to create access' stub",
                 LOG_FILE_PATH(__FILE__), __LINE__);
+            return nullptr;
+        }
+
+        // login target server
+        ff::LoginReq req;
+        req.set_username(username);
+        req.set_password(password);
+        req.set_otp(otp);
+
+        ff::LoginRes res;
+        grpc::ClientContext ctx;
+        DAO::GRPC::Utils::setupCtx(ctx);
+        grpc::Status status = stub->Login(&ctx, req, &res);
+
+        if (status.ok())
+        {
+            ret->token = res.token();
+            ret->channel = channel;
+        }
+        else
+        {
+            DAO::GRPC::Utils::buildErrMsg(
+                LOG_FILE_PATH(__FILE__), __LINE__, status);
             return nullptr;
         }
     }
@@ -76,7 +118,7 @@ std::shared_ptr<grpc::ChannelInterface> connect(const std::string &target, const
         return nullptr;
     }
 
-    return token;
+    return ret;
 }
 
 } // end namespace GRPC

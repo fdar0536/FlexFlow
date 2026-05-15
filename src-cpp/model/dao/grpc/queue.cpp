@@ -50,7 +50,7 @@ Queue::~Queue()
 {}
 
 u8
-Queue::init(std::shared_ptr<grpc::ChannelInterface> &token,
+Queue::init(std::shared_ptr<Connect::GRPC::Token> &token,
             const std::string &name)
 {
     spdlog::debug("{}:{} Queue::init", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -71,7 +71,7 @@ Queue::init(std::shared_ptr<grpc::ChannelInterface> &token,
 
     try
     {
-        m_stub = ff::Queue::NewStub(token);
+        m_stub = ff::Queue::NewStub(token->channel);
         if (m_stub == nullptr)
         {
             spdlog::error("{}:{} Fail to get stub",
@@ -87,6 +87,7 @@ Queue::init(std::shared_ptr<grpc::ChannelInterface> &token,
     }
 
     m_queueName = name;
+    m_token = token->token;
     return ErrCode_OK;
 }
 
@@ -103,7 +104,7 @@ u8 Queue::listPending(std::vector<int> &out)
     grpc::ClientContext ctx;
     ff::ListTaskRes res;
 
-    Utils::setupCtx(ctx);
+    Utils::setupCtx(ctx, m_token);
     auto reader = m_stub->ListPending(&ctx, req);
     if (reader == nullptr)
     {
@@ -134,7 +135,7 @@ u8 Queue::listFinished(std::vector<int> &out)
     grpc::ClientContext ctx;
     ff::ListTaskRes res;
 
-    Utils::setupCtx(ctx);
+    Utils::setupCtx(ctx, m_token);
     auto reader = m_stub->ListFinished(&ctx, req);
     if (reader == nullptr)
     {
@@ -164,7 +165,7 @@ u8 Queue::pendingDetails(const int id,
     grpc::ClientContext ctx;
     ff::TaskDetailsRes res;
 
-    Utils::setupCtx(ctx);
+    Utils::setupCtx(ctx, m_token);
     grpc::Status status = m_stub->PendingDetails(&ctx, req, &res);
     if (status.ok())
     {
@@ -189,7 +190,7 @@ u8 Queue::finishedDetails(const int id,
     grpc::ClientContext ctx;
     ff::TaskDetailsRes res;
 
-    Utils::setupCtx(ctx);
+    Utils::setupCtx(ctx, m_token);
     grpc::Status status = m_stub->FinishedDetails(&ctx, req, &res);
     if (status.ok())
     {
@@ -212,7 +213,7 @@ u8 Queue::clearPending()
     grpc::ClientContext ctx;
     ff::Empty res;
 
-    Utils::setupCtx(ctx);
+    Utils::setupCtx(ctx, m_token);
     grpc::Status status = m_stub->ClearPending(&ctx, req, &res);
     if (status.ok())
     {
@@ -234,7 +235,7 @@ u8 Queue::clearFinished()
     grpc::ClientContext ctx;
     ff::Empty res;
 
-    Utils::setupCtx(ctx);
+    Utils::setupCtx(ctx, m_token);
     grpc::Status status = m_stub->ClearFinished(&ctx, req, &res);
     if (status.ok())
     {
@@ -256,7 +257,7 @@ u8 Queue::currentTask(Proc::Task &out)
     grpc::ClientContext ctx;
     ff::TaskDetailsRes res;
 
-    Utils::setupCtx(ctx);
+    Utils::setupCtx(ctx, m_token);
     grpc::Status status = m_stub->CurrentTask(&ctx, req, &res);
     if (status.ok())
     {
@@ -288,7 +289,7 @@ u8 Queue::addTask(Proc::Task &in)
     grpc::ClientContext ctx;
     ff::ListTaskRes res;
 
-    Utils::setupCtx(ctx);
+    Utils::setupCtx(ctx, m_token);
     grpc::Status status = m_stub->AddTask(&ctx, req, &res);
     if (status.ok())
     {
@@ -313,7 +314,7 @@ u8 Queue::removeTask(const i32 in)
     grpc::ClientContext ctx;
     ff::Empty res;
 
-    Utils::setupCtx(ctx);
+    Utils::setupCtx(ctx, m_token);
     grpc::Status status;
 
     status = m_stub->RemoveTask(&ctx, req, &res);
@@ -337,7 +338,7 @@ bool Queue::isRunning() const
     grpc::ClientContext ctx;
     ff::IsRunningRes res;
 
-    Utils::setupCtx(ctx);
+    Utils::setupCtx(ctx, m_token);
     grpc::Status status = m_stub->IsRunning(&ctx, req, &res);
     if (status.ok())
     {
@@ -361,7 +362,7 @@ void Queue::readCurrentOutput(std::vector<std::string> &out)
 
     grpc::ClientContext ctx;
     ff::Msg res;
-    Utils::setupCtx(ctx);
+    Utils::setupCtx(ctx, m_token);
 
     auto reader = m_stub->ReadCurrentOutput(&ctx, req);
     if (reader == nullptr)
@@ -388,7 +389,7 @@ u8 Queue::start()
     grpc::ClientContext ctx;
     ff::Empty res;
 
-    Utils::setupCtx(ctx);
+    Utils::setupCtx(ctx, m_token);
     grpc::Status status = m_stub->Start(&ctx, req, &res);
     if (status.ok())
     {
@@ -409,7 +410,7 @@ void Queue::stop()
     grpc::ClientContext ctx;
     ff::Empty res;
 
-    Utils::setupCtx(ctx);
+    Utils::setupCtx(ctx, m_token);
     grpc::Status status = m_stub->Stop(&ctx, req, &res);
     if (status.ok())
     {

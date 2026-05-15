@@ -37,7 +37,18 @@ namespace Connect
 namespace GRPC
 {
 
-std::shared_ptr<grpc::ChannelInterface> connect(const std::string &target, const u16 port);
+typedef struct Token
+{
+    std::string token;
+    std::shared_ptr<grpc::ChannelInterface> channel;
+} Token;
+
+std::shared_ptr<Token> connect(
+    const std::string &target,
+    const u16 port,
+    const std::string username,
+    const std::string password,
+    const std::string otp);
 
 } // end namespace GRPC
 

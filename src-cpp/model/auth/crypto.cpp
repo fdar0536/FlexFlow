@@ -22,9 +22,13 @@
  */
 
 #include <iomanip>
+
+#include "openssl/bio.h"
+#include "openssl/buffer.h"
+#include "openssl/core_names.h"
 #include "openssl/evp.h"
 #include "openssl/hmac.h"
-#include "openssl/rand.h"
+#include "openssl/kdf.h"
 #include "spdlog/spdlog.h"
 
 #include "model/utils.hpp"
@@ -66,6 +70,89 @@ void decodeBase32(const std::string &base32, std::vector<u8> &out)
             bitsLeft -= 8;
         }
     }
+}
+
+void encodeBase32(const std::vector<u8> &in, std::string &out)
+{
+    spdlog::debug("{}:{} Model::Auth::Utils::encodeBase32",
+                  LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("in.size(): {}", in.size());
+
+    out.clear();
+    out.reserve(((in.size() + 4) / 5) << 3);
+
+    uint32_t buffer = 0;
+    int bitsLeft = 0;
+
+    for (u8 b : in)
+    {
+        buffer = (buffer << 8) | b;
+        bitsLeft += 8;
+
+        // when buffer excess 5 bits, output one char
+        while (bitsLeft >= 5)
+        {
+            bitsLeft -= 5;
+            out.push_back(alphabet[(buffer >> bitsLeft) & 0x1F]);
+        }
+    }
+
+    // handle bits left
+    if (bitsLeft > 0)
+    {
+        out.push_back(alphabet[(buffer << (5 - bitsLeft)) & 0x1F]);
+    }
+}
+
+void decodeBase64(const std::string &base64, std::vector<u8> &out)
+{
+    spdlog::debug("{}:{} Model::Auth::Utils::decodeBase64",
+                  LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("base64: {}", base64);
+    spdlog::debug("out.size(): {}", out.size());
+
+    out.clear();
+    out.reserve(base64.size());
+
+    std::unique_ptr<BIO, decltype(&BIO_free_all)> b64(BIO_new(BIO_f_base64()), BIO_free_all);
+    std::unique_ptr<BIO, decltype(&BIO_free)> bmem(BIO_new_mem_buf(base64.data(), static_cast<int>(base64.size())), BIO_free);
+    
+    BIO_set_flags(b64.get(), BIO_FLAGS_BASE64_NO_NL);
+    BIO_push(b64.get(), bmem.get());
+    
+    int decoded_size = BIO_read(b64.get(), out.data(), static_cast<int>(out.size()));
+    
+    if (decoded_size > 0)
+    {
+        out.resize(decoded_size);
+    }
+    else
+    {
+        out.clear();
+    }
+}
+
+void encodeBase64(const std::vector<u8> &in, std::string &out)
+{
+    spdlog::debug("{}:{} Model::Auth::Utils::encodeBase64",
+        LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("in.size(): {}", in.size());
+
+    out.clear();
+
+    std::unique_ptr<BIO, decltype(&BIO_free_all)> b64(BIO_new(BIO_f_base64()), BIO_free_all);
+    std::unique_ptr<BIO, decltype(&BIO_free)> bmem(BIO_new(BIO_s_mem()), BIO_free);
+    
+    BIO_set_flags(b64.get(), BIO_FLAGS_BASE64_NO_NL);
+    
+    BIO_push(b64.get(), bmem.get());
+    
+    BIO_write(b64.get(), in.data(), static_cast<int>(in.size()));
+    BIO_flush(b64.get());
+    
+    BUF_MEM *bptr;
+    BIO_get_mem_ptr(b64.get(), &bptr);
+    out = std::string(bptr->data, bptr->length);
 }
 
 std::string generateTotp(const std::vector<u8> &key, u64 time_step)
@@ -133,33 +220,68 @@ std::string sha512(const std::string &input)
     return ss.str();
 }
 
-u8 genHexString(size_t length, std::string &out)
+u8 argon2id(const std::string& password, 
+            const std::vector<uint8_t>& salt, 
+            std::vector<uint8_t>& out_hash)
 {
-    spdlog::debug("{}:{} Model::Auth::Utils::genHexString",
+    spdlog::debug("{}:{} Model::Auth::Utils::argon2id",
                   LOG_FILE_PATH(__FILE__), __LINE__);
-    spdlog::debug("length: {}", length);
+    spdlog::debug("password: {}", password);
+    spdlog::debug("salt.size(): {}", salt.size());
 
-    // Each hex character represents 4 bits, so 2 characters = 1 byte
-    size_t num_bytes = (length + 1) / 2;
-    std::vector<unsigned char> buffer(num_bytes);
+    out_hash.clear();
+    out_hash.resize(32);
 
-    // RAND_bytes returns 1 on success
-    if (RAND_bytes(buffer.data(), buffer.size()) != 1)
+    EVP_KDF *kdf = nullptr;
+    EVP_KDF_CTX *kctx = nullptr;
+    u8 ret(1);
+
+    // 1. get Argon2id
+    kdf = EVP_KDF_fetch(nullptr, "ARGON2ID", nullptr);
+    if (!kdf)
     {
-        spdlog::error("{}:{} OpenSSL RAND_bytes failed",
-            LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} Error: EVP_KDF_fetch failed",
+                      LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
-    std::stringstream ss;
-    ss << std::hex << std::setfill('0');
-    for (auto b : buffer)
+    // 2. setup KDF context
+    kctx = EVP_KDF_CTX_new(kdf);
+    EVP_KDF_free(kdf);
+    if (!kctx)
     {
-        ss << std::setw(2) << static_cast<int>(b);
+        spdlog::error("{}:{} Error: EVP_KDF_CTX_new failed",
+                      LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
     }
 
-    out = ss.str().substr(0, length);
-    return 0;
+    // 3. set Argon2id parameter
+    uint32_t lanes = 4;           // Parallelism
+    uint32_t mem_cost = 65536;    // 64MB
+    uint32_t iterations = 3;      // Time cost
+
+    OSSL_PARAM params[7];
+    params[0] = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_PASSWORD, (void*)password.data(), password.size());
+    params[1] = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_SALT, (void*)salt.data(), salt.size());
+    params[2] = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_THREADS, &lanes);
+    params[3] = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_ARGON2_LANES, &lanes);
+    params[4] = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_ARGON2_MEMCOST, &mem_cost);
+    params[5] = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_ITER, &iterations);
+    params[6] = OSSL_PARAM_construct_end();
+
+    // 4. encrypt the password
+    if (EVP_KDF_derive(kctx, out_hash.data(), out_hash.size(), params) > 0)
+    {
+        ret = 0;
+    }
+    else
+    {
+        spdlog::error("{}:{} Error: EVP_KDF_derive failed",
+                      LOG_FILE_PATH(__FILE__), __LINE__);
+    }
+
+    EVP_KDF_CTX_free(kctx);
+    return ret;
 }
 
 } // end namespace Utils

@@ -27,6 +27,7 @@
 #include <string>
 
 #include "spdlog/common.h"
+#include "yaml-cpp/yaml.h"
 
 #include "model/defines.h"
 
@@ -61,6 +62,8 @@ public:
 private:
 
     static void printVersion();
+
+    static u8 parseAuth(YAML::Node &, const std::string &path);
 };
 
 } // end namespace GRPCServer

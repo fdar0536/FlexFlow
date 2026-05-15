@@ -81,7 +81,7 @@ func main() {
 		ListenPort  uint16 `arg:"-P,--listen-port" help:"http gateway listen port"`
 	}
 
-	// 賦予預設值
+	// set default
 	args.ServerIp = "127.0.0.1"
 	args.ServerPort = 9090
 	args.ListenIp = "127.0.0.1"

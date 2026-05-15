@@ -26,6 +26,7 @@
 
 #include "queue.grpc.pb.h"
 
+#include "model/connect/grpc/connect.hpp"
 #include "model/proc/task.hpp"
 #include "model/dao/iqueue.hpp"
 
@@ -47,7 +48,7 @@ public:
 
     ~Queue();
 
-    u8 init(std::shared_ptr<grpc::ChannelInterface> &token,
+    u8 init(std::shared_ptr<Connect::GRPC::Token> &token,
             const std::string &name);
 
     u8 listPending(std::vector<int> &out) override;
@@ -81,6 +82,8 @@ public:
 private:
 
     std::unique_ptr<ff::Queue::Stub> m_stub;
+
+    std::string m_token;
 
     std::string m_queueName;
 

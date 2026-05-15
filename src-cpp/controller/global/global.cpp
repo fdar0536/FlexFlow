@@ -184,38 +184,6 @@ u8 sqliteInit(Model::DAO::IQueueList **out, std::string &target)
     return 0;
 }
 
-u8 grpcInit(Model::DAO::IQueueList **out, const std::string &target, const i32 port)
-{
-    spdlog::debug("{}:{} grpcInit", LOG_FILE_PATH(__FILE__), __LINE__);
-    spdlog::debug("{}:{} target is: {}", LOG_FILE_PATH(__FILE__), __LINE__, target);
-    spdlog::debug("{}:{} port is: {}", LOG_FILE_PATH(__FILE__), __LINE__, port);
-
-    auto token = Model::Connect::GRPC::connect(target, port);
-
-    if (token == nullptr)
-    {
-        spdlog::error("{}:{} Fail to connect to server", LOG_FILE_PATH(__FILE__), __LINE__);
-        return 1;
-    }
-
-    Model::DAO::GRPC::QueueList *queueList = new (std::nothrow) Model::DAO::GRPC::QueueList;
-    if (!queueList)
-    {
-        spdlog::error("{}:{} Fail to allocate memory", LOG_FILE_PATH(__FILE__), __LINE__);
-        return 1;
-    }
-
-    if (queueList->init(token))
-    {
-        delete queueList;
-        spdlog::error("{}:{} Fail to initialize queue list", LOG_FILE_PATH(__FILE__), __LINE__);
-        return 1;
-    }
-
-    *out = queueList;
-    return 0;
-}
-
 } // end namespace Global
 
 } // end namespace Controller

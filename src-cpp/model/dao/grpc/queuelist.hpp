@@ -24,6 +24,7 @@
 #ifndef _MODEL_DAO_GRPC_QUEUELIST_HPP_
 #define _MODEL_DAO_GRPC_QUEUELIST_HPP_
 
+#include "model/connect/grpc/connect.hpp"
 #include "model/dao/iqueuelist.hpp"
 
 #include "queuelist.grpc.pb.h"
@@ -46,7 +47,7 @@ public:
 
     ~QueueList();
 
-    u8 init(std::shared_ptr<grpc::ChannelInterface> &token);
+    u8 init(std::shared_ptr<Connect::GRPC::Token> &token);
 
     u8 createQueue(const std::string &name) override;
 
@@ -63,7 +64,7 @@ private:
 
     std::unique_ptr<ff::QueueList::Stub> m_stub;
 
-    std::shared_ptr<grpc::ChannelInterface> m_token;
+    std::shared_ptr<Connect::GRPC::Token> m_token;
 
 }; // end class QueueList
 

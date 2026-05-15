@@ -21,11 +21,15 @@
  * SOFTWARE.
  */
 
+#include <iomanip>
+#include <mutex>
+#include <sstream>
+
+#include "openssl/rand.h"
 #include "spdlog/spdlog.h"
 
 #include "model/utils.hpp"
 #include "model/auth/crypto.hpp"
-#include <mutex>
 
 #include "auth.hpp"
 
@@ -69,7 +73,7 @@ u8 Auth::login(const std::string &username,
         return 1;
     }
 
-    if (Crypto::generateTotp(key) != otp)
+    if (Crypto::generateTotp(totpKey) != otp)
     {
         spdlog::error("{}:{} otp is invalid", LOG_FILE_PATH(__FILE__), __LINE__);
         banUser();
@@ -83,9 +87,24 @@ u8 Auth::login(const std::string &username,
         return 1;
     }
 
-    if (username != this->username || Crypto::sha512(password) != this->password)
+    if (username != this->username)
     {
-        spdlog::error("{}:{} username or password is invalid",
+        spdlog::error("{}:{} username is invalid",
+            LOG_FILE_PATH(__FILE__), __LINE__);
+        banUser();
+        return 1;
+    }
+
+    std::vector<u8> hash;
+    if (Crypto::argon2id(password, salt, hash))
+    {
+        spdlog::error("{}:{} argon2id failed", LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
+
+    if (hash != this->password)
+    {
+        spdlog::error("{}:{} password is invalid",
             LOG_FILE_PATH(__FILE__), __LINE__);
         banUser();
         return 1;
@@ -284,14 +303,23 @@ u8 Auth::genToken()
     spdlog::debug("{}:{} Model::Auth::Simple::Auth::genToken",
                   LOG_FILE_PATH(__FILE__), __LINE__);
     
-    std::unique_lock<std::mutex> lock(m_mutex);
-    if (Crypto::genHexString(8, m_currentToken))
+    std::vector<u8> out = std::vector<u8>(16);
+    if (RAND_bytes(out.data(), out.size()) != 1)
     {
-        m_currentToken = "";
+        spdlog::error("{}:{} OpenSSL RAND_bytes failed",
+            LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
-    m_currentToken += username;
+    std::stringstream ss;
+    ss << std::hex << std::setfill('0');
+    for (u8 b : out)
+    {
+        ss << std::setw(2) << (int)b;
+    }
+
+    std::unique_lock<std::mutex> lock(m_mutex);
+    m_currentToken = username + ss.str();
     m_currentToken = Crypto::sha512(m_currentToken);
     return 0;
 }

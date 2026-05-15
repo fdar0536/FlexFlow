@@ -72,9 +72,11 @@ public:
 
     std::string username = "test";
     
-    std::string password = ""; // hashed password
+    std::vector<u8> password; // hashed password
 
-    std::vector<u8> key;
+    std::vector<u8> salt;
+
+    std::vector<u8> totpKey;
 
     u8 maxRetry = 3;
 

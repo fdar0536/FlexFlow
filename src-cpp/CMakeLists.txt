@@ -99,5 +99,4 @@ target_link_libraries(grpc_common
 set_property(TARGET grpc_common PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 include(cmake/ffmodel.cmake)
-include(cmake/ffmodel_ut.cmake)
 include(cmake/flexflowserver.cmake)
