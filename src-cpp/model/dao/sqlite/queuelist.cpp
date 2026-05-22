@@ -120,7 +120,7 @@ QueueList::init(std::shared_ptr<Connect::SQLite::Token> &token,
         }
 
         name = name.substr(0, index);
-        if (createQueue(name))
+        if (create(name))
         {
             spdlog::error("{}:{} Fail to create queue: {}", LOG_FILE_PATH(__FILE__), __LINE__,
                           name);
@@ -133,10 +133,12 @@ QueueList::init(std::shared_ptr<Connect::SQLite::Token> &token,
     return ErrCode_OK;
 }
 
-u8 QueueList::createQueue(const std::string &name)
+u8 QueueList::create(const std::string &name)
 {
     spdlog::debug("{}:{} QueueList::createQueue", LOG_FILE_PATH(__FILE__), __LINE__);
     spdlog::debug("{}:{} name: {}", LOG_FILE_PATH(__FILE__), __LINE__, name.c_str());
+
+    std::unique_lock<std::mutex> lock(m_mutex);
 
     if (m_queueList.find(name) != m_queueList.end())
     {
@@ -179,25 +181,32 @@ u8 QueueList::createQueue(const std::string &name)
     return ErrCode_OK;
 }
 
-u8 QueueList::listQueue(std::vector<std::string> &out)
+u8 QueueList::list(std::vector<std::string> &out)
 {
     spdlog::debug("{}:{} QueueList::listQueue", LOG_FILE_PATH(__FILE__), __LINE__);
 
     out.clear();
     out.reserve(m_queueList.size());
-    for (auto it = m_queueList.begin();
-         it != m_queueList.end();
-         ++it)
+    
     {
-        out.push_back(it->first);
+        std::unique_lock<std::mutex> lock(m_mutex);
+
+        for (auto it = m_queueList.begin();
+            it != m_queueList.end();
+            ++it)
+        {
+            out.push_back(it->first);
+        }
     }
 
     return ErrCode_OK;
 }
 
-u8 QueueList::deleteQueue(const std::string &name)
+u8 QueueList::delete_(const std::string &name)
 {
     spdlog::debug("{}:{} QueueList::deleteQueue", LOG_FILE_PATH(__FILE__), __LINE__);
+
+    std::unique_lock<std::mutex> lock(m_mutex);
 
     if (!m_queueList.erase(name))
     {
@@ -211,28 +220,31 @@ u8 QueueList::deleteQueue(const std::string &name)
 }
 
 u8
-QueueList::renameQueue(const std::string &oldName,
+QueueList::rename(const std::string &oldName,
                              const std::string &newName)
 {
     spdlog::debug("{}:{} QueueList::renameQueue", LOG_FILE_PATH(__FILE__), __LINE__);
     spdlog::debug("{}:{} oldName: {}", LOG_FILE_PATH(__FILE__), __LINE__, oldName.c_str());
     spdlog::debug("{}:{} newName: {}", LOG_FILE_PATH(__FILE__), __LINE__, newName.c_str());
 
-    for (auto &it : m_queueList)
     {
-        if (it.first == oldName)
+        std::unique_lock<std::mutex> lock(m_mutex);
+        for (auto &it : m_queueList)
         {
-            Queue *queue = static_cast<Queue *>(it.second.get());
-            if (queue->rename(newName, oldName))
+            if (it.first == oldName)
             {
-                spdlog::error("{}:{} Fail to rename", LOG_FILE_PATH(__FILE__), __LINE__);
-                return ErrCode_OS_ERROR;
-            }
+                Queue *queue = static_cast<Queue *>(it.second.get());
+                if (queue->rename(newName, oldName))
+                {
+                    spdlog::error("{}:{} Fail to rename", LOG_FILE_PATH(__FILE__), __LINE__);
+                    return ErrCode_OS_ERROR;
+                }
 
-            m_queueList[newName] = it.second;
-            m_queueList.erase(oldName);
-            return ErrCode_OK;
-        }
+                m_queueList[newName] = it.second;
+                m_queueList.erase(oldName);
+                return ErrCode_OK;
+            } // if (it.first == oldName)
+        } // for (auto &it : m_queueList)
     }
 
     spdlog::error("{}:{} No such queue: {}", LOG_FILE_PATH(__FILE__), __LINE__,
@@ -240,11 +252,12 @@ QueueList::renameQueue(const std::string &oldName,
     return ErrCode_NOT_FOUND;
 }
 
-std::shared_ptr<IQueue> QueueList::getQueue(const std::string &name)
+std::shared_ptr<IQueue> QueueList::get(const std::string &name)
 {
     spdlog::debug("{}:{} QueueList::getQueue", LOG_FILE_PATH(__FILE__), __LINE__);
     spdlog::debug("{}:{} name: {}", LOG_FILE_PATH(__FILE__), __LINE__, name.c_str());
 
+    std::unique_lock<std::mutex> lock(m_mutex);
     auto it = m_queueList.find(name);
     if (it == m_queueList.end()) return nullptr;
     return it->second;

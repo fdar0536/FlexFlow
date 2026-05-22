@@ -26,7 +26,6 @@
 
 #include <vector>
 
-#include "model/proc/iproc.hpp"
 #include "model/proc/task.hpp"
 
 namespace Model
@@ -35,19 +34,38 @@ namespace Model
 namespace DAO
 {
 
+/**
+ * @brief The inter face that define the queue
+ */
 class IQueue
 {
 public:
 
     virtual ~IQueue() {}
 
+    /**
+     * @brief list pending task in this queue
+     * @param out the output of list
+     * @return u8 return 0 if success
+     */
     virtual u8 listPending(std::vector<int> &out) = 0;
 
+    /**
+     * @brief list finished task in this queue
+     * @param out the output of list
+     * @return u8 return 0 if success
+     */
     virtual u8 listFinished(std::vector<int> &out) = 0;
 
+    /**
+     * @brief the details of task which id is "id" in pending list
+     * @param id the task id which you want to know details
+     * @param out the output of task details
+     * @return u8 return 0 if success
+     */
     virtual u8 pendingDetails(const int id,
                               Proc::Task &out) = 0;
-
+    
     virtual u8 finishedDetails(const int id,
                                Proc::Task &out) = 0;
 
@@ -68,10 +86,6 @@ public:
     virtual u8 start() = 0;
 
     virtual void stop() = 0;
-
-protected:
-
-    std::shared_ptr<Proc::IProc> m_proc;
 
 }; // end class IQueue
 

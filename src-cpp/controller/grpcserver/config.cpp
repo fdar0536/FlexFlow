@@ -152,14 +152,6 @@ uint_fast8_t Config::parse(Config *obj, const std::string &path)
         YAML::Node config = YAML::LoadFile(path);
 
         obj->dbPath = config["db path"].as<std::string>();
-        obj->logPath = config["log path"].as<std::string>();
-
-        Model::Utils::convertPath(obj->logPath);
-        if (Model::Utils::verifyDir(obj->logPath))
-        {
-            spdlog::error("{}:{} fail to verify log path", LOG_FILE_PATH(__FILE__), __LINE__);
-            return 1;
-        }
 
         obj->listenPort = config["port"].as<u16>();
         obj->listenIP = config["ip"].as<std::string>();
@@ -169,10 +161,6 @@ uint_fast8_t Config::parse(Config *obj, const std::string &path)
             spdlog::error("{}:{} Invalid ip", LOG_FILE_PATH(__FILE__), __LINE__);
             return 1;
         }
-
-        u8 level(0);
-        level = config["log level"].as<u8>();
-        obj->logLevel = static_cast<spdlog::level::level_enum>(level);
 
         if (parseAuth(config, path))
         {
@@ -232,6 +220,12 @@ u8 Config::parseAuth(YAML::Node &config, const std::string &path)
         }
 
         Model::Auth::Crypto::encodeBase64(out, salt);
+        if (out.empty())
+        {
+            spdlog::error("{}:{} Fail to encode salt",
+                LOG_FILE_PATH(__FILE__), __LINE__);
+            return 1;
+        }
 
         authConfig["salt"] = salt;
         simpleAuth->salt = out;
@@ -247,6 +241,13 @@ u8 Config::parseAuth(YAML::Node &config, const std::string &path)
 
         // encode password
         Model::Auth::Crypto::encodeBase64(out, password);
+        if (out.empty())
+        {
+            spdlog::error("{}:{} Fail to encode password",
+                LOG_FILE_PATH(__FILE__), __LINE__);
+            return 1;
+        }
+
         authConfig["password"] = password;
     }
     else

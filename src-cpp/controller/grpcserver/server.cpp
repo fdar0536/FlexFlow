@@ -59,6 +59,8 @@ Server::~Server()
 
 uint_fast8_t Server::start()
 {
+    spdlog::debug("{}:{} Server::start", LOG_FILE_PATH(__FILE__), __LINE__);
+    
     try
     {
         grpc::ServerBuilder builder;

@@ -49,16 +49,16 @@ public:
 
     u8 init(std::shared_ptr<Connect::GRPC::Token> &token);
 
-    u8 createQueue(const std::string &name) override;
+    u8 create(const std::string &name) override;
 
-    u8 listQueue(std::vector<std::string> &out) override;
+    u8 list(std::vector<std::string> &out) override;
 
-    u8 deleteQueue(const std::string &name) override;
+    u8 delete_(const std::string &name) override;
 
-    u8 renameQueue(const std::string &oldName,
-                   const std::string &newName) override;
+    u8 rename(const std::string &oldName,
+              const std::string &newName) override;
 
-    std::shared_ptr<IQueue> getQueue(const std::string &name) override;
+    std::shared_ptr<IQueue> get(const std::string &name) override;
 
 private:
 

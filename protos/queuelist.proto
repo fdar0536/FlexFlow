@@ -34,9 +34,9 @@ service QueueList {
     };
   }
 
-  rpc GetQueue(QueueReq) returns (Empty) {
+  rpc Get(QueueReq) returns (Empty) {
     option (google.api.http) = {
-      get: "/queuelist/getqueue"
+      get: "/queuelist/get"
     };
   }
 }

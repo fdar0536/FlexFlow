@@ -6,13 +6,11 @@ log path: /path/to/your/log/folder
 ip: 127.0.0.1
 # the port for server listen
 port: 12345
-# log level for server, it's spdlog's log level
-log level: 3
 # the auth config for server
 auth:
   username: test
   # type your password, server will update it to hashed
-  password: “12345”
+  password: 12345
   # if salt is empty, server will generate hashed password and its salt then write back here
   salt: ""
   # Base32 TOTP key, if it's empty, server will generate a new one then write back here

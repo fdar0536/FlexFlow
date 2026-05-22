@@ -20,7 +20,7 @@ vars:
   CPP_BUILD_DIR: '{{ .CPP_BUILD_DIR | default (printf "%s/build-cpp" .TMP_DIR) }}'
   CMAKE_GENERATOR: '{{ .CMAKE_GENERATOR | default "Ninja" }}'
   ENABLE_SERVER: '{{ .ENABLE_SERVER | default 1 }}'
-  ENABLE_MODEL_TEST: '{{ .ENABLE_MODEL_TEST | default 1 }}'
+  ENABLE_CLI: '{{ .ENABLE_CLI | default 1 }}'
   CMAKE_EXTRA_ARGS: '{{ .CMAKE_EXTRA_ARGS | default "" }}'
   JOBS: '{{ .JOBS | default 1 }}'
   MODEL_CLIENT_TIMEOUT: '{{ .MODEL_CLIENT_TIMEOUT | default 31 }}'
@@ -86,7 +86,7 @@ tasks:
       - >
         cmake -S src-cpp -B "{{.CPP_BUILD_DIR}}" -G "{{.CMAKE_GENERATOR}}" 
         -DENABLE_SERVER={{.ENABLE_SERVER}} 
-        -DENABLE_TEST={{.ENABLE_MODEL_TEST}} 
+        -DENABLE_CLI={{.ENABLE_CLI}} 
         -DCMAKE_BUILD_TYPE={{.BUILD_TYPE}} 
         -DFF_VERSION={{.FF_VERSION}} 
         -DFF_COMMIT={{.FF_COMMIT}} 

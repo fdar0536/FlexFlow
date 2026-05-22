@@ -79,7 +79,7 @@ u8 QueueList::init(std::shared_ptr<Connect::GRPC::Token> &token)
     return ErrCode_OK;
 }
 
-u8 QueueList::createQueue(const std::string &name)
+u8 QueueList::create(const std::string &name)
 {
     spdlog::debug("{}:{} QueueList::createQueue",
         LOG_FILE_PATH(__FILE__), __LINE__);
@@ -101,7 +101,7 @@ u8 QueueList::createQueue(const std::string &name)
     return ErrCode_OS_ERROR;
 }
 
-u8 QueueList::listQueue(std::vector<std::string> &out)
+u8 QueueList::list(std::vector<std::string> &out)
 {
     spdlog::debug("{}:{} QueueList::listQueue",
         LOG_FILE_PATH(__FILE__), __LINE__);
@@ -136,7 +136,7 @@ u8 QueueList::listQueue(std::vector<std::string> &out)
     return ErrCode_OS_ERROR;
 }
 
-u8 QueueList::deleteQueue(const std::string &name)
+u8 QueueList::delete_(const std::string &name)
 {
     spdlog::debug("{}:{} QueueList::deleteQueue",
         LOG_FILE_PATH(__FILE__), __LINE__);
@@ -158,8 +158,8 @@ u8 QueueList::deleteQueue(const std::string &name)
     return ErrCode_OS_ERROR;
 }
 
-u8 QueueList::renameQueue(const std::string &oldName,
-                              const std::string &newName)
+u8 QueueList::rename(const std::string &oldName,
+                     const std::string &newName)
 {
     spdlog::debug("{}:{} QueueList::renameQueue",
         LOG_FILE_PATH(__FILE__), __LINE__);
@@ -182,7 +182,7 @@ u8 QueueList::renameQueue(const std::string &oldName,
     return ErrCode_OS_ERROR;
 }
 
-std::shared_ptr<IQueue> QueueList::getQueue(const std::string &name)
+std::shared_ptr<IQueue> QueueList::get(const std::string &name)
 {
     spdlog::debug("{}:{} QueueList::getQueue",
         LOG_FILE_PATH(__FILE__), __LINE__);
@@ -194,7 +194,7 @@ std::shared_ptr<IQueue> QueueList::getQueue(const std::string &name)
     grpc::ClientContext ctx;
 
     Utils::setupCtx(ctx, m_token->token);
-    grpc::Status status = m_stub->GetQueue(&ctx, req, &res);
+    grpc::Status status = m_stub->Get(&ctx, req, &res);
     if (status.ok())
     {
         Queue *queue = new (std::nothrow) Queue;

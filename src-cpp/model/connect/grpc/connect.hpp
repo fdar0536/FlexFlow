@@ -39,11 +39,12 @@ namespace GRPC
 
 typedef struct Token
 {
-    std::string token;
-    std::shared_ptr<grpc::ChannelInterface> channel;
+    std::string token = "";
+    std::shared_ptr<grpc::ChannelInterface> channel = nullptr;
 } Token;
 
 std::shared_ptr<Token> connect(
+    const bool ssl,
     const std::string &target,
     const u16 port,
     const std::string username,

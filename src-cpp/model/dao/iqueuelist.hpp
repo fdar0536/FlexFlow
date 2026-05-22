@@ -1,6 +1,6 @@
 /*
  * Flex Flow
- * Copyright (c) 2023-2024 fdar0536
+ * Copyright (c) 2026-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -49,21 +49,21 @@ public:
      * @param name the name for the new queue
      * @return u8 return 0 if success
      */
-    virtual u8 createQueue(const std::string &name) = 0;
+    virtual u8 create(const std::string &name) = 0;
 
     /**
      * @brief list all queue in list
      * @param[out] out the list of queue(s)
      * @return u8 return 0 if success
      */
-    virtual u8 listQueue(std::vector<std::string> &out) = 0;
+    virtual u8 list(std::vector<std::string> &out) = 0;
 
     /**
      * @brief delete the queue
      * @param name the name of queue you want to delete
      * @return u8 return 0 if success
      */
-    virtual u8 deleteQueue(const std::string &name) = 0;
+    virtual u8 delete_(const std::string &name) = 0;
 
     /**
      * @brief rename the existed queue
@@ -72,8 +72,8 @@ public:
      * @param newName the new name of queue
      * @return u8 return 0 if success
      */
-    virtual u8 renameQueue(const std::string &oldName,
-                           const std::string &newName) = 0;
+    virtual u8 rename(const std::string &oldName,
+                      const std::string &newName) = 0;
 
     /**
      * @brief Get the Queue object
@@ -81,7 +81,7 @@ public:
      * @param name the queue's name you want to get
      * @return std::shared_ptr<IQueue> return nullptr if failed
      */
-    virtual std::shared_ptr<IQueue> getQueue(const std::string &name) = 0;
+    virtual std::shared_ptr<IQueue> get(const std::string &name) = 0;
 
 }; // end class IQueueList
 

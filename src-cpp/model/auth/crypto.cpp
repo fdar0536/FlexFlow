@@ -26,6 +26,7 @@
 #include "openssl/bio.h"
 #include "openssl/buffer.h"
 #include "openssl/core_names.h"
+#include "openssl/err.h"
 #include "openssl/evp.h"
 #include "openssl/hmac.h"
 #include "openssl/kdf.h"
@@ -112,15 +113,27 @@ void decodeBase64(const std::string &base64, std::vector<u8> &out)
     spdlog::debug("out.size(): {}", out.size());
 
     out.clear();
-    out.reserve(base64.size());
+    out.resize(base64.size());
 
-    std::unique_ptr<BIO, decltype(&BIO_free_all)> b64(BIO_new(BIO_f_base64()), BIO_free_all);
-    std::unique_ptr<BIO, decltype(&BIO_free)> bmem(BIO_new_mem_buf(base64.data(), static_cast<int>(base64.size())), BIO_free);
+    BIO *b64 = BIO_new(BIO_f_base64());
+    if (!b64)
+    {
+        spdlog::error("{}:{} BIO_new failed", LOG_FILE_PATH(__FILE__), __LINE__);
+        return;
+    }
+
+    BIO *bmem = BIO_new_mem_buf(base64.data(), static_cast<int>(base64.size()));
+    if (!bmem)
+    {
+        spdlog::error("{}:{} BIO_new_mem_buf failed", LOG_FILE_PATH(__FILE__), __LINE__);
+        BIO_free_all(b64);
+        return;
+    }
     
-    BIO_set_flags(b64.get(), BIO_FLAGS_BASE64_NO_NL);
-    BIO_push(b64.get(), bmem.get());
+    BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
+    BIO_push(b64, bmem);
     
-    int decoded_size = BIO_read(b64.get(), out.data(), static_cast<int>(out.size()));
+    int decoded_size = BIO_read(b64, out.data(), static_cast<int>(out.size()));
     
     if (decoded_size > 0)
     {
@@ -130,6 +143,8 @@ void decodeBase64(const std::string &base64, std::vector<u8> &out)
     {
         out.clear();
     }
+
+    BIO_free_all(b64);
 }
 
 void encodeBase64(const std::vector<u8> &in, std::string &out)
@@ -140,19 +155,34 @@ void encodeBase64(const std::vector<u8> &in, std::string &out)
 
     out.clear();
 
-    std::unique_ptr<BIO, decltype(&BIO_free_all)> b64(BIO_new(BIO_f_base64()), BIO_free_all);
-    std::unique_ptr<BIO, decltype(&BIO_free)> bmem(BIO_new(BIO_s_mem()), BIO_free);
+    BIO *b64 = BIO_new(BIO_f_base64());
+    if (!b64)
+    {
+        spdlog::error("{}:{} Error: BIO_new failed",
+                      LOG_FILE_PATH(__FILE__), __LINE__);
+        return;
+    }
+
+    BIO *bmem = BIO_new(BIO_s_mem());
+    if (!bmem)
+    {
+        spdlog::error("{}:{} Error: BIO_new failed",
+                      LOG_FILE_PATH(__FILE__), __LINE__);
+        BIO_free_all(b64);
+        return;
+    }
     
-    BIO_set_flags(b64.get(), BIO_FLAGS_BASE64_NO_NL);
+    BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
     
-    BIO_push(b64.get(), bmem.get());
+    BIO_push(b64, bmem);
     
-    BIO_write(b64.get(), in.data(), static_cast<int>(in.size()));
-    BIO_flush(b64.get());
+    BIO_write(b64, in.data(), static_cast<int>(in.size()));
+    BIO_flush(b64);
     
     BUF_MEM *bptr;
-    BIO_get_mem_ptr(b64.get(), &bptr);
+    BIO_get_mem_ptr(b64, &bptr);
     out = std::string(bptr->data, bptr->length);
+    BIO_free_all(b64);
 }
 
 std::string generateTotp(const std::vector<u8> &key, u64 time_step)
@@ -260,14 +290,13 @@ u8 argon2id(const std::string& password,
     uint32_t mem_cost = 65536;    // 64MB
     uint32_t iterations = 3;      // Time cost
 
-    OSSL_PARAM params[7];
+    OSSL_PARAM params[6];
     params[0] = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_PASSWORD, (void*)password.data(), password.size());
     params[1] = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_SALT, (void*)salt.data(), salt.size());
-    params[2] = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_THREADS, &lanes);
-    params[3] = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_ARGON2_LANES, &lanes);
-    params[4] = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_ARGON2_MEMCOST, &mem_cost);
-    params[5] = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_ITER, &iterations);
-    params[6] = OSSL_PARAM_construct_end();
+    params[2] = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_ARGON2_LANES, &lanes);
+    params[3] = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_ARGON2_MEMCOST, &mem_cost);
+    params[4] = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_ITER, &iterations);
+    params[5] = OSSL_PARAM_construct_end();
 
     // 4. encrypt the password
     if (EVP_KDF_derive(kctx, out_hash.data(), out_hash.size(), params) > 0)
@@ -276,8 +305,11 @@ u8 argon2id(const std::string& password,
     }
     else
     {
-        spdlog::error("{}:{} Error: EVP_KDF_derive failed",
-                      LOG_FILE_PATH(__FILE__), __LINE__);
+        char err_buf[256];
+        int err_code = ERR_get_error();
+        ERR_error_string(err_code, err_buf);
+        spdlog::error("{}:{} Error: EVP_KDF_derive failed: {}",
+                      LOG_FILE_PATH(__FILE__), __LINE__, err_buf);
     }
 
     EVP_KDF_CTX_free(kctx);

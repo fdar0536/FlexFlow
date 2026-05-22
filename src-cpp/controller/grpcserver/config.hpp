@@ -51,13 +51,9 @@ public:
 
     std::string dbPath;
 
-    std::string logPath = "";
-
     u16 listenPort = 12345;
 
     std::string listenIP = "127.0.0.1";
-
-    i32 logLevel = static_cast<i32>(spdlog::level::level_enum::info);
 
 private:
 

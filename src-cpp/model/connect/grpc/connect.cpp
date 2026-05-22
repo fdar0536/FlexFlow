@@ -40,6 +40,7 @@ namespace GRPC
 {
 
 std::shared_ptr<Token> connect(
+    const bool ssl,
     const std::string &target,
     const u16 port,
     const std::string username,
@@ -48,6 +49,18 @@ std::shared_ptr<Token> connect(
 {
     spdlog::debug("{}:{} Model::Connect::GRPC::connect",
         LOG_FILE_PATH(__FILE__), __LINE__);
+    spdlog::debug("{}:{} ssl: {}",
+        LOG_FILE_PATH(__FILE__), __LINE__, ssl);
+    spdlog::debug("{}:{} target: {}",
+        LOG_FILE_PATH(__FILE__), __LINE__, target.c_str());
+    spdlog::debug("{}:{} port: {}",
+        LOG_FILE_PATH(__FILE__), __LINE__, port);
+    spdlog::debug("{}:{} username: {}",
+        LOG_FILE_PATH(__FILE__), __LINE__, username.c_str());
+    spdlog::debug("{}:{} password: {}",
+        LOG_FILE_PATH(__FILE__), __LINE__, password.c_str());
+    spdlog::debug("{}:{} otp: {}",
+        LOG_FILE_PATH(__FILE__), __LINE__, otp.c_str());
 
     auto channel = std::shared_ptr<grpc::ChannelInterface>();
 
@@ -69,8 +82,16 @@ std::shared_ptr<Token> connect(
     try
     {
         // connect to server
-        channel = grpc::CreateChannel(ip, 
-            grpc::InsecureChannelCredentials());
+        if (ssl)
+        {
+            channel = grpc::CreateChannel(ip,
+            grpc::SslCredentials(grpc::SslCredentialsOptions()));
+        }
+        else
+        {
+            channel = grpc::CreateChannel(ip, 
+                grpc::InsecureChannelCredentials());
+        }
 
         if (channel == nullptr)
         {

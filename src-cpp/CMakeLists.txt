@@ -8,22 +8,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 if (UNIX)
-    add_compile_options(-Wall -Werror -Wextra -fvisibility=hidden -ffunction-sections -fdata-sections -flto)
-    add_link_options(-flto)
-
-    if(APPLE)
-        add_link_options(-Wl,-dead_strip)
-    else()
-        add_link_options(-Wl,--gc-sections)
-    endif()
+    add_compile_options(-Wall -Werror -Wextra -fvisibility=hidden)
 
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
         add_compile_options(-Weffc++)
     endif ()
 else () # Windows
     if (MINGW)
-        add_compile_options(-Wall -Werror -Wextra -fvisibility=hidden -ffunction-sections -fdata-sections -flto)
-        add_link_options(-flto -Wl,--gc-sections)
+        add_compile_options(-Wall -Werror -Wextra -fvisibility=hidden)
 
         if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
             add_compile_options(-Weffc++)
@@ -100,3 +92,4 @@ set_property(TARGET grpc_common PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 include(cmake/ffmodel.cmake)
 include(cmake/flexflowserver.cmake)
+include(cmake/flexflowcli.cmake)

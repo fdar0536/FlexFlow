@@ -89,6 +89,8 @@ private:
 
     std::shared_ptr<Connect::SQLite::Token> m_token;
 
+    std::shared_ptr<Proc::IProc> m_proc;
+
     std::mutex m_currentTaskMutex;
 
     Proc::Task m_currentTask;

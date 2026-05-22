@@ -52,9 +52,9 @@ public:
                       const ff::Empty *req,
                       grpc::ServerWriter<::ff::ListQueueRes> *writer) override;
 
-    grpc::Status GetQueue(grpc::ServerContext *ctx,
-                          const ff::QueueReq *req,
-                          ff::Empty *res) override;
+    grpc::Status Get(grpc::ServerContext *ctx,
+                     const ff::QueueReq *req,
+                    ff::Empty *res) override;
 
 }; // end class QueueListImpl
 
