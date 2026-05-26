@@ -10,19 +10,25 @@ import "google/api/annotations.proto";
 service Access {
   rpc Info(Empty) returns (InfoRes) {
     option (google.api.http) = {
-      get: "/info"
+      get: "/api/v1/info"
     };
   }
 
-  rpc Login(LoginReq) returns (LoginRes) {
+  rpc Login(LoginReq) returns (Empty) {
     option (google.api.http) = {
-      post: "/login"
+      post: "/api/v1/login"
     };
   }
 
   rpc Logout(LogoutReq) returns (Empty) {
     option (google.api.http) = {
-      post: "/logout"
+      post: "/api/v1/logout"
+    };
+  }
+
+  rpc Echo(Empty) returns (Empty) {
+    option (google.api.http) = {
+      get: "/api/v1/echo"
     };
   }
 }
@@ -37,10 +43,7 @@ message LoginReq {
   string username = 1;
   string password = 2;
   string otp = 3;
-}
-
-message LoginRes {
-  string token = 1;
+  int32 tokentimeout = 4;
 }
 
 message LogoutReq {

@@ -49,7 +49,8 @@ std::shared_ptr<Token> connect(
     const u16 port,
     const std::string username,
     const std::string password,
-    const std::string otp);
+    const std::string otp,
+    const u64 tokenTimeout = 0);
 
 } // end namespace GRPC
 

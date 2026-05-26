@@ -24,6 +24,8 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
+#define ENABLE_DEBUG           @ENABLE_DEBUG@
+
 #define FF_VERSION             "@FF_VERSION@"
 #define FF_BRANCH              "@FF_BRANCH@"
 #define FF_COMMIT              "@FF_COMMIT@"

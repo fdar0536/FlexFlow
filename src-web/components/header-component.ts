@@ -25,7 +25,6 @@ import {Component, inject} from "@angular/core";
 import {RouterLink} from '@angular/router';
 import {MatTabsModule} from '@angular/material/tabs';
 import {MatIconModule} from '@angular/material/icon';
-
 import {Global} from "../model/global";
 
 @Component
@@ -38,9 +37,4 @@ import {Global} from "../model/global";
 export class HeaderComponent
 {
     global = inject(Global);
-    onExitClicked = (event: Event) =>
-    {
-        event.stopPropagation();
-        this.global.onExitEvent();
-    }
 }

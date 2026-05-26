@@ -105,7 +105,7 @@ void encodeBase32(const std::vector<u8> &in, std::string &out)
     }
 }
 
-void decodeBase64(const std::string &base64, std::vector<u8> &out)
+u8 decodeBase64(const std::string &base64, std::vector<u8> &out)
 {
     spdlog::debug("{}:{} Model::Auth::Utils::decodeBase64",
                   LOG_FILE_PATH(__FILE__), __LINE__);
@@ -119,7 +119,7 @@ void decodeBase64(const std::string &base64, std::vector<u8> &out)
     if (!b64)
     {
         spdlog::error("{}:{} BIO_new failed", LOG_FILE_PATH(__FILE__), __LINE__);
-        return;
+        return 1;
     }
 
     BIO *bmem = BIO_new_mem_buf(base64.data(), static_cast<int>(base64.size()));
@@ -127,7 +127,7 @@ void decodeBase64(const std::string &base64, std::vector<u8> &out)
     {
         spdlog::error("{}:{} BIO_new_mem_buf failed", LOG_FILE_PATH(__FILE__), __LINE__);
         BIO_free_all(b64);
-        return;
+        return 1;
     }
     
     BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
@@ -141,13 +141,20 @@ void decodeBase64(const std::string &base64, std::vector<u8> &out)
     }
     else
     {
+        char err_buf[256];
+        int err_code = ERR_get_error();
+        ERR_error_string(err_code, err_buf);
+        spdlog::error("{}:{} Error: {}",
+                      LOG_FILE_PATH(__FILE__), __LINE__, err_buf);
         out.clear();
+        return 1;
     }
 
     BIO_free_all(b64);
+    return 0;
 }
 
-void encodeBase64(const std::vector<u8> &in, std::string &out)
+u8 encodeBase64(const std::vector<u8> &in, std::string &out)
 {
     spdlog::debug("{}:{} Model::Auth::Utils::encodeBase64",
         LOG_FILE_PATH(__FILE__), __LINE__);
@@ -160,7 +167,7 @@ void encodeBase64(const std::vector<u8> &in, std::string &out)
     {
         spdlog::error("{}:{} Error: BIO_new failed",
                       LOG_FILE_PATH(__FILE__), __LINE__);
-        return;
+        return 1;
     }
 
     BIO *bmem = BIO_new(BIO_s_mem());
@@ -169,7 +176,7 @@ void encodeBase64(const std::vector<u8> &in, std::string &out)
         spdlog::error("{}:{} Error: BIO_new failed",
                       LOG_FILE_PATH(__FILE__), __LINE__);
         BIO_free_all(b64);
-        return;
+        return 1;
     }
     
     BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
@@ -183,6 +190,7 @@ void encodeBase64(const std::vector<u8> &in, std::string &out)
     BIO_get_mem_ptr(b64, &bptr);
     out = std::string(bptr->data, bptr->length);
     BIO_free_all(b64);
+    return 0;
 }
 
 std::string generateTotp(const std::vector<u8> &key, u64 time_step)

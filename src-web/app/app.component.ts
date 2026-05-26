@@ -24,7 +24,6 @@
 import { Component, DestroyRef, inject, OnInit } from "@angular/core";
 import { RouterOutlet } from "@angular/router";
 import { HeaderComponent } from "../components/header-component";
-import { Global } from "../model/global";
 import { Logger } from "../model/logger";
 
 @Component
@@ -43,20 +42,14 @@ export class AppComponent implements OnInit
         this.destroyRef.onDestroy(() =>
         {
             this.logger.debug("AppComponent.onDestroy");
-            if (this.global.isTauri)
-            {
-                this.global.config.save();
-            } 
         });
     }
 
     ngOnInit()
     {
         this.logger.debug("AppComponent.ngOnInit");
-        this.global.config.load();
     }
 
-    global = inject(Global);
     private logger = inject(Logger);
     private destroyRef = inject(DestroyRef);
 }

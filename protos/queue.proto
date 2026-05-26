@@ -10,82 +10,82 @@ import "google/api/annotations.proto";
 service Queue {
   rpc ListPending(QueueReq) returns (stream ListTaskRes) {
     option (google.api.http) = {
-      get: "/queue/listpending"
+      get: "/api/v1/queue/listpending"
     };
   }
 
   rpc ListFinished(QueueReq) returns (stream ListTaskRes) {
     option (google.api.http) = {
-      get: "/queue/listfinished"
+      get: "/api/v1/queue/listfinished"
     };
   }
 
   rpc PendingDetails(TaskDetailsReq) returns (TaskDetailsRes) {
     option (google.api.http) = {
-      get: "/queue/pendingdetails"
+      get: "/api/v1/queue/pendingdetails"
     };
   }
 
   rpc FinishedDetails(TaskDetailsReq) returns (TaskDetailsRes) {
     option (google.api.http) = {
-      get: "/queue/finisheddetails"
+      get: "/api/v1/queue/finisheddetails"
     };
   }
 
   rpc ClearPending(QueueReq) returns (Empty) {
     option (google.api.http) = {
-      get: "/queue/clearpending"
+      get: "/api/v1/queue/clearpending"
     };
   }
 
   rpc ClearFinished(QueueReq) returns (Empty) {
     option (google.api.http) = {
-      get: "/queue/clearfinished"
+      get: "/api/v1/queue/clearfinished"
     };
   }
 
   rpc CurrentTask(QueueReq) returns (TaskDetailsRes) {
     option (google.api.http) = {
-      get: "/queue/currenttask"
+      get: "/api/v1/queue/currenttask"
     };
   }
   
   rpc AddTask(AddTaskReq) returns (ListTaskRes) {
     option (google.api.http) = {
-      post: "/queue/addtask"
+      post: "/api/v1/queue/addtask"
       body: "*"
     };
   }
   
   rpc RemoveTask(TaskDetailsReq) returns (Empty) {
     option (google.api.http) = {
-      post: "/queue/removetask"
+      post: "/api/v1/queue/removetask"
       body: "*"
     };
   }
   
   rpc IsRunning(QueueReq) returns (IsRunningRes) {
     option (google.api.http) = {
-      get: "/queue/isrunning"
+      get: "/api/v1/queue/isrunning"
     };
   }
   
   rpc ReadCurrentOutput(QueueReq) returns (stream Msg) {
     option (google.api.http) = {
-      get: "/queue/readcurrentoutput"
+      get: "/api/v1/queue/readcurrentoutput"
     };
   }
   
   rpc Start(QueueReq) returns (Empty) {
     option (google.api.http) = {
-      post: "/queue/start"
+      post: "/api/v1/queue/start"
       body: "*"
     };
   }
   
   rpc Stop(QueueReq) returns (Empty) {
     option (google.api.http) = {
-      post: "/queue/stop"
+      post: "/api/v1/queue/stop"
       body: "*"
     };
   }

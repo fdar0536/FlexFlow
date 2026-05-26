@@ -219,8 +219,7 @@ u8 Config::parseAuth(YAML::Node &config, const std::string &path)
             return 1;
         }
 
-        Model::Auth::Crypto::encodeBase64(out, salt);
-        if (out.empty())
+        if (Model::Auth::Crypto::encodeBase64(out, salt))
         {
             spdlog::error("{}:{} Fail to encode salt",
                 LOG_FILE_PATH(__FILE__), __LINE__);
@@ -240,8 +239,7 @@ u8 Config::parseAuth(YAML::Node &config, const std::string &path)
         }
 
         // encode password
-        Model::Auth::Crypto::encodeBase64(out, password);
-        if (out.empty())
+        if (Model::Auth::Crypto::encodeBase64(out, password))
         {
             spdlog::error("{}:{} Fail to encode password",
                 LOG_FILE_PATH(__FILE__), __LINE__);
@@ -253,7 +251,13 @@ u8 Config::parseAuth(YAML::Node &config, const std::string &path)
     else
     {
         // decode salt
-        Model::Auth::Crypto::decodeBase64(salt, simpleAuth->salt);
+        if (Model::Auth::Crypto::decodeBase64(salt, simpleAuth->salt))
+        {
+            spdlog::error("{}:{} Fail to decode salt",
+                LOG_FILE_PATH(__FILE__), __LINE__);
+            return 1;
+        }
+        
         if (simpleAuth->salt.size() < 16)
         {
             spdlog::error("{}:{} salt is too short or invalid salt",
@@ -262,7 +266,12 @@ u8 Config::parseAuth(YAML::Node &config, const std::string &path)
         }
 
         // decode password
-        Model::Auth::Crypto::decodeBase64(password, simpleAuth->password);
+        if (Model::Auth::Crypto::decodeBase64(password, simpleAuth->password))
+        {
+            spdlog::error("{}:{} Fail to decode password",
+                LOG_FILE_PATH(__FILE__), __LINE__);
+            return 1;
+        }
     }
 
     std::string totpKey = authConfig["totp key"].as<std::string>();
@@ -300,9 +309,31 @@ u8 Config::parseAuth(YAML::Node &config, const std::string &path)
         }
     }
 
-    simpleAuth->banTime = authConfig["ban time"].as<u64>();
+    simpleAuth->banTime = authConfig["ban time"].as<i32>();
     simpleAuth->maxRetry = authConfig["max retry"].as<u8>();
-    simpleAuth->tokenTimeout = authConfig["token timeout"].as<u64>();
+    simpleAuth->defaultTokenTimeout = authConfig["default token timeout"].as<i32>();
+    simpleAuth->maxTokenTimeout = authConfig["max token timeout"].as<i32>();
+
+    if (simpleAuth->defaultTokenTimeout > simpleAuth->maxTokenTimeout)
+    {
+        spdlog::error("{}:{} default token timeout is greater than max token timeout",
+            LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
+
+    if (simpleAuth->defaultTokenTimeout < 3600) // 1 hr
+    {
+        spdlog::error("{}:{} default token timeout is less than 1 hour",
+            LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
+
+    if (simpleAuth->maxTokenTimeout < 3600) // 1 hr
+    {
+        spdlog::error("{}:{} max token timeout is less than 1 hour",
+            LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
 
     if (needWriteBack)
     {

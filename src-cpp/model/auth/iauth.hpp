@@ -47,7 +47,8 @@ public:
     virtual u8 login(const std::string &username,
                      const std::string &password,
                      const std::string &otp,
-                     std::string &token) = 0;
+                     std::string &token,
+                     i32 &tokenTimeout) = 0;
 
     virtual u8 logout(const std::string &username, const std::string &token) = 0;
 

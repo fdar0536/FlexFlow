@@ -43,9 +43,9 @@ void decodeBase32(const std::string &base32, std::vector<u8> &out);
 
 void encodeBase32(const std::vector<u8> &in, std::string &out);
 
-void decodeBase64(const std::string &base64, std::vector<u8> &out);
+u8 decodeBase64(const std::string &base64, std::vector<u8> &out);
 
-void encodeBase64(const std::vector<u8> &in, std::string &out);
+u8 encodeBase64(const std::vector<u8> &in, std::string &out);
 
 std::string generateTotp(const std::vector<u8> &key,
                          u64 time_step = 30);

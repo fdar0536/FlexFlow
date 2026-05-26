@@ -51,7 +51,8 @@ Auth::~Auth()
 u8 Auth::login(const std::string &username,
                const std::string &password,
                const std::string &otp,
-               std::string &token)
+               std::string &token,
+               i32 &tokenTimeout)
 {
     spdlog::debug("{}:{} Model::Auth::Simple::Auth::login",
                   LOG_FILE_PATH(__FILE__), __LINE__);
@@ -116,6 +117,17 @@ u8 Auth::login(const std::string &username,
         return 1;
     }
 
+    // handle token timeout
+    if (tokenTimeout <= defaultTokenTimeout)
+    {
+        tokenTimeout = defaultTokenTimeout;
+    }
+    else if (tokenTimeout > maxTokenTimeout)
+    {
+        tokenTimeout = maxTokenTimeout;
+    }
+    
+    this->tokenTimeout = tokenTimeout;
     token = m_currentToken;
     m_retry = 0;
     m_lastAccess = std::time(nullptr);
@@ -190,7 +202,7 @@ u8 Auth::cannotAccess(const std::string &ip)
 
         // isNotBanned == false
         u64 now = std::time(nullptr);
-        if ((now - it->second.lastAccess) <= banTime)
+        if (static_cast<i32>(now - it->second.lastAccess) <= banTime)
         {
             it->second.lastAccess = now;
             spdlog::error("{}:{} ip is banned",
@@ -235,7 +247,7 @@ u8 Auth::cannotAccess(const std::string &ip, const std::string &token)
     }
 
     u64 now = std::time(nullptr);
-    if ((now - m_lastAccess) > tokenTimeout)
+    if (static_cast<i32>(now - m_lastAccess) > tokenTimeout)
     {
         // token expired
         m_currentToken = "";
@@ -345,7 +357,7 @@ u8 Auth::unBanUser()
     if (m_baned)
     {
         u64 now = std::time(nullptr);
-        if ((now - m_lastAccess) <= banTime)
+        if (static_cast<i32>(now - m_lastAccess) <= banTime)
         {
             m_lastAccess = now;
             spdlog::error("{}:{} user is banned",

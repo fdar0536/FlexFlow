@@ -55,7 +55,7 @@ grpc::Status AccessImpl::Info(grpc::ServerContext *ctx,
 
 grpc::Status AccessImpl::Login(grpc::ServerContext *ctx,
                                const ff::LoginReq *req,
-                               ff::LoginRes *res)
+                               ff::Empty *res)
 {
     spdlog::debug("{}:{} AccessImpl::Login", LOG_FILE_PATH(__FILE__), __LINE__);
     
@@ -66,9 +66,10 @@ grpc::Status AccessImpl::Login(grpc::ServerContext *ctx,
     }
 
     std::string token;
+    i32 tokenTimeout = req->tokentimeout();
 
     if (auth->login(req->username(),
-    req->password(), req->otp(), token))
+    req->password(), req->otp(), token, tokenTimeout))
     {
         spdlog::error("{}:{} Fail to login", LOG_FILE_PATH(__FILE__), __LINE__);
         std::string ip = Utils::getIPFromContext(ctx);
@@ -77,7 +78,8 @@ grpc::Status AccessImpl::Login(grpc::ServerContext *ctx,
             "Fail to login");
     }
 
-    res->set_token(token);
+    ctx->AddInitialMetadata("x-auth-token", token);
+    ctx->AddInitialMetadata("x-auth-token-timeout", std::to_string(tokenTimeout));
     return grpc::Status::OK;
 }
     
@@ -102,6 +104,19 @@ grpc::Status AccessImpl::Logout(grpc::ServerContext *ctx,
             "Fail to logout");
     }
 
+    ctx->AddInitialMetadata("x-auth-token", token);
+    ctx->AddInitialMetadata("x-auth-token-timeout", std::to_string(-1));
+    return grpc::Status::OK;
+}
+
+grpc::Status AccessImpl::Echo(grpc::ServerContext *ctx,
+                              const ff::Empty *req,
+                              ff::Empty *res)
+{
+    spdlog::debug("{}:{} AccessImpl::Echo", LOG_FILE_PATH(__FILE__), __LINE__);
+    UNUSED(ctx);
+    UNUSED(req);
+    UNUSED(res);
     return grpc::Status::OK;
 }
 

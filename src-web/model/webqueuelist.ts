@@ -28,23 +28,19 @@ export class WebQueueList implements IQueueList
     destroy(): Promise<void> {
         throw new Error("Method not implemented.");
     }
-    createQueue(name: string): Promise<void> {
+    create(name: string): Promise<void> {
         throw new Error("Method not implemented.");
     }
-    listQueue(): Promise<string[]> {
+    list(): Promise<string[]> {
         throw new Error("Method not implemented.");
     }
-    deleteQueue(name: string): Promise<void> {
+    delete(name: string): Promise<void> {
         throw new Error("Method not implemented.");
     }
-    renameQueue(old_name: string, new_name: string): Promise<void> {
+    rename(old_name: string, new_name: string): Promise<void> {
         throw new Error("Method not implemented.");
     }
-    getQueue(name: string): Promise<Handle> {
+    get(name: string): Promise<Handle> {
         throw new Error("Method not implemented.");
     }
-    returnQueue(queue: Handle): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-    
 }

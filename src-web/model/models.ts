@@ -35,23 +35,13 @@ export class ExitCode
     msg: string = "";
 }
 
-export interface IConnect
-{
-    destroy(code: ExitCode): Promise<void>;
-    handle(): Handle;
-    startConnect(target: string, port: number, code: ExitCode): Promise<void>;
-    targetPath(code: ExitCode): Promise<string>;
-}
-
 export interface IQueueList
 {
-    destroy(): Promise<void>;
-    createQueue(name: string): Promise<void>;
-    listQueue(): Promise<string[]>;
-    deleteQueue(name: string): Promise<void>;
-    renameQueue(old_name: string, new_name: string): Promise<void>;
-    getQueue(name: string): Promise<Handle>;
-    returnQueue(queue: Handle): Promise<void>;
+    create(name: string): Promise<void>;
+    list(): Promise<string[]>;
+    delete(name: string): Promise<void>;
+    rename(old_name: string, new_name: string): Promise<void>;
+    get(name: string): Promise<Handle>;
 }
 
 export interface ProcTask
@@ -66,7 +56,6 @@ export interface ProcTask
 
 export interface IQueue
 {
-    handle(): Handle;
     listPending(): Promise<number[]>;
     listFinished(): Promise<number[]>;
     pendingDetails(id: number): Promise<ProcTask>;
@@ -80,11 +69,4 @@ export interface IQueue
     clearPending(): Promise<void>;
     clearFinished(): Promise<void>;
     removeTask(id: number): Promise<void>;
-}
-
-export enum ConnectMode
-{
-    GRPC,
-    Local,
-    Web
 }

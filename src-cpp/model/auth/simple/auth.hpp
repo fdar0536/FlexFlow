@@ -58,7 +58,8 @@ public:
     virtual u8 login(const std::string &username,
                      const std::string &password,
                      const std::string &otp,
-                     std::string &token) override;
+                     std::string &token,
+                     i32 &tokenTimeout) override;
 
     virtual u8 logout(const std::string &username, const std::string &token) override;
 
@@ -78,15 +79,19 @@ public:
 
     std::vector<u8> totpKey;
 
-    u8 maxRetry = 3;
+    u8 maxRetry = 5;
 
-    u64 banTime = 600;
+    i32 banTime = 600;
 
-    u64 tokenTimeout = 86400; // 24hr
+    i32 tokenTimeout = 86400; // 1 day
+
+    i32 defaultTokenTimeout = 86400; // 1 day
+
+    i32 maxTokenTimeout = 2592000; // 1 month
 
 private:
 
-    u64 m_retry = 0;
+    u8 m_retry = 0;
 
     u64 m_lastAccess = 0;
 

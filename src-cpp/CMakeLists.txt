@@ -42,6 +42,13 @@ if (WIN32)
     string(REPLACE "/" "\\\\" PROJECT_ROOT_DIR ${CMAKE_SOURCE_DIR})
 endif (WIN32)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(ENABLE_DEBUG 1)
+else()
+    set(ENABLE_DEBUG 0)
+endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+
+# write config
 configure_file(config.h.in config.h @ONLY)
 include_directories(After SYSTEM
     ${CMAKE_CURRENT_BINARY_DIR}

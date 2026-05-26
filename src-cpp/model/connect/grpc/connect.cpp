@@ -45,7 +45,8 @@ std::shared_ptr<Token> connect(
     const u16 port,
     const std::string username,
     const std::string password,
-    const std::string otp)
+    const std::string otp,
+    const u64 tokenTimeout)
 {
     spdlog::debug("{}:{} Model::Connect::GRPC::connect",
         LOG_FILE_PATH(__FILE__), __LINE__);
@@ -114,15 +115,25 @@ std::shared_ptr<Token> connect(
         req.set_username(username);
         req.set_password(password);
         req.set_otp(otp);
+        req.set_tokentimeout(tokenTimeout);
 
-        ff::LoginRes res;
+        ff::Empty res;
         grpc::ClientContext ctx;
         DAO::GRPC::Utils::setupCtx(ctx);
         grpc::Status status = stub->Login(&ctx, req, &res);
 
         if (status.ok())
         {
-            ret->token = res.token();
+            auto meta = ctx.GetServerInitialMetadata();
+            auto it = meta.find("x-auth-token");
+            if (it == meta.end())
+            {
+                spdlog::error("{}:{} Fail to get token",
+                    LOG_FILE_PATH(__FILE__), __LINE__);
+                return nullptr;
+            }
+
+            ret->token = std::string(it->second.data(), it->second.length());
             ret->channel = channel;
         }
         else

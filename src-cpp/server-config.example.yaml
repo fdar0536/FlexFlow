@@ -1,7 +1,5 @@
 # set your database path
 db path: /path/to/your/database/folder
-# set your log path
-log path: /path/to/your/log/folder
 # the ip for server listen
 ip: 127.0.0.1
 # the port for server listen
@@ -18,6 +16,7 @@ auth:
   # how long will be banned when login failed in seconds
   ban time: 600
   # how many time can be failed to try
-  max retry: 3
+  max retry: 5
   # how long will token expire in seconds
-  token timeout: 86400
+  default token timeout: 86400 # 1 day
+  max token timeout: 2592000 # 1 month

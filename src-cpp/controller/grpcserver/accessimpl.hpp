@@ -44,11 +44,15 @@ public:
     
     grpc::Status Login(grpc::ServerContext *context,
                        const ff::LoginReq *request,
-                       ff::LoginRes *response) override;
+                       ff::Empty *response) override;
     
     grpc::Status Logout(grpc::ServerContext *context,
                         const ff::LogoutReq *request,
                         ff::Empty *response) override;
+    
+    grpc::Status Echo(grpc::ServerContext *context,
+                      const ff::Empty *request,
+                      ff::Empty *response) override;
 
 };
 

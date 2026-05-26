@@ -29,11 +29,7 @@
 /**
  * @brief the wrapper for suppress compiler's warning
  */
-#ifdef __cplusplus
 #define UNUSED(x) static_cast<void>(x)
-#else
-#define UNUSED(x) (void)x
-#endif
 
 /** @name Define the backend */
 /**{@*/

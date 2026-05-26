@@ -35,13 +35,5 @@
       </div>
     </ng-template>
   </mat-tab>
-  <mat-tab>
-    <ng-template mat-tab-label>
-      <div (click)="onExitClicked($event)" class="HeaderTab">
-        <mat-icon>close</mat-icon>
-        <p class="CommonText">Exit</p>
-      </div>
-    </ng-template>
-  </mat-tab>
 </mat-tab-group>
 <p class="CommonText">Status: {{ this.global.status() }}</p>

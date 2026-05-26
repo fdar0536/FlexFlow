@@ -10,7 +10,7 @@
  * furnished to do so, subject to the following conditions:
  *
  * The above copyright notice and this permission notice shall be included in all
- * copies or s`ubstantial portions of the Software.
+ * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -23,7 +23,6 @@
 
 import pino from 'pino';
 import { Injectable, isDevMode } from "@angular/core";
-import { info, debug, error, warn, trace } from "@tauri-apps/plugin-log";
 
 @Injectable
 ({
@@ -34,7 +33,7 @@ export class Logger
 {
     constructor()
     {
-        console.log('Logger initialized. isTauri:', this.isTauri);
+        console.log('Logger initialized.');
     }    
 
     trace(msg: string, ...args: any[])
@@ -67,49 +66,12 @@ export class Logger
         this.logger.fatal(args.length ? { detail: args } : {}, msg);
     }
 
-    private isTauri = !!(window as any).__TAURI_INTERNALS__;
     private logger = pino
     ({
         level: isDevMode() ? 'debug' : 'info',
         browser:
         {
             asObject: true,
-            write: (o) =>
-            {
-                console.log(o);
-            },
-            transmit:
-            {
-                level: isDevMode() ? 'debug' : 'info',
-                send: async (level, logEvent) =>
-                {
-                    if (this.isTauri)
-                    {
-                        try
-                        {   
-                            const msg = logEvent.messages.map(m => 
-                            typeof m === 'object' ? JSON.stringify(m) : m
-                            ).join(' ');
-
-                            // 對應 Pino 的 Level 到 Tauri Plugin Log
-                            switch (level)
-                            {
-                                case 'debug': await debug(msg); break;
-                                case 'info':  await info(msg);  break;
-                                case 'warn':  await warn(msg);  break;
-                                case 'error': await error(msg); break;
-                                case 'fatal': await error(`[FATAL] ${msg}`); break;
-                                default: await trace(msg);
-                            }
-                        } // try
-                        catch (err)
-                        {
-                            // 如果插件沒裝好，至少還有原生 console
-                            console.warn('Tauri logger plugin failed:', err);
-                        } // catch
-                    } // if (this.global.isTauri)
-                } // send: async (level, logEvent) =>
-            } // transmit:
         } // browser:
     });
 }

@@ -40,6 +40,14 @@ int main(int argc, char **argv)
 {
     spdlog::cfg::load_env_levels();
 
+#if !ENABLE_DEBUG
+    spdlog::level::level_enum level = spdlog::get_level();
+    if (level < spdlog::level::level_enum::info)
+    {
+        spdlog::set_level(spdlog::level::level_enum::info);
+    }
+#endif
+
     // build command line parser
     std::string appName = "Flex Flow ";
     appName.append(FF_VERSION);

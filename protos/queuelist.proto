@@ -10,33 +10,33 @@ import "google/api/annotations.proto";
 service QueueList {
   rpc Create(QueueReq) returns (Empty) {
     option (google.api.http) = {
-      post: "/queuelist/create"
+      post: "/api/v1/queuelist/create"
       body: "*"
     };
   }
 
   rpc Rename(RenameQueueReq) returns (Empty) {
     option (google.api.http) = {
-      post: "/queuelist/rename"
+      post: "/api/v1/queuelist/rename"
       body: "*"
     };
   }
 
   rpc Delete(QueueReq) returns (Empty) {
     option (google.api.http) = {
-      delete: "/queuelist/delete"
+      delete: "/api/v1/queuelist/delete"
     };
   }
 
   rpc List(Empty) returns (stream ListQueueRes) {
     option (google.api.http) = {
-      get: "/queuelist/list"
+      get: "/api/v1/queuelist/list"
     };
   }
 
   rpc Get(QueueReq) returns (Empty) {
     option (google.api.http) = {
-      get: "/queuelist/get"
+      get: "/api/v1/queuelist/get"
     };
   }
 }

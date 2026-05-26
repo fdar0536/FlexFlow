@@ -24,14 +24,16 @@
 package main
 
 import (
-	"fmt"
 	"context"
+	"fmt"
 	"net/http"
 
+	"github.com/alexflint/go-arg"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"github.com/alexflint/go-arg"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/proto"
 
 	pb "github.com/fdar0536/FlexFlowGateway/protos"
 )
@@ -39,6 +41,7 @@ import (
 var(
 	serverAddr = "localhost:9090"
 	listenAddr = "localhost:8080"
+	ssl = false
 )
 
 func run() error {
@@ -47,7 +50,9 @@ func run() error {
 	defer cancel()
 
 	// 1. add new ServeMux
-	mux := runtime.NewServeMux()
+	mux := runtime.NewServeMux(
+		runtime.WithForwardResponseOption(ffHttpResponseModifier),
+	)
 
 	// 2. setup
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
@@ -69,7 +74,68 @@ func run() error {
 	}
 
 	fmt.Printf("FlexFlow Gateway start successfully, listen on: %s\n", listenAddr)
-	return http.ListenAndServe(listenAddr, mux)
+	return http.ListenAndServe(listenAddr, cookieToMetadataMiddleware(mux))
+}
+
+func ffHttpResponseModifier(ctx context.Context,
+							w http.ResponseWriter,
+							resp proto.Message) error {
+	md, ok := runtime.ServerMetadataFromContext(ctx)
+	if !ok {
+		return nil
+	}
+
+	tokens := md.HeaderMD.Get("x-auth-token")
+	tokenTimeOutStr := md.HeaderMD.Get("x-auth-token-timeout")
+	if (len(tokenTimeOutStr) <= 0 || len(tokens) <= 0) {
+		return nil
+	}
+
+	var tokenTimeout int = 0
+	_, err := fmt.Sscan(tokenTimeOutStr[0], &tokenTimeout);
+	if (err != nil) {
+		fmt.Println(err)
+		return nil
+	}
+
+	token := tokens[0]
+	// build HttpOnly cookie
+	cookie := &http.Cookie{
+		Name:     "x-auth-token",
+		Value:    token,
+		Path:     "/",
+		HttpOnly: true, // for prevent xss
+		Secure:   ssl,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   tokenTimeout,
+	}
+
+	// write HTTP Response
+	http.SetCookie(w, cookie)
+
+	// remove x-auth-token amd x-auth-token-timeout from http header
+	w.Header().Del("Grpc-Metadata-X-Auth-Token")
+	w.Header().Del("Grpc-Metadata-X-Auth-Token-Timeout")
+
+	return nil
+}
+
+func cookieToMetadataMiddleware(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        // 1. try to get "x-auth-token" Cookie from browser data
+        if cookie, err := r.Cookie("x-auth-token"); err == nil {
+            
+            // 2. convert it to gRPC's Incoming Metadata
+            md := metadata.Pairs("x-auth-token", cookie.Value)
+            
+            // 3. insert new Metadata to current context
+            ctx := metadata.NewIncomingContext(r.Context(), md)
+            r = r.WithContext(ctx)
+        }
+        
+        // to next step（sent to gRPC-Gateway and convert to gRPC request）
+        next.ServeHTTP(w, r)
+    })
 }
 
 func main() {
@@ -79,17 +145,20 @@ func main() {
 		ServerPort  uint16 `arg:"-p,--server-port" help:"grpc server port"`
 		ListenIp    string `arg:"-l,--listen-ip" help:"http gateway listen ip"`
 		ListenPort  uint16 `arg:"-P,--listen-port" help:"http gateway listen port"`
+		SSL         bool   `arg:"-S,--ssl" help:"use ssl cookie or not"`
 	}
 
 	// set default
 	args.ServerIp = "127.0.0.1"
-	args.ServerPort = 9090
+	args.ServerPort = 12345
 	args.ListenIp = "127.0.0.1"
 	args.ListenPort = 8080
+	args.SSL = false
 
 	arg.MustParse(&args)
 	serverAddr = args.ServerIp + ":" + fmt.Sprint(args.ServerPort)
 	listenAddr = args.ListenIp + ":" + fmt.Sprint(args.ListenPort)
+	ssl = args.SSL
 
 	if err := run(); err != nil {
 		panic(err)
