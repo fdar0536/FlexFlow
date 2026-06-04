@@ -47,7 +47,7 @@ public:
                        ff::Empty *response) override;
     
     grpc::Status Logout(grpc::ServerContext *context,
-                        const ff::LogoutReq *request,
+                        const ff::Empty *request,
                         ff::Empty *response) override;
     
     grpc::Status Echo(grpc::ServerContext *context,

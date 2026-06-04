@@ -21,34 +21,29 @@
  * SOFTWARE.
  */
 
-#ifndef _CONTROLLER_GRPCSERVER_AUTHINTERCEPTOR_HPP_
-#define _CONTROLLER_GRPCSERVER_AUTHINTERCEPTOR_HPP_
+import { inject, Injectable } from '@angular/core';
+import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot } from '@angular/router';
+import { Global } from '../model/global';
 
-#include "grpcpp/support/interceptor.h"
-#include "grpcpp/support/server_interceptor.h"
+@Injectable({
+  providedIn: 'root'
+})
 
-namespace Controller
+export class AuthGuard implements CanActivate
 {
+    canActivate(
+        route: ActivatedRouteSnapshot,
+        state: RouterStateSnapshot)
+    {
+        if (this.global.connected())
+        {
+            return true;
+        }
 
-namespace GRPCServer
-{
+        this.router.navigate(['/login']);
+        return false;
+    }
 
-class AuthInterceptor : public grpc::experimental::Interceptor
-{
-public:
-
-    explicit AuthInterceptor(grpc::experimental::ServerRpcInfo *info) : m_info(info) {}
-
-    virtual void Intercept(grpc::experimental::InterceptorBatchMethods *methods) override;
-
-private:
-
-    grpc::experimental::ServerRpcInfo *m_info;
-
-}; // end class AuthInterceptor
-
-} // end namespace GRPCServer
-
-} // end namespace Controller
-
-#endif // _CONTROLLER_GRPCSERVER_AUTHINTERCEPTOR_HPP_
+    private router = inject(Router);
+    private global = inject(Global);
+}

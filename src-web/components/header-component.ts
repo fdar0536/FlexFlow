@@ -21,20 +21,75 @@
  * SOFTWARE.
  */
 
-import {Component, inject} from "@angular/core";
-import {RouterLink} from '@angular/router';
+import {Component, inject, ChangeDetectionStrategy} from "@angular/core";
+import {Router, RouterLink} from '@angular/router';
 import {MatTabsModule} from '@angular/material/tabs';
 import {MatIconModule} from '@angular/material/icon';
-import {Global} from "../model/global";
+import { MatDialog } from "@angular/material/dialog";
+
+import { Global } from "../model/global";
+import { MessageDialog } from "../components/message-dialog";
 
 @Component
 ({
     selector: "header-component",
     templateUrl: "./header-component.html",
-    imports: [MatTabsModule, MatIconModule, RouterLink],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [
+        MatTabsModule,
+        MatIconModule,
+        RouterLink
+    ],
 })
 
 export class HeaderComponent
 {
+    onLogoutClicked = (e: Event) =>
+    {
+        e.preventDefault();
+        const dialogRef = this.dialog.open(MessageDialog,
+        {
+            data:
+            {
+                type: 'confirm',
+                title: 'Logout',
+                message: 'Are you sure you want to Logout?'
+            },
+        });
+        
+        dialogRef.afterClosed().subscribe(result =>
+        {
+            if (!result)
+            {
+                return;
+            }
+
+            // log out the api
+            try
+            {
+                this.global.api.post('/logout');
+            }
+            catch
+            {
+                this.dialog.open(MessageDialog,
+                {
+                    data:
+                    {
+                        type: 'info',
+                        title: 'Error',
+                        message: 'Failed to logout'
+                    }
+                });
+
+                return;
+            }
+
+            this.global.connected.set(false);
+            this.router.navigate(['/login']);
+        });
+    }
+
     global = inject(Global);
+    private dialog = inject(MatDialog);
+    private router = inject(Router);
 }

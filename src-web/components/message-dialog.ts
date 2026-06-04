@@ -1,6 +1,6 @@
 /*
  * Flex Flow
- * Copyright (c) 2026-present fdar0536
+ * Copyright (c) 2025-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,25 +21,31 @@
  * SOFTWARE.
  */
 
-import {Component, inject} from "@angular/core";
-
-import { Global } from "../model/global";
-import { Logger } from "../model/logger";
+import {Component, ChangeDetectionStrategy, inject} from "@angular/core";
+import {MatButtonModule} from '@angular/material/button';
+import {
+  MatDialogActions,
+  MatDialogClose,
+  MatDialogContent,
+  MatDialogTitle,
+  MAT_DIALOG_DATA
+} from '@angular/material/dialog';
 
 @Component
 ({
-    selector: "queueList-page",
-    templateUrl: "./queuelist-page.html",
-    imports: [],
+    templateUrl: "./message-dialog.html",
+    imports:
+    [
+        MatButtonModule,
+        MatDialogTitle,
+        MatDialogContent,
+        MatDialogActions,
+        MatDialogClose
+    ],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 
-export class QueueListPage
+export class MessageDialog
 {
-    constructor()
-    {
-        this.logger.debug("QueueListPage.constructor");
-    }
-
-    global = inject(Global);
-    private logger = inject(Logger);
+    data = inject(MAT_DIALOG_DATA);
 }

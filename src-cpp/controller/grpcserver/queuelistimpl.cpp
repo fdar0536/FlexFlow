@@ -24,6 +24,7 @@
 #include "spdlog/spdlog.h"
 
 #include "controller/global/global.hpp"
+#include "controller/grpcserver/utils.hpp"
 #include "model/errmsg.hpp"
 #include "model/utils.hpp"
 #include "init.hpp"
@@ -43,7 +44,12 @@ QueueListImpl::Create(grpc::ServerContext *ctx,
 {
     spdlog::debug("{}:{} QueueListImpl::Create", LOG_FILE_PATH(__FILE__), __LINE__);
 
-    UNUSED(ctx);
+    if (Utils::cannotAccess(ctx))
+    {
+        spdlog::error("{}:{} cannot access", LOG_FILE_PATH(__FILE__), __LINE__);
+        return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Cannot access");
+    }
+
     UNUSED(res);
 
     if (!req)
@@ -79,7 +85,12 @@ QueueListImpl::Rename(grpc::ServerContext *ctx,
 {
     spdlog::debug("{}:{} QueueListImpl::Rename", LOG_FILE_PATH(__FILE__), __LINE__);
 
-    UNUSED(ctx);
+    if (Utils::cannotAccess(ctx))
+    {
+        spdlog::error("{}:{} cannot access", LOG_FILE_PATH(__FILE__), __LINE__);
+        return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Cannot access");
+    }
+
     UNUSED(res);
 
     if (!req)
@@ -113,7 +124,12 @@ QueueListImpl::Delete(grpc::ServerContext *ctx,
 {
     spdlog::debug("{}:{} QueueListImpl::Delete", LOG_FILE_PATH(__FILE__), __LINE__);
 
-    UNUSED(ctx);
+    if (Utils::cannotAccess(ctx))
+    {
+        spdlog::error("{}:{} cannot access", LOG_FILE_PATH(__FILE__), __LINE__);
+        return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Cannot access");
+    }
+
     UNUSED(res);
 
     if (!req)
@@ -148,7 +164,12 @@ QueueListImpl::List(grpc::ServerContext *ctx,
 {
     spdlog::debug("{}:{} QueueListImpl::List", LOG_FILE_PATH(__FILE__), __LINE__);
 
-    UNUSED(ctx);
+    if (Utils::cannotAccess(ctx))
+    {
+        spdlog::error("{}:{} cannot access", LOG_FILE_PATH(__FILE__), __LINE__);
+        return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Cannot access");
+    }
+
     UNUSED(req);
 
     if (!writer)
@@ -184,7 +205,12 @@ QueueListImpl::Get(grpc::ServerContext *ctx,
     spdlog::debug("{}:{} QueueListImpl::GetQueue",
         LOG_FILE_PATH(__FILE__), __LINE__);
 
-    UNUSED(ctx);
+    if (Utils::cannotAccess(ctx))
+    {
+        spdlog::error("{}:{} cannot access", LOG_FILE_PATH(__FILE__), __LINE__);
+        return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Cannot access");
+    }
+    
     UNUSED(res);
     if (!req)
     {

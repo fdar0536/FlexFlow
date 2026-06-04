@@ -24,6 +24,7 @@
 #include "spdlog/spdlog.h"
 
 #include "controller/global/global.hpp"
+#include "controller/grpcserver/utils.hpp"
 #include "model/errmsg.hpp"
 #include "model/utils.hpp"
 
@@ -44,7 +45,12 @@ QueueImpl::ListPending(grpc::ServerContext *ctx,
 {
     spdlog::debug("{}:{} QueueImpl::ListPending", LOG_FILE_PATH(__FILE__), __LINE__);
     
-    UNUSED(ctx);
+    if (Utils::cannotAccess(ctx))
+    {
+        spdlog::error("{}:{} cannot access", LOG_FILE_PATH(__FILE__), __LINE__);
+        return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Cannot access");
+    }
+
     if (!req || !writer)
     {
         spdlog::error("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -86,7 +92,12 @@ QueueImpl::ListFinished(grpc::ServerContext *ctx,
     spdlog::debug("{}:{} QueueImpl::ListFinished",
         LOG_FILE_PATH(__FILE__), __LINE__);
     
-    UNUSED(ctx);
+    if (Utils::cannotAccess(ctx))
+    {
+        spdlog::error("{}:{} cannot access", LOG_FILE_PATH(__FILE__), __LINE__);
+        return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Cannot access");
+    }
+
     if (!req || !writer)
     {
         spdlog::error("{}:{} Invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -148,7 +159,12 @@ QueueImpl::PendingDetails(grpc::ServerContext *ctx,
     spdlog::debug("{}:{} QueueImpl::PendingDetails",
         LOG_FILE_PATH(__FILE__), __LINE__);
 
-    UNUSED(ctx);
+    if (Utils::cannotAccess(ctx))
+    {
+        spdlog::error("{}:{} cannot access", LOG_FILE_PATH(__FILE__), __LINE__);
+        return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Cannot access");
+    }
+
     if (!req || !res)
     {
         spdlog::error("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -184,7 +200,12 @@ QueueImpl::FinishedDetails(grpc::ServerContext *ctx,
     spdlog::debug("{}:{} QueueImpl::FinishedDetails",
         LOG_FILE_PATH(__FILE__), __LINE__);
 
-    UNUSED(ctx);
+    if (Utils::cannotAccess(ctx))
+    {
+        spdlog::error("{}:{} cannot access", LOG_FILE_PATH(__FILE__), __LINE__);
+        return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Cannot access");
+    }
+
     if (!req || !res)
     {
         spdlog::error("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -219,7 +240,12 @@ QueueImpl::ClearPending(grpc::ServerContext *ctx,
 {
     spdlog::debug("{}:{} QueueImpl::ClearPending", LOG_FILE_PATH(__FILE__), __LINE__);
 
-    UNUSED(ctx);
+    if (Utils::cannotAccess(ctx))
+    {
+        spdlog::error("{}:{} cannot access", LOG_FILE_PATH(__FILE__), __LINE__);
+        return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Cannot access");
+    }
+
     UNUSED(res);
     if (!req)
     {
@@ -252,7 +278,12 @@ QueueImpl::ClearFinished(grpc::ServerContext *ctx,
     spdlog::debug("{}:{} QueueImpl::ClearFinished",
         LOG_FILE_PATH(__FILE__), __LINE__);
 
-    UNUSED(ctx);
+    if (Utils::cannotAccess(ctx))
+    {
+        spdlog::error("{}:{} cannot access", LOG_FILE_PATH(__FILE__), __LINE__);
+        return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Cannot access");
+    }
+
     UNUSED(res);
     if (!req)
     {
@@ -285,7 +316,13 @@ QueueImpl::CurrentTask(grpc::ServerContext *ctx,
                        ff::TaskDetailsRes *res)
 {
     spdlog::debug("{}:{} QueueImpl::CurrentTask", LOG_FILE_PATH(__FILE__), __LINE__);
-    UNUSED(ctx);
+    
+    if (Utils::cannotAccess(ctx))
+    {
+        spdlog::error("{}:{} cannot access", LOG_FILE_PATH(__FILE__), __LINE__);
+        return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Cannot access");
+    }
+
     if (!req || !res)
     {
         spdlog::error("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -319,7 +356,12 @@ QueueImpl::AddTask(grpc::ServerContext *ctx,
                    ff::ListTaskRes *res)
 {
     spdlog::debug("{}:{} QueueImpl::AddTask", LOG_FILE_PATH(__FILE__), __LINE__);
-    UNUSED(ctx);
+    if (Utils::cannotAccess(ctx))
+    {
+        spdlog::error("{}:{} cannot access", LOG_FILE_PATH(__FILE__), __LINE__);
+        return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Cannot access");
+    }
+
     if (!req || !res)
     {
         spdlog::error("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -360,7 +402,12 @@ QueueImpl::RemoveTask(grpc::ServerContext *ctx,
 {
     spdlog::debug("{}:{} QueueImpl::RemoveTask", LOG_FILE_PATH(__FILE__), __LINE__);
 
-    UNUSED(ctx);
+    if (Utils::cannotAccess(ctx))
+    {
+        spdlog::error("{}:{} cannot access", LOG_FILE_PATH(__FILE__), __LINE__);
+        return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Cannot access");
+    }
+
     UNUSED(res);
     if (!req)
     {
@@ -392,7 +439,12 @@ QueueImpl::IsRunning(grpc::ServerContext *ctx,
 {
     spdlog::debug("{}:{} QueueImpl::IsRunning", LOG_FILE_PATH(__FILE__), __LINE__);
 
-    UNUSED(ctx);
+    if (Utils::cannotAccess(ctx))
+    {
+        spdlog::error("{}:{} cannot access", LOG_FILE_PATH(__FILE__), __LINE__);
+        return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Cannot access");
+    }
+
     if (!req || !res)
     {
         spdlog::error("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -418,7 +470,12 @@ QueueImpl::ReadCurrentOutput(grpc::ServerContext *ctx,
     spdlog::debug("{}:{} QueueImpl::ReadCurrentOutput",
         LOG_FILE_PATH(__FILE__), __LINE__);
 
-    UNUSED(ctx);
+    if (Utils::cannotAccess(ctx))
+    {
+        spdlog::error("{}:{} cannot access", LOG_FILE_PATH(__FILE__), __LINE__);
+        return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Cannot access");
+    }
+
     if (!req || !writer)
     {
         spdlog::error("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
@@ -452,7 +509,12 @@ QueueImpl::Start(grpc::ServerContext *ctx,
 {
     spdlog::debug("{}:{} QueueImpl::Start", LOG_FILE_PATH(__FILE__), __LINE__);
 
-    UNUSED(ctx);
+    if (Utils::cannotAccess(ctx))
+    {
+        spdlog::error("{}:{} cannot access", LOG_FILE_PATH(__FILE__), __LINE__);
+        return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Cannot access");
+    }
+
     UNUSED(res);
     if (!req)
     {
@@ -484,7 +546,12 @@ QueueImpl::Stop(grpc::ServerContext *ctx,
 {
     spdlog::debug("{}:{} QueueImpl::Stop", LOG_FILE_PATH(__FILE__), __LINE__);
 
-    UNUSED(ctx);
+    if (Utils::cannotAccess(ctx))
+    {
+        spdlog::error("{}:{} cannot access", LOG_FILE_PATH(__FILE__), __LINE__);
+        return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Cannot access");
+    }
+    
     UNUSED(res);
     if (!req)
     {

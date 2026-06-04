@@ -21,32 +21,89 @@
  * SOFTWARE.
  */
 
-import {Component} from "@angular/core";
+import {AfterViewInit, Component, inject, signal, ChangeDetectionStrategy} from "@angular/core";
+import { Router } from "@angular/router";
+
 import { CommonLayoutComponent } from "../components/common-layout";
 import { FF_VERSION, FF_COMMIT, FF_BRANCH } from "../model/config";
+import { Global } from "../model/global";
+
+
+interface ServerInfo
+{
+    branch: string;
+    commit: string;
+    version: string;
+}
 
 @Component
 ({
     selector: "about-page",
     template: `
+        <h1>Flex Flow Web UI</h1>
         <common-layout
-            direction="column"
+            direction="row"
             align_items="center"
             justify_content="center"
+            gap="10"
         >
-            <h1>Flex Flow</h1>
             <p class="CommonText">Version: {{ version }}</p>
             <p class="CommonText">Commit: {{ commit }}</p>
             <p class="CommonText">Branch: {{ branch }}</p>
             <p class="CommonText">License: <a class="CommonText" href="https://opensource.org/licenses/MIT" target="_blank">MIT License</a></p>
         </common-layout>
+        <h1>Server Info</h1>
+        <common-layout
+            direction="row"
+            align_items="center"
+            justify_content="center"
+            gap="10"
+        >
+            <p class="CommonText">Version: {{ this.serverVersion() }}</p>
+            <p class="CommonText">Commit: {{ this.serverCommit() }}</p>
+            <p class="CommonText">Branch: {{ this.serverBranch() }}</p>
+        </common-layout>  
     `,
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [CommonLayoutComponent],
 })
 
-export class AboutPage
+export class AboutPage implements AfterViewInit
 {
+    ngAfterViewInit()
+    {
+        setTimeout(() =>
+        {
+            this.getServerInfo();
+        }, 0);
+    }
+
     version = FF_VERSION;
     commit = FF_COMMIT;
     branch = FF_BRANCH;
+
+    // server info
+    serverVersion = signal<string>("Not connected");
+    serverCommit = signal<string>("Not connected");
+    serverBranch = signal<string>("Not connected");
+
+    private global = inject(Global);
+
+    private getServerInfo = async () =>
+    {
+        try
+        {
+            const res = await this.global.api.get<ServerInfo>('/info');
+            this.serverVersion.set(res.data.version);
+            this.serverCommit.set(res.data.commit);
+            this.serverBranch.set(res.data.branch);
+        }
+        catch
+        {
+            const err = "Failed to get server info"
+            this.serverVersion.set(err);
+            this.serverCommit.set(err);
+            this.serverBranch.set(err);
+        }
+    }
 }

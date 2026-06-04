@@ -45,6 +45,12 @@ grpc::Status AccessImpl::Info(grpc::ServerContext *ctx,
                               ff::InfoRes *res)
 {
     spdlog::debug("{}:{} AccessImpl::Info", LOG_FILE_PATH(__FILE__), __LINE__);
+    if (Utils::cannotAccess(ctx))
+    {
+        spdlog::error("{}:{} cannot access", LOG_FILE_PATH(__FILE__), __LINE__);
+        return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Cannot access");
+    }
+
     UNUSED(ctx);
     UNUSED(req);
     res->set_branch(FF_BRANCH);
@@ -63,6 +69,12 @@ grpc::Status AccessImpl::Login(grpc::ServerContext *ctx,
     {
         spdlog::error("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
         return grpc::Status(grpc::StatusCode::INTERNAL, "Invalid input");
+    }
+
+    if (Utils::cannotAccess(ctx, false))
+    {
+        spdlog::error("{}:{} cannot access", LOG_FILE_PATH(__FILE__), __LINE__);
+        return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Cannot access");
     }
 
     std::string token;
@@ -84,7 +96,7 @@ grpc::Status AccessImpl::Login(grpc::ServerContext *ctx,
 }
     
 grpc::Status AccessImpl::Logout(grpc::ServerContext *ctx,
-                                const ff::LogoutReq *req,
+                                const ff::Empty *req,
                                 ff::Empty *res)
 {
     if (!ctx || !req || !res)
@@ -93,9 +105,15 @@ grpc::Status AccessImpl::Logout(grpc::ServerContext *ctx,
         return grpc::Status(grpc::StatusCode::INTERNAL, "Invalid input");
     }
 
+    if (Utils::cannotAccess(ctx))
+    {
+        spdlog::error("{}:{} cannot access", LOG_FILE_PATH(__FILE__), __LINE__);
+        return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Cannot access");
+    }
+
     auto it = ctx->client_metadata().find("x-auth-token");
     std::string token = std::string(it->second.data(), it->second.length());
-    if (auth->logout(req->username(), token))
+    if (auth->logout(token))
     {
         spdlog::error("{}:{} Fail to logout", LOG_FILE_PATH(__FILE__), __LINE__);
         std::string ip = Utils::getIPFromContext(ctx);
@@ -114,7 +132,12 @@ grpc::Status AccessImpl::Echo(grpc::ServerContext *ctx,
                               ff::Empty *res)
 {
     spdlog::debug("{}:{} AccessImpl::Echo", LOG_FILE_PATH(__FILE__), __LINE__);
-    UNUSED(ctx);
+    if (Utils::cannotAccess(ctx))
+    {
+        spdlog::error("{}:{} cannot access", LOG_FILE_PATH(__FILE__), __LINE__);
+        return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Cannot access");
+    }
+
     UNUSED(req);
     UNUSED(res);
     return grpc::Status::OK;

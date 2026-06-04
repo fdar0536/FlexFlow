@@ -21,22 +21,22 @@
  * SOFTWARE.
  */
 
-import {Component, input} from "@angular/core";
+import {Component, input, ChangeDetectionStrategy} from "@angular/core";
 
 @Component
 ({
-  selector: 'common-layout',
-  standalone: true,
-  template: `
-    <div [style.display]="'flex'" 
-         [style.flex-direction]="direction()" 
-         [style.gap]="gap() + 'px'"
-         [style.align-items]="align_items()"
-         [style.justify-content]="justify_content()"
-         >
-      <ng-content></ng-content>
-    </div>
-  `
+    selector: 'common-layout',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    template: `
+        <div [style.display]="'flex'" 
+            [style.flex-direction]="direction()" 
+            [style.gap]="gap() + 'px'"
+            [style.align-items]="align_items()"
+            [style.justify-content]="justify_content()"
+            >
+        <ng-content></ng-content>
+        </div>
+    `
 })
 
 export class CommonLayoutComponent

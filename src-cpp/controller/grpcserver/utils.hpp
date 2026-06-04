@@ -42,6 +42,8 @@ std::string getIPFromContext(grpc::ServerContextBase *);
 
 u8 getTokenFromContext(grpc::ServerContextBase *, std::string &);
 
+u8 cannotAccess(grpc::ServerContextBase *, bool checkToken = true);
+
 } // end namespace Utils
 
 } // end namespace GRPCServer

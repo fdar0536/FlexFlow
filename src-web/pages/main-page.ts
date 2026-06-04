@@ -1,6 +1,6 @@
 /*
  * Flex Flow
- * Copyright (c) 2025-present fdar0536
+ * Copyright (c) 2026-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,26 +21,29 @@
  * SOFTWARE.
  */
 
-import { Handle, IQueueList } from "./models";
+import {Component, inject, ChangeDetectionStrategy} from "@angular/core";
 
-export class WebQueueList implements IQueueList
+import { QueueListComponent } from "../components/queuelist-component";
+import { Global } from "../model/global";
+import { Logger } from "../model/logger";
+
+@Component
+({
+    selector: "main-page",
+    templateUrl: "./main-page.html",
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [
+        QueueListComponent
+    ],
+})
+
+export class MainPage
 {
-    destroy(): Promise<void> {
-        throw new Error("Method not implemented.");
+    constructor()
+    {
+        this.logger.debug("MainPage.constructor");
     }
-    create(name: string): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-    list(): Promise<string[]> {
-        throw new Error("Method not implemented.");
-    }
-    delete(name: string): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-    rename(old_name: string, new_name: string): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-    get(name: string): Promise<Handle> {
-        throw new Error("Method not implemented.");
-    }
+
+    global = inject(Global);
+    private logger = inject(Logger);
 }

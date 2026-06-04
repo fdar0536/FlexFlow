@@ -21,7 +21,8 @@
  * SOFTWARE.
  */
 
-import { Component, inject } from "@angular/core";
+import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
+import { Router } from "@angular/router";
 import { MatRadioModule } from '@angular/material/radio';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
@@ -37,15 +38,16 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 
 import { Global } from "../model/global";
-import { ExitCode } from '../model/models';
-import { CommonDialog } from '../components/common-dialog';
+import { MessageDialog } from '../components/message-dialog';
 import { CommonLayoutComponent } from '../components/common-layout';
 import { Logger } from "../model/logger";
+import { FF_BRANCH, FF_COMMIT, FF_VERSION } from "../model/config";
 
 @Component
 ({
-    selector: "settings-page",
-    templateUrl: "./settings-page.html",
+    selector: "login-page",
+    templateUrl: "./login-page.html",
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports:
     [
         MatRadioModule,
@@ -60,109 +62,126 @@ import { Logger } from "../model/logger";
     ],
 })
 
-export class SettingsPage
+export class LoginPage
 {
-    constructor()
-    {
-        this.logger = inject(Logger);
-        this.logger.debug("SettingsPage.constructor");
-    }
-
-    // config btns
-    onLoadClicked = () =>
-    {
-        this.logger.debug("SettingsPage.onLoadClicked");
-        this.logger.debug("configCtl.value is: " +
-            this.configCtl.value?.toString());
-
-        if (this.configCtl.value === null ||
-            this.configCtl.value === undefined ||
-            this.configCtl.value === ""
-        ) return;
-    }
-
-    // connect btns
-    onSaveClicked = () =>
-    {
-        this.logger.debug("SettingsPage.onSaveClicked");
-
-        if (this.profileForm.invalid) return;
-        const profile = this.profileForm.value;
-        this.logger.debug("profile is: " + JSON.stringify(profile));
-
-        if (profile.host === null ||
-            profile.host === undefined ||
-            profile.host === ""
-        ) return;
-    }
-
     onClearClicked = () =>
     {
         this.logger.debug("SettingsPage.onClearClicked");
         this.profileForm.setValue({
-            host: "",
             username: "",
             password: "",
             totp: "",
+            tokenTimeOut: 86400
         });
     }
 
-    onDisconnectClicked = async () =>
-    {
-        this.logger.debug("SettingsPage.onDisconnectClicked");
-        var code: ExitCode = new ExitCode();
-        if (code.hasError)
-        {
-            this.dialog.open(CommonDialog,
-            {
-                data:
-                {
-                    type: 'error',
-                    title: 'Fatal error',
-                    message: code.msg
-                },
-            });
-        }
-    }
-
-    onConnectClicked = async () =>
+    onLoginClicked = async () =>
     {
         this.logger.debug("SettingsPage.onConnectClicked");
-        var code: ExitCode = new ExitCode();
-
-        if (code.hasError)
+        if (this.global.connected())
         {
-            this.dialog.open(CommonDialog,
+            this.dialog.open(MessageDialog,
             {
                 data:
                 {
-                    type: 'error',
+                    type: 'info',
+                    title: 'Info',
+                    message: 'You are already connected'
+                
+                },
+            }); 
+
+            return;
+        }
+
+        // check form data
+        if (this.profileForm.invalid)
+        {
+            this.dialog.open(MessageDialog,
+            {
+                data:
+                {
+                    type: 'info',
                     title: 'Error',
-                    message: code.msg
+                    message: 'Invalid login information'
+                
+                },
+            });
+
+            return;
+        }
+
+        this.global.disabled.set(true);
+        const value = this.profileForm.getRawValue();
+        this.global.connected.set(false);
+
+        // login the api
+        try
+        {
+            await this.global.api.post('/login',
+                {
+                    username: value.username,
+                    password: value.password,
+                    otp: value.totp,
+                    tokentimeout: value.tokenTimeOut
+                }
+            );
+
+            this.global.connected.set(true);
+            this.router.navigate(['/']);
+        }
+        catch
+        {
+            this.dialog.open(MessageDialog,
+            {
+                data:
+                {
+                    type: 'info',
+                    title: 'Error',
+                    message: 'Failed to login'
                 },
             });
         }
-    }
 
-    // config
-    configCtl = new FormControl('');
+        this.global.disabled.set(false);
+    }
 
     // profile
     profileForm = new FormGroup
     ({
-        host: new FormControl('', [Validators.required, Validators.minLength(1)]),
         username: new FormControl('',
-            [Validators.required, Validators.minLength(1)]
+            {
+                validators: [Validators.required, Validators.minLength(1)],
+                nonNullable: true
+            }
         ),
         password: new FormControl('',
-            [Validators.required, Validators.minLength(1)]
+            {
+                validators: [Validators.required, Validators.minLength(1)],
+                nonNullable: true
+            }
         ),
         totp: new FormControl('',
-            [Validators.required, Validators.minLength(1)]
+            {
+                validators: [Validators.required, Validators.minLength(1)],
+                nonNullable: true
+            }
         ),
+        tokenTimeOut: new FormControl(86400,
+            {
+                validators: [Validators.required, Validators.min(3600), Validators.max(2592000)],
+                nonNullable: true
+            }
+        )
     });
 
     global = inject(Global);
+
+    version = FF_VERSION;
+    commit = FF_COMMIT;
+    branch = FF_BRANCH;
+
     private dialog = inject(MatDialog);
-    private logger: Logger;
+    private logger = inject(Logger);
+    private router = inject(Router);
 }

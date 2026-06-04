@@ -9,5 +9,15 @@
     ]
   },
   "include": ["src-web/**/*.ts"],
-  "exclude": ["src-web/**/*.spec.ts"]
+  "exclude": [
+    "src-web/**/*.spec.ts"
+  ],
+  "angularCompilerOptions": {
+    "extendedDiagnostics": {
+      "checks": {
+        "nullishCoalescingNotNullable": "suppress",
+        "optionalChainNotNullable": "suppress"
+      }
+    }
+  }
 }

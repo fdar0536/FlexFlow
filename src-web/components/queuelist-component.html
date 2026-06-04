@@ -1,0 +1,29 @@
+<common-layout
+    [class.is-disabled]="this.global.disabled()"
+    gap="10"
+>
+    <mat-form-field>
+        <mat-label>Queue List</mat-label>
+        <mat-select [(ngModel)]="selectedItem">
+            @for (name of list; track $index)
+            {
+                <mat-option [value]="name">{{ name }}</mat-option>
+            }
+        </mat-select>
+    </mat-form-field>
+    <button matFab extended (click)="onRefreshClicked()">
+        <p class="CommonText">Refresh</p>
+    </button>
+    <button matFab extended (click)="onLoadClicked()">
+        <p class="CommonText">Load</p>
+    </button>
+    <button matFab extended (click)="onCreateClicked()">
+        <p class="CommonText">Create</p>
+    </button>
+    <button matFab extended (click)="onDeleteClicked()">
+        <p class="CommonText">Delete</p>
+    </button>
+    <button matFab extended (click)="onRenameClicked()">
+        <p class="CommonText">Rename</p>
+    </button>
+</common-layout>

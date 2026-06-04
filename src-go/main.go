@@ -24,100 +24,128 @@
 package main
 
 import (
-	"context"
-	"fmt"
-	"net/http"
+    "context"
+    "fmt"
+    "net/http"
+    "strings"
 
-	"github.com/alexflint/go-arg"
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/metadata"
-	"google.golang.org/protobuf/proto"
+    "github.com/alexflint/go-arg"
+    "github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+    "google.golang.org/grpc"
+    "google.golang.org/grpc/credentials/insecure"
+    "google.golang.org/protobuf/proto"
 
-	pb "github.com/fdar0536/FlexFlowGateway/protos"
+    pb "github.com/fdar0536/FlexFlowGateway/protos"
 )
 
 var(
-	serverAddr = "localhost:9090"
-	listenAddr = "localhost:8080"
-	ssl = false
+    serverAddr = "localhost:9090"
+    listenAddr = "localhost:8080"
+    ssl = false
+    frontendDir = ""
 )
 
 func run() error {
-	ctx := context.Background()
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
+    ctx := context.Background()
+    ctx, cancel := context.WithCancel(ctx)
+    defer cancel()
 
-	// 1. add new ServeMux
-	mux := runtime.NewServeMux(
-		runtime.WithForwardResponseOption(ffHttpResponseModifier),
-	)
+    // 1. add new grpc ServeMux
+    mux := runtime.NewServeMux(
+        runtime.WithForwardResponseOption(ffHttpResponseModifier),
+    )
 
-	// 2. setup
-	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
+    // 2. add regular http mux
+    mainMux := http.NewServeMux()
 
-	// 3. register Handler, let http request forward to grpc server
-	err := pb.RegisterAccessHandlerFromEndpoint(ctx, mux, serverAddr, opts)
-	if err != nil {
-		return err
-	}
+    // 3. setup
+    opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 
-	err = pb.RegisterQueueListHandlerFromEndpoint(ctx, mux, serverAddr, opts)
-	if err != nil {
-		return err
-	}
+    // 4. register Handler, let http request forward to grpc server
+    err := pb.RegisterAccessHandlerFromEndpoint(ctx, mux, serverAddr, opts)
+    if err != nil {
+        return err
+    }
 
-	err = pb.RegisterQueueHandlerFromEndpoint(ctx, mux, serverAddr, opts)
-	if err != nil {
-		return err
-	}
+    err = pb.RegisterQueueListHandlerFromEndpoint(ctx, mux, serverAddr, opts)
+    if err != nil {
+        return err
+    }
 
-	fmt.Printf("FlexFlow Gateway start successfully, listen on: %s\n", listenAddr)
-	return http.ListenAndServe(listenAddr, cookieToMetadataMiddleware(mux))
+    err = pb.RegisterQueueHandlerFromEndpoint(ctx, mux, serverAddr, opts)
+    if err != nil {
+        return err
+    }
+
+    var fs http.Handler
+    if (frontendDir != "") {
+        mainMux.Handle("/api/", mux)
+        fs = http.FileServer(http.Dir(frontendDir))
+    }
+
+    if (frontendDir == "") {
+        mainMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+            mux.ServeHTTP(w, r)
+        })
+    } else {
+        mainMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+            // ban path "API" and let Angular SPA frontend handle it
+            if strings.HasPrefix(r.URL.Path, "/api/") {
+                mux.ServeHTTP(w, r)
+                return
+            }
+
+            // Redirect all missing static files to index.html
+            // (to maintain proper Angular routing)
+            fs.ServeHTTP(w, r)
+        })
+    }
+
+    fmt.Printf("FlexFlow Gateway start successfully, listen on: %s\n", listenAddr)
+    return http.ListenAndServe(listenAddr, cookieToMetadataMiddleware(mainMux))
 }
 
 func ffHttpResponseModifier(ctx context.Context,
-							w http.ResponseWriter,
-							resp proto.Message) error {
-	md, ok := runtime.ServerMetadataFromContext(ctx)
-	if !ok {
-		return nil
-	}
+                            w http.ResponseWriter,
+                            resp proto.Message) error {
+    md, ok := runtime.ServerMetadataFromContext(ctx)
+    if !ok {
+        return nil
+    }
 
-	tokens := md.HeaderMD.Get("x-auth-token")
-	tokenTimeOutStr := md.HeaderMD.Get("x-auth-token-timeout")
-	if (len(tokenTimeOutStr) <= 0 || len(tokens) <= 0) {
-		return nil
-	}
+    tokens := md.HeaderMD.Get("x-auth-token")
+    tokenTimeOutStr := md.HeaderMD.Get("x-auth-token-timeout")
+    if (len(tokenTimeOutStr) <= 0 || len(tokens) <= 0) {
+        return nil
+    }
 
-	var tokenTimeout int = 0
-	_, err := fmt.Sscan(tokenTimeOutStr[0], &tokenTimeout);
-	if (err != nil) {
-		fmt.Println(err)
-		return nil
-	}
+    var tokenTimeout int = 0
+    _, err := fmt.Sscan(tokenTimeOutStr[0], &tokenTimeout);
+    if (err != nil) {
+        fmt.Println(err)
+        return nil
+    }
 
-	token := tokens[0]
-	// build HttpOnly cookie
-	cookie := &http.Cookie{
-		Name:     "x-auth-token",
-		Value:    token,
-		Path:     "/",
-		HttpOnly: true, // for prevent xss
-		Secure:   ssl,
-		SameSite: http.SameSiteLaxMode,
-		MaxAge:   tokenTimeout,
-	}
+    token := tokens[0]
+    // build HttpOnly cookie
+    cookie := &http.Cookie{
+        Name:     "x-auth-token",
+        Value:    token,
+        Path:     "/",
+        HttpOnly: true, // for prevent xss
+        Secure:   ssl,
+        SameSite: http.SameSiteLaxMode,
+        MaxAge:   tokenTimeout,
+    }
 
-	// write HTTP Response
-	http.SetCookie(w, cookie)
+    // write HTTP Response
+    http.SetCookie(w, cookie)
 
-	// remove x-auth-token amd x-auth-token-timeout from http header
-	w.Header().Del("Grpc-Metadata-X-Auth-Token")
-	w.Header().Del("Grpc-Metadata-X-Auth-Token-Timeout")
+    // remove x-auth-token amd x-auth-token-timeout from http header
+    w.Header().Del("Grpc-Metadata-X-Auth-Token")
+    w.Header().Del("Grpc-Metadata-X-Auth-Token-Timeout")
 
-	return nil
+    return nil
 }
 
 func cookieToMetadataMiddleware(next http.Handler) http.Handler {
@@ -125,12 +153,9 @@ func cookieToMetadataMiddleware(next http.Handler) http.Handler {
         // 1. try to get "x-auth-token" Cookie from browser data
         if cookie, err := r.Cookie("x-auth-token"); err == nil {
             
-            // 2. convert it to gRPC's Incoming Metadata
-            md := metadata.Pairs("x-auth-token", cookie.Value)
-            
-            // 3. insert new Metadata to current context
-            ctx := metadata.NewIncomingContext(r.Context(), md)
-            r = r.WithContext(ctx)
+            // 2. write to HTTP Header directly, and add "Grpc-Metadata-" prefix
+            // gRPC-Gateway will convert "Grpc-Metadata-" automatically to gRPC Metadata
+            r.Header.Set("Grpc-Metadata-x-auth-token", cookie.Value)
         }
         
         // to next step（sent to gRPC-Gateway and convert to gRPC request）
@@ -140,27 +165,30 @@ func cookieToMetadataMiddleware(next http.Handler) http.Handler {
 
 func main() {
 
-	var args struct {
-		ServerIp    string `arg:"-s,--server-ip" help:"grpc server ip"`
-		ServerPort  uint16 `arg:"-p,--server-port" help:"grpc server port"`
-		ListenIp    string `arg:"-l,--listen-ip" help:"http gateway listen ip"`
-		ListenPort  uint16 `arg:"-P,--listen-port" help:"http gateway listen port"`
-		SSL         bool   `arg:"-S,--ssl" help:"use ssl cookie or not"`
-	}
+    var args struct {
+        ServerIp    string `arg:"-s,--server-ip" help:"grpc server ip"`
+        ServerPort  uint16 `arg:"-p,--server-port" help:"grpc server port"`
+        ListenIp    string `arg:"-l,--listen-ip" help:"http gateway listen ip"`
+        ListenPort  uint16 `arg:"-P,--listen-port" help:"http gateway listen port"`
+        SSL         bool   `arg:"-S,--ssl" help:"use ssl cookie or not"`
+        FrontendDir string `arg:"-f,--frontend-dir" help:"set where is webui data dir. if empty, just be http gateway"`
+    }
 
-	// set default
-	args.ServerIp = "127.0.0.1"
-	args.ServerPort = 12345
-	args.ListenIp = "127.0.0.1"
-	args.ListenPort = 8080
-	args.SSL = false
+    // set default
+    args.ServerIp = "127.0.0.1"
+    args.ServerPort = 12345
+    args.ListenIp = "127.0.0.1"
+    args.ListenPort = 8080
+    args.SSL = false
+    args.FrontendDir = ""
 
-	arg.MustParse(&args)
-	serverAddr = args.ServerIp + ":" + fmt.Sprint(args.ServerPort)
-	listenAddr = args.ListenIp + ":" + fmt.Sprint(args.ListenPort)
-	ssl = args.SSL
+    arg.MustParse(&args)
+    serverAddr = args.ServerIp + ":" + fmt.Sprint(args.ServerPort)
+    listenAddr = args.ListenIp + ":" + fmt.Sprint(args.ListenPort)
+    ssl = args.SSL
+    frontendDir = args.FrontendDir
 
-	if err := run(); err != nil {
-		panic(err)
-	}
+    if err := run(); err != nil {
+        panic(err)
+    }
 }

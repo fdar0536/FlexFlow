@@ -2,23 +2,9 @@
   <mat-tab>
     <ng-template mat-tab-label>
       <div class="HeaderTab" routerLink="/">
-        <mat-icon>settings</mat-icon>
-        <p class="CommonText">Settings</p>
-      </div>
-    </ng-template>
-  </mat-tab>
-  <mat-tab>
-    <ng-template mat-tab-label>
-      <div class="HeaderTab" routerLink="/QueueList">
         <mat-icon>playlist_add</mat-icon>
-        <p class="CommonText">Queue List</p>
+        <p class="CommonText">Main</p>
       </div>
-    </ng-template>
-  </mat-tab>
-  <mat-tab>
-    <ng-template mat-tab-label>
-      <mat-icon>playlist_play</mat-icon>
-      <p class="CommonText">Queue</p>
     </ng-template>
   </mat-tab>
   <mat-tab>
@@ -29,11 +15,18 @@
   </mat-tab>
   <mat-tab>
     <ng-template mat-tab-label>
-      <div class="HeaderTab" routerLink="/About">
+      <div class="HeaderTab" routerLink="/about">
         <mat-icon>info</mat-icon>
         <p class="BaseText">About</p>
       </div>
     </ng-template>
   </mat-tab>
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <div class="HeaderTab" (click)="onLogoutClicked($event)">
+        <mat-icon>close</mat-icon>
+        <p class="BaseText">Logout</p>
+      </div>
+    </ng-template>
+  </mat-tab>
 </mat-tab-group>
-<p class="CommonText">Status: {{ this.global.status() }}</p>

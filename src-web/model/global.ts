@@ -21,7 +21,12 @@
  * SOFTWARE.
  */
 
-import { Injectable, signal, inject } from '@angular/core';
+import { Injectable, signal, inject, computed } from '@angular/core';
+import { Router } from '@angular/router';
+
+import axios from 'axios';
+
+import { API_BASE } from './config';
 import { Logger } from "./logger";
 
 @Injectable
@@ -33,12 +38,58 @@ export class Global
 {
     constructor()
     {
-        this.logger = inject(Logger);
         this.logger.debug("Global.constructor");
+
+        this.api = axios.create(
+        {
+            baseURL: window.location.protocol + "//" + window.location.host + API_BASE,
+            timeout: 30000, // 30 secs
+            // set Cookie
+            withCredentials: true 
+        });
     }
 
-    status = signal<string>('Not connected');
+    init = async() =>
+    {
+        this.logger.debug("Global.init");
+        this.echoTest();
+        if (this.connected())
+        {
+            this.router.navigate(['/']);
+        }
+        else
+        {
+            this.router.navigate(['/login']);
+        }
+    }
+
+    disabled = signal<boolean>(false);
+
+    api = axios.create();
     connected = signal<boolean>(false);
-    url = "";
-    private logger: Logger;
-}
+    queueConnected = signal<boolean>(false);
+    queueDisabled = computed(() => this.disabled() || !this.queueConnected());
+    queueName = signal<string>('');
+
+    private logger = inject(Logger);
+    private router = inject(Router);
+    private echoTest = async () =>
+    {
+        this.logger.debug("SettingsPage.echoTest");
+        this.connected.set(false);
+        this.disabled.set(true);
+
+        // start echo test
+        try
+        {
+            await this.api.get("/echo");
+            this.connected.set(true);
+        }
+        catch
+        {
+            this.connected.set(false);
+        }
+
+        this.disabled.set(false);
+    } // end echoTest
+} // end export class Global

@@ -2,4 +2,4 @@ ssl: false
 host: 127.0.0.1
 port: 12345
 username: test
-password: 12345
+tokenTimeOut: 86400

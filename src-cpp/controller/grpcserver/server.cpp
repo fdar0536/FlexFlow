@@ -29,7 +29,6 @@
 
 #include "model/utils.hpp"
 
-#include "authinterceptor.hpp"
 #include "server.hpp"
 
 namespace Controller
@@ -37,17 +36,6 @@ namespace Controller
 
 namespace GRPCServer
 {
-
-class AuthInterceptorFactory :
-    public grpc::experimental::ServerInterceptorFactoryInterface
-{
-public:
-    grpc::experimental::Interceptor
-    *CreateServerInterceptor(grpc::experimental::ServerRpcInfo *info) override
-    {
-        return new AuthInterceptor(info);
-    }
-};
 
 Server::Server()
 {}
@@ -74,13 +62,6 @@ uint_fast8_t Server::start()
         builder.RegisterService(&m_accessImpl);
         builder.RegisterService(&m_queueImpl);
         builder.RegisterService(&m_queueListImpl);
-
-        std::vector<std::unique_ptr<grpc::experimental::ServerInterceptorFactoryInterface>>
-            creators;
-        creators.reserve(1);
-        creators.push_back(std::make_unique<AuthInterceptorFactory>());
-        builder.experimental()
-            .SetInterceptorCreators(std::move(creators));
         
         auto server = builder.BuildAndStart();
         spdlog::info("{}:{} Server is listening on {}",

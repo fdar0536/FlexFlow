@@ -1,6 +1,15 @@
-<div>
-    <header-component></header-component>
-</div>
-<main class="container">
-    <router-outlet />
-</main>
+@if (this.global.connected())
+{
+    <div [class.is-disabled]="this.global.disabled()">
+        <header-component></header-component>
+    </div>
+    <main class="container" [class.is-disabled]="this.global.disabled()">
+        <router-outlet />
+    </main>
+}
+@else
+{
+    <main class="container" [class.is-disabled]="this.global.disabled()">
+        <login-page></login-page>
+    </main>
+}

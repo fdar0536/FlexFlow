@@ -38,6 +38,7 @@ tasks:
       - cmake --build "{{.CPP_BUILD_DIR}}" -j {{.JOBS}}
   
   build-gateway:
+    deps: [generate-buf]
     dir: ./src-go
     cmds:
       - go mod tidy
@@ -50,7 +51,7 @@ tasks:
   build-webui:
     deps: [config-webui]
     cmds:
-      - npx ng build --delete-output-path=false
+      - npx ng build --base-href ./ --output-path={{.WEBUI_BUILD_DIR}} --delete-output-path=false
   
   clean:
     deps: [clean-cmake, clean-buf, clean-go, clean-webui]
@@ -96,14 +97,11 @@ tasks:
         -DMAX_READ_QUEUE_SIZE={{.MODEL_MAX_READ_QUEUE_SIZE}}
         {{.CMAKE_EXTRA_ARGS}}
 
-  prepare-webui-link:
+  prepare-webui-dir:
     internal: true
     cmds:
       - { cmd: 'cmake -E make_directory "{{.WEBUI_BUILD_DIR | replace "/" "\\" }}"', platforms: [windows] }
       - { cmd: 'cmake -E make_directory "{{.WEBUI_BUILD_DIR}}"', platforms: [linux, darwin] }
-      - cmake -E rm -rf dist
-      - { cmd: "powershell -Command \"New-Item -ItemType Junction -Path dist -Target '{{.WEBUI_BUILD_DIR | replace \"/\" \"\\\\\" }}' \"", platforms: [windows] }
-      - { cmd: "ln -s {{.WEBUI_BUILD_DIR}} dist", platforms: [linux, darwin] }
   
   prepare-webui-version:
     internal: true
@@ -116,7 +114,7 @@ tasks:
 
   config-webui:
     internal: true
-    deps: [prepare-webui-link, prepare-webui-version]
+    deps: [prepare-webui-dir, prepare-webui-version]
     sources:
       - package.json
       - pnpm-lock.yaml

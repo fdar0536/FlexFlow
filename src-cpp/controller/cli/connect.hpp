@@ -53,7 +53,7 @@ typedef struct Profile
     u16 port;
 
     std::string username;
-    std::string password;
+    i32 tokenTimeOut;
 } Profile;
 
 extern Profile profile;

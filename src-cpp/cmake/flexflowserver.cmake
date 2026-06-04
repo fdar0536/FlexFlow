@@ -25,8 +25,6 @@ if(ENABLE_SERVER)
         # grpc
         controller/grpcserver/accessimpl.cpp
         controller/grpcserver/accessimpl.hpp
-        controller/grpcserver/authinterceptor.cpp
-        controller/grpcserver/authinterceptor.hpp
         controller/grpcserver/queueimpl.cpp
         controller/grpcserver/queueimpl.hpp
         controller/grpcserver/queuelistimpl.cpp

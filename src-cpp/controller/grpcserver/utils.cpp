@@ -25,6 +25,7 @@
 
 #include "model/utils.hpp"
 
+#include "init.hpp"
 #include "utils.hpp"
 
 namespace Controller
@@ -112,6 +113,32 @@ u8 getTokenFromContext(grpc::ServerContextBase *ctx, std::string &out)
 
     spdlog::error("{}:{} token is not found", LOG_FILE_PATH(__FILE__), __LINE__);
     return 1;
+}
+
+u8 cannotAccess(grpc::ServerContextBase *ctx, bool checkToken)
+{
+    spdlog::debug("{}:{} Utils::canAccess", LOG_FILE_PATH(__FILE__), __LINE__);
+    if (!ctx)
+    {
+        spdlog::error("{}:{} invalid input", LOG_FILE_PATH(__FILE__), __LINE__);
+        return 1;
+    }
+
+    const std::string ip = getIPFromContext(ctx);
+    if (checkToken)
+    {
+        std::string token;
+        if (getTokenFromContext(ctx, token))
+        {
+            spdlog::error("{}:{} Fail to get token",
+                LOG_FILE_PATH(__FILE__), __LINE__);
+            return 1;
+        }
+
+        return auth->cannotAccess(ip, token);
+    }
+
+    return auth->cannotAccess(ip);
 }
 
 } // end namespace Utils

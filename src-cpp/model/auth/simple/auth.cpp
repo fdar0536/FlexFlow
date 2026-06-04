@@ -134,16 +134,15 @@ u8 Auth::login(const std::string &username,
     return 0;
 }
 
-u8 Auth::logout(const std::string &username, const std::string &token)
+u8 Auth::logout(const std::string &token)
 {
     spdlog::debug("{}:{} Model::Auth::Simple::Auth::logout",
         LOG_FILE_PATH(__FILE__), __LINE__);
-    spdlog::debug("username: {}", username);
     spdlog::debug("token: {}", token);
 
-    if (username.empty() || token.empty())
+    if (token.empty())
     {
-        spdlog::error("{}:{} username or token is empty",
+        spdlog::error("{}:{} token is empty",
             LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
@@ -151,17 +150,10 @@ u8 Auth::logout(const std::string &username, const std::string &token)
     {
         std::unique_lock<std::mutex> lock(m_mutex);
 
-        if (username != this->username)
-        {
-            spdlog::error("{}:{} username is invalid",
-                LOG_FILE_PATH(__FILE__), __LINE__);
-            return 1;
-        }
-
         if (m_currentToken.empty())
         {
             spdlog::warn("{}:{} token is empty", LOG_FILE_PATH(__FILE__), __LINE__);
-            return 0; // already logout
+            return 1; // already logout
         }
 
         if (token != m_currentToken)

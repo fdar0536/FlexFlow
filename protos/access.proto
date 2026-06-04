@@ -17,10 +17,11 @@ service Access {
   rpc Login(LoginReq) returns (Empty) {
     option (google.api.http) = {
       post: "/api/v1/login"
+      body: "*"
     };
   }
 
-  rpc Logout(LogoutReq) returns (Empty) {
+  rpc Logout(Empty) returns (Empty) {
     option (google.api.http) = {
       post: "/api/v1/logout"
     };
@@ -44,8 +45,4 @@ message LoginReq {
   string password = 2;
   string otp = 3;
   int32 tokentimeout = 4;
-}
-
-message LogoutReq {
-  string username = 1;
 }

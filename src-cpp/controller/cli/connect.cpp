@@ -80,7 +80,7 @@ u8 connect(const std::string &file)
         profile.host = config["host"].as<std::string>();
         profile.port = config["port"].as<u16>();
         profile.username = config["username"].as<std::string>();
-        profile.password = config["password"].as<std::string>();
+        profile.tokenTimeOut = config["tokenTimeOut"].as<i32>();
     }
     catch (...)
     {
@@ -95,6 +95,13 @@ static u8 connect()
 {
     spdlog::debug("{}:{} connect", LOG_FILE_PATH(__FILE__), __LINE__);
 
+    std::cout << "Enter your password (no echo): ";
+    setEcho(false);
+    std::string password;
+    std::cin >> password;
+    setEcho(true);
+    std::cout << std::endl;
+
     std::cout << "Enter your TOTP code (no echo): ";
     setEcho(false);
     std::string code;
@@ -107,8 +114,9 @@ static u8 connect()
         profile.host,
         profile.port,
         profile.username,
-        profile.password,
-        code);
+        password,
+        code,
+        profile.tokenTimeOut);
     
     if (token == nullptr)
     {

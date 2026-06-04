@@ -49,6 +49,8 @@ compile_commands.json
 testem.log
 /typings
 .env
+src-cpp/server.yaml
+src-cpp/client.yaml
 
 # System files
 .DS_Store

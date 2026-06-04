@@ -50,7 +50,7 @@ public:
                      std::string &token,
                      i32 &tokenTimeout) = 0;
 
-    virtual u8 logout(const std::string &username, const std::string &token) = 0;
+    virtual u8 logout(const std::string &token) = 0;
 
     virtual u8 cannotAccess(const std::string &ip) = 0;
 

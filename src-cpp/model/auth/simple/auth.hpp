@@ -61,7 +61,7 @@ public:
                      std::string &token,
                      i32 &tokenTimeout) override;
 
-    virtual u8 logout(const std::string &username, const std::string &token) override;
+    virtual u8 logout(const std::string &token) override;
 
     virtual u8 cannotAccess(const std::string &ip) override;
 
@@ -87,7 +87,7 @@ public:
 
     i32 defaultTokenTimeout = 86400; // 1 day
 
-    i32 maxTokenTimeout = 2592000; // 1 month
+    i32 maxTokenTimeout = 2592000; // 30 days
 
 private:
 

@@ -1,18 +1,12 @@
 <!-- Connect info -->
+<h1>Flex Flow Web UI Login</h1>
 <form [formGroup]="profileForm">
     <common-layout
         align_items="center"
         justify_content="center"
         gap="10"
+        direction="column"
     >
-        <mat-form-field appearance="outline">
-            <mat-label>Host</mat-label>
-            <input
-                matInput
-                placeholder="Your host"
-                formControlName="host"
-            >
-        </mat-form-field>
         <mat-form-field appearance="outline">
             <mat-label>Username</mat-label>
             <input
@@ -39,6 +33,14 @@
                 type="password"
             >
         </mat-form-field>
+        <mat-form-field appearance="outline">
+            <mat-label>Session length</mat-label>
+            <input
+                matInput
+                placeholder="Session length in seconds"
+                formControlName="tokenTimeOut"
+            >
+        </mat-form-field>
     </common-layout>
 </form>
 
@@ -46,30 +48,25 @@
 <common-layout
     align_items="center"
     justify_content="center"
-    gap="10"
+    gap="20"
 >
-    <button matFab extended (click)="onLoadClicked()">
-        <mat-icon>file_open</mat-icon>
-        <p class="CommonText">Load profile</p>
-    </button>
-    <button matFab extended (click)="onSaveClicked()">
-        <mat-icon>save</mat-icon>
-        <p class="CommonText">Save profile</p>
-    </button>
     <button matFab extended (click)="onClearClicked()">
         <mat-icon>delete</mat-icon>
         <p class="CommonText">Clear</p>
     </button>
-    <button matFab extended (click)="onDisconnectClicked()">
-        <mat-icon>link_off</mat-icon>
-        <p class="CommonText">Disconnect/Reset</p>
+    <button matFab extended (click)="onLoginClicked()">
+        <mat-icon>exit_to_app</mat-icon>
+        <p class="CommonText">Login</p>
     </button>
-    <button matFab extended (click)="onConnectClicked()">
-        <mat-icon>link</mat-icon>
-        <p class="CommonText">Connect</p>
-    </button>
-    <button matFab extended (click)="onConnectClicked()">
-        <mat-icon>rss_feed</mat-icon>
-        <p class="CommonText">Echo Test</p>
-    </button>
+</common-layout>
+<h2> </h2>
+<common-layout
+    direction="row"
+    align_items="center"
+    justify_content="center"
+    gap="10"
+>
+    <p class="CommonText">Flex Flow {{ version }}</p>
+    <p class="CommonText">Branch: {{ branch }}</p>
+    <p class="CommonText">Commit: {{ commit }}</p>
 </common-layout>

@@ -21,35 +21,26 @@
  * SOFTWARE.
  */
 
-import { Component, DestroyRef, inject, OnInit } from "@angular/core";
+import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
 import { RouterOutlet } from "@angular/router";
 import { HeaderComponent } from "../components/header-component";
-import { Logger } from "../model/logger";
+import { LoginPage } from "../pages/login-page";
+import { Global } from "../model/global";
 
 @Component
 ({
     selector: "app-root",
-    imports: [RouterOutlet, HeaderComponent],
+    imports: [
+        RouterOutlet,
+        HeaderComponent,
+        LoginPage,
+    ],
     templateUrl: "./app.component.html",
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: "./app.component.css",
 })
 
-export class AppComponent implements OnInit
+export class AppComponent
 {
-    constructor()
-    {
-        this.logger.debug("AppComponent.constructor");
-        this.destroyRef.onDestroy(() =>
-        {
-            this.logger.debug("AppComponent.onDestroy");
-        });
-    }
-
-    ngOnInit()
-    {
-        this.logger.debug("AppComponent.ngOnInit");
-    }
-
-    private logger = inject(Logger);
-    private destroyRef = inject(DestroyRef);
+    global = inject(Global);
 }

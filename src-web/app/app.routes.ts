@@ -23,22 +23,25 @@
 
 import { Routes } from "@angular/router";
 
-import { SettingsPage } from "../pages/settings-page";
-import { QueueListPage } from "../pages/queuelist-page";
+import { LoginPage } from "../pages/login-page";
+import { MainPage } from "../pages/main-page";
 import { AboutPage } from "../pages/about-page";
+import { AuthGuard } from "./authguard";
 
 export const routes: Routes =
 [
     {
+        path: "login",
+        component: LoginPage,
+    },
+    {
         path: "",
-        component: SettingsPage,
+        component: MainPage,
+        canActivate: [AuthGuard],
     },
     {
-        path: "QueueList",
-        component: QueueListPage,
-    },
-    {
-        path: "About",
+        path: "about",
         component: AboutPage,
+        canActivate: [AuthGuard],
     },
 ];
