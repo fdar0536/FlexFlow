@@ -46,12 +46,13 @@ export class HeaderComponent
 {
     onLogoutClicked = (e: Event) =>
     {
+        this.global.logger.debug("HeaderComponent.onLogoutClicked");
         e.preventDefault();
         const dialogRef = this.dialog.open(MessageDialog,
         {
             data:
             {
-                type: 'confirm',
+                isInfo: false,
                 title: 'Logout',
                 message: 'Are you sure you want to Logout?'
             },
@@ -75,7 +76,7 @@ export class HeaderComponent
                 {
                     data:
                     {
-                        type: 'info',
+                        isInfo: true,
                         title: 'Error',
                         message: 'Failed to logout'
                     }
@@ -90,6 +91,7 @@ export class HeaderComponent
     }
 
     global = inject(Global);
+    
     private dialog = inject(MatDialog);
     private router = inject(Router);
 }

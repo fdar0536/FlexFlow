@@ -21,11 +21,17 @@
  * SOFTWARE.
  */
 
-import {Component, inject, ChangeDetectionStrategy} from "@angular/core";
+import {
+    Component,
+    inject,
+    ChangeDetectionStrategy
+} from "@angular/core";
 
-import { QueueListComponent } from "../components/queuelist-component";
+import { QueueListComponent } from "../components/queuelist";
+import { QueueStatusComponent } from "../components/queuestatus";
+import { QueueOptComponent } from "../components/queueopt";
+import { CommonLayoutComponent } from "../components/common-layout";
 import { Global } from "../model/global";
-import { Logger } from "../model/logger";
 
 @Component
 ({
@@ -33,17 +39,14 @@ import { Logger } from "../model/logger";
     templateUrl: "./main-page.html",
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
-        QueueListComponent
+        QueueListComponent,
+        QueueStatusComponent,
+        QueueOptComponent,
+        CommonLayoutComponent
     ],
 })
 
 export class MainPage
 {
-    constructor()
-    {
-        this.logger.debug("MainPage.constructor");
-    }
-
     global = inject(Global);
-    private logger = inject(Logger);
 }

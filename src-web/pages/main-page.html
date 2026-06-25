@@ -1,3 +1,27 @@
-<div>
-    <queuelist-component></queuelist-component>
-</div>
+<common-layout
+    direction="column"
+    align_items="center"
+    justify_content="center"
+    [class.is-disabled]="this.global.disabled()"
+>
+    <QueueList></QueueList>
+    <common-layout>
+        <QueueStatus
+            title="Pending List"
+            listApi="/queue/listpending"
+            detailsApi="/queue/pendingdetails"
+            clearApi="/queue/clearpending"
+            [isPending]="true"
+        >
+        </QueueStatus>
+        <QueueStatus
+            title="Finished List"
+            listApi="/queue/listfinished"
+            detailsApi="/queue/finisheddetails"
+            clearApi="/queue/clearfinished"
+            [isPending]="false"
+        >
+        </QueueStatus>
+    </common-layout>
+    <QueueOpt></QueueOpt>
+</common-layout>

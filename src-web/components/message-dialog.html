@@ -2,17 +2,17 @@
     {{ data.title }}
 </h2>
 <mat-dialog-content>
-    {{ data.message }}
+    <p class="CommonText">{{ data.message }}</p>
 </mat-dialog-content>
 <mat-dialog-actions>
-    @if (data.type == 'confirm')
+    @if (data.isInfo)
     {
-        <button matButton [mat-dialog-close]="true">Yes</button>
-        <button matButton mat-dialog-close>No</button>
-        <button matButton mat-dialog-close>Cancel</button>
+        <button matButton mat-dialog-close class="CommonText">OK</button>
     }
-    @else if (data.type == 'info')
+    @else
     {
-        <button matButton mat-dialog-close>OK</button>
+        <button matButton [mat-dialog-close]="true" class="CommonText">Yes</button>
+        <button matButton mat-dialog-close class="CommonText">No</button>
+        <button matButton mat-dialog-close class="CommonText">Cancel</button>
     }
 </mat-dialog-actions>

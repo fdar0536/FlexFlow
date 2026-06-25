@@ -1,0 +1,39 @@
+<common-layout
+    [class.is-disabled]="this.global.queueDisabled()"
+>
+    <button
+        matFab extended
+        matTooltip="Add the task to the queue"
+        (click)="onAddClicked()"
+    >
+        <p class="CommonText">Add</p>
+    </button>
+    <button
+        matFab extended
+        matTooltip="Running status"
+        (click)="onStatusClicked()"
+    >
+        <p class="CommonText">Status</p>
+    </button>
+    <button
+        matFab extended
+        matTooltip="Current task"
+        (click)="onCurrentTaskClicked()"
+    >
+        <p class="CommonText">Current task</p>
+    </button>
+    <button
+        matFab extended
+        matTooltip="Start the queue"
+        (click)="onStartClicked()"
+    >
+        <p class="CommonText">Start</p>
+    </button>
+    <button
+        matFab extended
+        matTooltip="Stop the queue"
+        (click)="onStopClicked()"
+    >
+        <p class="CommonText">Stop</p>
+    </button>
+</common-layout>

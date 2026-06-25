@@ -40,7 +40,7 @@ typedef struct Task
     std::string execName = "";
     std::vector<std::string> args = std::vector<std::string>();
     std::string workDir = "";
-    i32 ID = 0;
+    i32 ID = -1;
     i32 exitCode = 0;
     bool isSuccess = false;
 } Task; // end class Task

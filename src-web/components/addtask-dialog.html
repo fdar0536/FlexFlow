@@ -1,0 +1,21 @@
+<h2 mat-dialog-title>
+    New Task
+</h2>
+<mat-dialog-content>
+    <mat-form-field appearance="fill" style="display: block; margin-bottom: 10px;">
+        <mat-label>Work Dir</mat-label>
+        <input matInput [(ngModel)]="taskInput.workDir">
+    </mat-form-field>
+    <mat-form-field appearance="fill" style="display: block; margin-bottom: 10px;">
+        <mat-label>Exec Name</mat-label>
+        <input matInput [(ngModel)]="taskInput.execName">
+    </mat-form-field>
+    <mat-form-field appearance="fill" style="display: block; margin-bottom: 10px;">
+        <mat-label>Args</mat-label>
+        <input matInput [(ngModel)]="taskInput.args">
+    </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions>
+    <button matButton (click)="onOkClicked()">Ok</button>
+    <button matButton (click)="onCancelClicked()">Cancel</button>
+</mat-dialog-actions>

@@ -1,5 +1,0 @@
-.is-disabled {
-  opacity: 0.6;          /* 讓畫面變淡，呈現禁用視覺效果 */
-  pointer-events: none;  /* 關鍵：讓滑鼠事件完全失效，點不到裡面的任何東西 */
-  user-select: none;     /* 選擇性：防止使用者選取裡面的文字 */
-}

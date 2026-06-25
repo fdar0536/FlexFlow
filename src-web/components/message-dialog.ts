@@ -43,6 +43,7 @@ import {
         MatDialogClose
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    styleUrl: "../model/global.css",
 })
 
 export class MessageDialog

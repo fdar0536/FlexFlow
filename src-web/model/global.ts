@@ -21,13 +21,12 @@
  * SOFTWARE.
  */
 
-import { Injectable, signal, inject, computed } from '@angular/core';
+import { Injectable, signal, inject, computed, isDevMode } from '@angular/core';
 import { Router } from '@angular/router';
-
+import { Logger } from "tslog";
 import axios from 'axios';
 
 import { API_BASE } from './config';
-import { Logger } from "./logger";
 
 @Injectable
 ({
@@ -71,7 +70,11 @@ export class Global
     queueDisabled = computed(() => this.disabled() || !this.queueConnected());
     queueName = signal<string>('');
 
-    private logger = inject(Logger);
+    logger = new Logger(
+    {
+        type: "pretty",
+        minLevel: isDevMode() ? 0 : 3,
+    });
     private router = inject(Router);
     private echoTest = async () =>
     {

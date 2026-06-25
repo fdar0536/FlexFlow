@@ -40,13 +40,13 @@ import { MatInputModule } from '@angular/material/input';
 import { Global } from "../model/global";
 import { MessageDialog } from '../components/message-dialog';
 import { CommonLayoutComponent } from '../components/common-layout';
-import { Logger } from "../model/logger";
 import { FF_BRANCH, FF_COMMIT, FF_VERSION } from "../model/config";
 
 @Component
 ({
     selector: "login-page",
     templateUrl: "./login-page.html",
+    styleUrl: "../model/global.css",
     changeDetection: ChangeDetectionStrategy.Eager,
     imports:
     [
@@ -66,7 +66,7 @@ export class LoginPage
 {
     onClearClicked = () =>
     {
-        this.logger.debug("SettingsPage.onClearClicked");
+        this.global.logger.debug("SettingsPage.onClearClicked");
         this.profileForm.setValue({
             username: "",
             password: "",
@@ -77,14 +77,14 @@ export class LoginPage
 
     onLoginClicked = async () =>
     {
-        this.logger.debug("SettingsPage.onConnectClicked");
+        this.global.logger.debug("SettingsPage.onConnectClicked");
         if (this.global.connected())
         {
             this.dialog.open(MessageDialog,
             {
                 data:
                 {
-                    type: 'info',
+                    isInfo: true,
                     title: 'Info',
                     message: 'You are already connected'
                 
@@ -101,7 +101,7 @@ export class LoginPage
             {
                 data:
                 {
-                    type: 'info',
+                    isInfo: true,
                     title: 'Error',
                     message: 'Invalid login information'
                 
@@ -136,7 +136,7 @@ export class LoginPage
             {
                 data:
                 {
-                    type: 'info',
+                    isInfo: true,
                     title: 'Error',
                     message: 'Failed to login'
                 },
@@ -182,6 +182,6 @@ export class LoginPage
     branch = FF_BRANCH;
 
     private dialog = inject(MatDialog);
-    private logger = inject(Logger);
+    
     private router = inject(Router);
 }

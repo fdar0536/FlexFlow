@@ -27,6 +27,12 @@ minimumReleaseAgeExclude:
   - '@angular/platform-browser@22.0.0'
   - '@angular/router@22.0.0'
   - '@schematics/angular@22.0.0'
+  - '@angular-devkit/architect@0.2200.4'
+  - '@angular-devkit/core@22.0.4'
+  - '@angular/build@22.0.4'
+  - '@angular-devkit/schematics@22.0.4'
+  - '@angular/cli@22.0.4'
+  - '@schematics/angular@22.0.4'
 
 overrides:
   '@isaacs/brace-expansion@<=5.0.0': '>=5.0.1'

@@ -1,0 +1,22 @@
+<h2 mat-dialog-title>
+    {{ data.title }}
+</h2>
+<mat-dialog-content class="grid-container">
+    <p class="CommonText label">Work Dir:</p>
+    <p class="CommonText content">{{ data.workDir }}</p>
+    
+    <p class="CommonText label">Exec Name:</p>
+    <p class="CommonText content">{{ data.execName }}</p>
+    
+    <p class="CommonText label">Arguments:</p>
+    <p class="CommonText content">{{ data.args }}</p>
+    
+    <p class="CommonText label">Exit Code:</p>
+    <p class="CommonText content">{{ data.exitCode }}</p>
+    
+    <p class="CommonText label">ID:</p>
+    <p class="CommonText content">{{ data.ID }}</p>
+</mat-dialog-content>
+<mat-dialog-actions>
+    <button matButton mat-dialog-close>OK</button>
+</mat-dialog-actions>

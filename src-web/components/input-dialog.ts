@@ -1,6 +1,6 @@
 /*
  * Flex Flow
- * Copyright (c) 2025-present fdar0536
+ * Copyright (c) 2026-present fdar0536
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 
 import {
   MatDialogActions,
-  MatDialogClose,
   MatDialogContent,
   MatDialogTitle,
   MatDialogRef,
@@ -46,7 +45,6 @@ import {
         MatDialogTitle,
         MatDialogContent,
         MatDialogActions,
-        MatDialogClose,
         MatFormFieldModule,
         MatInputModule,
         FormsModule
@@ -63,7 +61,6 @@ export class InputDialog
         this.dialogRef.close(); 
     }
 
-    // 確定時，把整包 formData 丟回去
     onOkClicked = () =>
     {
         this.dialogRef.close(this.input); 

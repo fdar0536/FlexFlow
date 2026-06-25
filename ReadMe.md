@@ -25,7 +25,7 @@ This is a simple tool that allow you can manage the task flow by remote or in lo
 - Protobuf
   - [Buf](https://buf.build)
 - Model
-  - C++ 20
+  - C++ 23
   - Protobuf
   - [SQLite](https://www.sqlite.org)
   - [gRPC](https://grpc.io)
@@ -33,7 +33,7 @@ This is a simple tool that allow you can manage the task flow by remote or in lo
   - [OpenSSL](https://www.openssl.org)
 - Webui
   - [pnpm](https://pnpm.io)
-- Server
+- Server and CLI
   - Model
   - [CLI11](https://github.com/CLIUtils/CLI11)
   - [yaml-cpp](https://github.com/jbeder/yaml-cpp)

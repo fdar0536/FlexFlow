@@ -1133,6 +1133,11 @@ u8 Queue::getID(i32 &out)
     m_token->stmt = nullptr;
     oldValue = out;
     newValue = out + 1;
+    if (newValue < 0)
+    {
+        // overflow, reset to zero
+        newValue = 0;
+    }
 
     if (sqlite3_prepare_v2(m_token->db,
         "update lastID set ID=? where ID=?;", 34,

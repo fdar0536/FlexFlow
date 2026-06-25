@@ -3,7 +3,7 @@ project(FlexFlow LANGUAGES C CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -71,15 +71,8 @@ find_package(gRPC REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(SQLite3 REQUIRED)
 find_package(OpenSSL REQUIRED)
-
-if (ENABLE_SERVER)
-    find_package(CLI11 REQUIRED)
-    find_package(yaml-cpp REQUIRED)
-endif (ENABLE_SERVER)
-
-if(ENABLE_TEST)
-    find_package(GTest REQUIRED)
-endif(ENABLE_TEST)
+find_package(CLI11 REQUIRED)
+find_package(yaml-cpp REQUIRED)
 
 file(GLOB_RECURSE PROTO_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/protos/*.cc")
 file(GLOB_RECURSE PROTO_HDRS "${CMAKE_CURRENT_SOURCE_DIR}/protos/*.h")
@@ -100,3 +93,20 @@ set_property(TARGET grpc_common PROPERTY POSITION_INDEPENDENT_CODE ON)
 include(cmake/ffmodel.cmake)
 include(cmake/flexflowserver.cmake)
 include(cmake/flexflowcli.cmake)
+
+if (ENABLE_DEBUG)
+    add_executable(TestProg
+        testmain.cpp
+    )
+
+    target_link_libraries(TestProg
+        PRIVATE
+
+        CLI11::CLI11
+    )
+
+    if (MSVC AND WIN32 AND NOT MSVC_VERSION VERSION_LESS 142)
+        target_link_options(TestProg PRIVATE $<$<CONFIG:Debug>:/INCREMENTAL>)
+        target_compile_options(TestProg PRIVATE $<$<CONFIG:Debug>:/ZI>)
+    endif (MSVC AND WIN32 AND NOT MSVC_VERSION VERSION_LESS 142)
+endif (ENABLE_DEBUG)

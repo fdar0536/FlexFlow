@@ -21,7 +21,14 @@
  * SOFTWARE.
  */
 
-import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
+import
+{
+    Component,
+    inject,
+    ChangeDetectionStrategy,
+    AfterViewInit
+} from "@angular/core";
+
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatSelectModule } from "@angular/material/select";
@@ -30,14 +37,13 @@ import { MatDialog } from "@angular/material/dialog";
 
 import { Global } from "../model/global";
 import { CommonLayoutComponent } from "./common-layout";
-import { Logger } from "../model/logger";
 import { InputDialog } from "./input-dialog";
 import { MessageDialog } from "./message-dialog";
 
 @Component
 ({
-    selector: "queuelist-component",
-    templateUrl: "./queuelist-component.html",
+    selector: "QueueList",
+    templateUrl: "./queuelist.html",
     imports: [
         CommonLayoutComponent,
         MatFormFieldModule,
@@ -46,22 +52,23 @@ import { MessageDialog } from "./message-dialog";
         FormsModule
     ],
     changeDetection: ChangeDetectionStrategy.Eager,
-    styleUrl: "../model/disable.css",
+    styleUrl: "../model/global.css",
 })
 
-export class QueueListComponent
+export class QueueListComponent implements AfterViewInit
 {
-    constructor()
+    ngAfterViewInit()
     {
-        this.logger.debug("QueueListComponent.constructor");
+        this.global.logger.debug("QueueListComponent.ngAfterViewInit");
         this.onRefreshClicked();
     }
 
     onRefreshClicked = async() =>
     {
-        this.logger.debug("QueueListComponent.onRefreshClicked");
-        this.global.disabled.set(true);
+        this.global.logger.debug("QueueListComponent.onRefreshClicked");
         this.list = [];
+        this.selectedItem = '';
+        this.global.queueConnected.set(false);
         try
         {
             // the result is chunked, handle it as string
@@ -90,9 +97,16 @@ export class QueueListComponent
 
                     try
                     {
+                        // Mistake prevention
+                        // Replace single quotes with standard JSON double quotes
+                        const jsonStandardLine = line.replace(/'/g, '"');
+
                         // string as JSON
-                        const parsed = JSON.parse(line);
-                        if (parsed?.result?.name)
+                        const parsed = JSON.parse(jsonStandardLine);
+                        if (parsed?.result?.name !== undefined &&
+                            parsed?.result?.name !== null &&
+                            parsed?.result?.name !== ''
+                        )
                         {
                             this.list.push(parsed.result.name);
                         }
@@ -100,25 +114,36 @@ export class QueueListComponent
                     catch (error)
                     {
                         // avoid error to crash whole app
-                        this.logger.error('parse Chunk failed:', error, 'raw data:', line);
+                        this.global.logger.error('parse Chunk failed:', error, 'raw data:', line);
                     }
                 } // for (const line of lines)
+
+                // find the current name is in new list or not
+                if (this.list.includes(this.global.queueName()))
+                {
+                    this.selectedItem = this.global.queueName();
+                    this.global.queueConnected.set(true);
+                }
+                else
+                {
+                    this.selectedItem = '';
+                    this.global.queueName.set('');
+                    this.global.queueConnected.set(false);
+                }
             } // if (rawData)
         }
         catch
         {
             // do nothing
         }
-
-        this.global.disabled.set(false);
     } // onRefreshClicked
 
     onLoadClicked = async() =>
     {
-        this.logger.debug("QueueListComponent.onLoadClicked");
+        this.global.logger.debug("QueueListComponent.onLoadClicked");
         if (this.selectedItem === '')
         {
-            this.logger.error("QueueListComponent.onLoadClicked: selectedItem is empty");
+            this.global.logger.error("QueueListComponent.onLoadClicked: selectedItem is empty");
             return;
         }
 
@@ -126,7 +151,8 @@ export class QueueListComponent
         this.global.queueConnected.set(false);
         try
         {
-            await this.global.api.get('/queuelist/get', {
+            await this.global.api.get('/queuelist/get', 
+            {
                 params:
                 {
                     name: this.selectedItem
@@ -142,7 +168,7 @@ export class QueueListComponent
             {
                 data:
                 {
-                    type: 'info',
+                    isInfo: true,
                     title: 'Error',
                     message: 'Failed to load queue'
                 }        
@@ -157,7 +183,7 @@ export class QueueListComponent
 
     onCreateClicked = async() =>
     {
-        this.logger.debug("QueueListComponent.onAddClicked");
+        this.global.logger.debug("QueueListComponent.onAddClicked");
         const dialogRef = this.dialog.open(InputDialog,
         {
             data:
@@ -194,7 +220,7 @@ export class QueueListComponent
                 {
                     data:
                     {
-                        type: 'info',
+                        isInfo: true,
                         title: 'Error',
                         message: 'Failed to create queue'
                     }        
@@ -208,10 +234,10 @@ export class QueueListComponent
 
     onDeleteClicked = async() =>
     {
-        this.logger.debug("QueueListComponent.onDeleteClicked");
+        this.global.logger.debug("QueueListComponent.onDeleteClicked");
         if (this.selectedItem === '')
         {
-            this.logger.error("QueueListComponent.onDeleteClicked: selectedItem is empty");
+            this.global.logger.error("QueueListComponent.onDeleteClicked: selectedItem is empty");
             return;
         }
 
@@ -227,6 +253,9 @@ export class QueueListComponent
                 }
             });
 
+            this.global.queueName.set('');
+            this.selectedItem = '';
+            this.global.queueConnected.set(false);
             this.global.disabled.set(false);
             this.onRefreshClicked();
         }
@@ -236,7 +265,7 @@ export class QueueListComponent
             {
                 data:
                 {
-                    type: 'info',
+                    isInfo: true,
                     title: 'Error',
                     message: 'Failed to delete queue'
                 }        
@@ -248,10 +277,10 @@ export class QueueListComponent
 
     onRenameClicked = async() =>
     {
-        this.logger.debug("QueueListComponent.onRenameClicked");
+        this.global.logger.debug("QueueListComponent.onRenameClicked");
         if (this.selectedItem === '')
         {
-            this.logger.error("QueueListComponent.onRenameClicked: selectedItem is empty");
+            this.global.logger.error("QueueListComponent.onRenameClicked: selectedItem is empty");
             return;
         }
 
@@ -285,6 +314,10 @@ export class QueueListComponent
                     oldName: this.selectedItem,
                     newName: result
                 });
+
+                this.global.queueConnected.set(false);
+                this.global.queueName.set(result);
+                this.selectedItem = result;
                 this.global.disabled.set(false);
                 this.onRefreshClicked();
             }
@@ -294,7 +327,7 @@ export class QueueListComponent
                 {
                     data:
                     {
-                        type: 'info',
+                        isInfo: true,
                         title: 'Error',
                         message: 'Failed to rename queue'
                     }        
@@ -306,7 +339,6 @@ export class QueueListComponent
     } // onRenameClicked
 
     global = inject(Global);
-    logger = inject(Logger);
     dialog = inject(MatDialog);
     list: string[] = [];
     selectedItem = '';

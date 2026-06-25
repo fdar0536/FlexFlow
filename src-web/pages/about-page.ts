@@ -22,7 +22,6 @@
  */
 
 import {AfterViewInit, Component, inject, signal, ChangeDetectionStrategy} from "@angular/core";
-import { Router } from "@angular/router";
 
 import { CommonLayoutComponent } from "../components/common-layout";
 import { FF_VERSION, FF_COMMIT, FF_BRANCH } from "../model/config";
@@ -66,6 +65,7 @@ interface ServerInfo
     `,
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [CommonLayoutComponent],
+    styleUrl: "../model/global.css",
 })
 
 export class AboutPage implements AfterViewInit

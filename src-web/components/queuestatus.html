@@ -1,0 +1,85 @@
+<common-layout
+    direction="column"
+    [class.is-disabled]="disabled()"
+>
+    <div class="my-box" #boxContainer (mousedown)="onMouseDown($event)">
+        <p class="CommonText">{{ title() }}</p>
+
+        @if (isDragging())
+        {
+            <div class="selection-box" [style]="dragBoxStyle()"></div>
+        }
+
+        @if (list().length > 0)
+        {
+            @for (ID of list(); track $index)
+            {
+                <p
+                    
+                    (click)="onItemClicked($event, ID)"
+                    (dblclick)="onItemDblClicked(ID)"
+                    class="CommonText my-item"
+                    [class.selected]="selectedIds().has(ID)"
+                    [attr.data-id]="ID"
+                >
+                    {{ ID }}
+                </p>
+            }
+        }
+        @else
+        {
+            <p class="CommonText">No data</p>
+        }
+        <style>
+            .my-box
+            {
+                border: 2px solid #333333; 
+                padding: 20px;
+                position: relative;
+                user-select: none;
+            }
+
+            .my-item
+            {
+                padding: 8px 12px;
+                margin: 4px 0;
+                cursor: pointer;
+                transition: background-color 0.2s;
+            }
+
+            .my-item:hover
+            {
+                color: #6a96b4;
+            }
+
+            .my-item.selected
+            {
+                background-color: #e2f0fd;
+                color: #0b5ed7;
+                border-left: 4px solid #0b5ed7;
+            }
+
+            .selection-box
+            {
+                border: 1px dashed #0b5ed7;
+                background-color: rgba(11, 94, 215, 0.15);
+                pointer-events: none; /* 關鍵：讓滑鼠事件能穿透框選盒，不會阻擋 mousemove */
+                z-index: 10;
+            }
+        </style>
+        <common-layout>
+            <button matFab extended (click)="onRefreshClicked()">
+                <p class="CommonText">Refresh</p>
+            </button>
+            @if (isPending())
+            {
+                <button matFab extended (click)="onRemoveClicked()">
+                    <p class="CommonText">Remove</p>
+                </button>
+            }
+            <button matFab extended (click)="onClearClicked()">
+                <p class="CommonText">Clear</p>
+            </button>
+        </common-layout>
+    </div>
+</common-layout>

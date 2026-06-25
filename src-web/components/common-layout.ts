@@ -42,7 +42,7 @@ import {Component, input, ChangeDetectionStrategy} from "@angular/core";
 export class CommonLayoutComponent
 {
     direction = input<string>('row');
-    gap = input<string>("0");
+    gap = input<string>("10");
     align_items = input<string>('stretch');
     justify_content = input<string>('flex-start');
 }
