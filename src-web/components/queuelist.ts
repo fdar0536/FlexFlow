@@ -86,51 +86,53 @@ export class QueueListComponent implements AfterViewInit
             {"result":{"name":"Cache"}}
             */
             const rawData = res.data;
-            if (rawData)
+            if (!rawData)
             {
-                // split string
-                const lines = rawData.split(/\r?\n/);
-                for (const line of lines)
-                {
-                    // ensure its not empty
-                    if (line.trim() === '') continue;
+                return;
+            }
 
-                    try
+            // split string
+            const lines = rawData.split(/\r?\n/);
+            for (const line of lines)
+            {
+                // ensure its not empty
+                if (line.trim() === '') continue;
+
+                try
+                {
+                    // Mistake prevention
+                    // Replace single quotes with standard JSON double quotes
+                    const jsonStandardLine = line.replace(/'/g, '"');
+
+                    // string as JSON
+                    const parsed = JSON.parse(jsonStandardLine);
+                    if (parsed?.result?.name !== undefined &&
+                        parsed?.result?.name !== null &&
+                        parsed?.result?.name !== ''
+                    )
                     {
-                        // Mistake prevention
-                        // Replace single quotes with standard JSON double quotes
-                        const jsonStandardLine = line.replace(/'/g, '"');
-
-                        // string as JSON
-                        const parsed = JSON.parse(jsonStandardLine);
-                        if (parsed?.result?.name !== undefined &&
-                            parsed?.result?.name !== null &&
-                            parsed?.result?.name !== ''
-                        )
-                        {
-                            this.list.push(parsed.result.name);
-                        }
+                        this.list.push(parsed.result.name);
                     }
-                    catch (error)
-                    {
-                        // avoid error to crash whole app
-                        this.global.logger.error('parse Chunk failed:', error, 'raw data:', line);
-                    }
-                } // for (const line of lines)
+                }
+                catch (error)
+                {
+                    // avoid error to crash whole app
+                    this.global.logger.error('parse Chunk failed:', error, 'raw data:', line);
+                }
+            } // for (const line of lines)
 
-                // find the current name is in new list or not
-                if (this.list.includes(this.global.queueName()))
-                {
-                    this.selectedItem = this.global.queueName();
-                    this.global.queueConnected.set(true);
-                }
-                else
-                {
-                    this.selectedItem = '';
-                    this.global.queueName.set('');
-                    this.global.queueConnected.set(false);
-                }
-            } // if (rawData)
+            // find the current name is in new list or not
+            if (this.list.includes(this.global.queueName()))
+            {
+                this.selectedItem = this.global.queueName();
+                this.global.queueConnected.set(true);
+            }
+            else
+            {
+                this.selectedItem = '';
+                this.global.queueName.set('');
+                this.global.queueConnected.set(false);
+            }
         }
         catch
         {
@@ -338,8 +340,8 @@ export class QueueListComponent implements AfterViewInit
         }); // dialogRef.afterClosed().subscribe
     } // onRenameClicked
 
-    global = inject(Global);
-    dialog = inject(MatDialog);
+    readonly global = inject(Global);
+    readonly dialog = inject(MatDialog);
     list: string[] = [];
     selectedItem = '';
 }

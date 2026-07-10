@@ -175,13 +175,13 @@ export class LoginPage
         )
     });
 
-    global = inject(Global);
+    readonly global = inject(Global);
 
-    version = FF_VERSION;
-    commit = FF_COMMIT;
-    branch = FF_BRANCH;
+    readonly version = FF_VERSION;
+    readonly commit = FF_COMMIT;
+    readonly branch = FF_BRANCH;
 
-    private dialog = inject(MatDialog);
+    private readonly dialog = inject(MatDialog);
     
-    private router = inject(Router);
+    private readonly router = inject(Router);
 }

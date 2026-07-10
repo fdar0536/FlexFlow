@@ -67,5 +67,5 @@ export class InputDialog
     }
 
     input = '';
-    data = inject(MAT_DIALOG_DATA);
+    readonly data = inject(MAT_DIALOG_DATA);
 }

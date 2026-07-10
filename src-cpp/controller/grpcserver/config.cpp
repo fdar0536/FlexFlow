@@ -154,13 +154,6 @@ uint_fast8_t Config::parse(Config *obj, const std::string &path)
         obj->dbPath = config["db path"].as<std::string>();
 
         obj->listenPort = config["port"].as<u16>();
-        obj->listenIP = config["ip"].as<std::string>();
-
-        if (Model::Utils::verifyIP(obj->listenIP))
-        {
-            spdlog::error("{}:{} Invalid ip", LOG_FILE_PATH(__FILE__), __LINE__);
-            return 1;
-        }
 
         if (parseAuth(config, path))
         {

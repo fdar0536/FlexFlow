@@ -25,6 +25,7 @@ import { Routes } from "@angular/router";
 
 import { LoginPage } from "../pages/login-page";
 import { MainPage } from "../pages/main-page";
+import { OutputPage } from "../pages/output-page";
 import { AboutPage } from "../pages/about-page";
 import { AuthGuard } from "./authguard";
 
@@ -37,6 +38,11 @@ export const routes: Routes =
     {
         path: "",
         component: MainPage,
+        canActivate: [AuthGuard],
+    },
+    {
+        path: "output",
+        component: OutputPage,
         canActivate: [AuthGuard],
     },
     {

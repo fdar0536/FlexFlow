@@ -1,29 +1,33 @@
-.is-disabled {
-  opacity: 0.6;
-  pointer-events: none;
-  user-select: none;
+.is-disabled
+{
+    opacity: 0.6;
+    pointer-events: none;
+    user-select: none;
 }
 
 .CommonText
 {
-  font-size: 20px;
+    font-size: 20px;
 }
 
-.grid-container {
-  display: grid;
-  grid-template-columns: max-content minmax(0, 1fr);
-  gap: 10px 10px;
-  align-items: start;
+.grid-container
+{
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 10px 10px;
+    align-items: start;
 }
 
-.label {
-  margin: 0;
-  text-align: right;
-  white-space: nowrap;
+.label
+{
+    margin: 0;
+    text-align: right;
+    white-space: nowrap;
 }
 
-.content {
-  margin: 0;
-  text-align: left;
-  word-break: break-all;
+.content
+{
+    margin: 0;
+    text-align: left;
+    word-break: break-all;
 }

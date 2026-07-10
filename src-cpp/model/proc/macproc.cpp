@@ -52,15 +52,6 @@ u8 MacProc::asioInit()
 {
     spdlog::debug("{}:{} MacProc::asioInit", LOG_FILE_PATH(__FILE__), __LINE__);
 
-    m_kqueue = kqueue();
-    if (m_kqueue == -1)
-    {
-        spdlog::error("{}:{} {}", LOG_FILE_PATH(__FILE__), __LINE__,
-            strerror(errno));
-        return 1;
-    }
-
-    EV_SET(&m_change_event, m_masterFD, EVFILT_READ, EV_ADD | EV_ENABLE, 0, 0, NULL);
     m_thread = std::jthread(&MacProc::readOutputLoop, this);
     return 0;
 }
@@ -68,68 +59,49 @@ u8 MacProc::asioInit()
 void MacProc::asioFin()
 {
     spdlog::debug("{}:{} MacProc::asioFin", LOG_FILE_PATH(__FILE__), __LINE__);
-
     closeFile(&m_masterFD);
-    closeFile(&m_kqueue);
 }
 
 void MacProc::readOutputLoop()
 {
     spdlog::debug("{}:{} MacProc::readOutputLoop",
         LOG_FILE_PATH(__FILE__), __LINE__);
+    
+    char buffer[FF_READ_BUFFER_SIZE];
+    fd_set readfds;
+    struct timeval timeout;
 
     while (1)
     {
-        int nevents = kevent(m_kqueue, &m_change_event, 1, m_event_list, 8, NULL);
-        if (nevents < 0)
-        {
-            if (errno == EINTR) continue;
-            break;
-        }
-        
-        for (int i = 0; i < nevents; ++i)
-        {
-            if (static_cast<int>(m_event_list[i].ident) == m_masterFD)
-            {
-                if (m_event_list[i].flags & EV_EOF)
-                {
-                    printf("\n[Done] 子進程已退出。\n");
-                    asioFin();
-                    return;
-                }
+        FD_ZERO(&readfds);
+        FD_SET(m_masterFD, &readfds);
+        timeout.tv_sec = 0;
+        timeout.tv_usec = 100000; // 100ms
 
-                char buffer[FF_READ_BUFFER_SIZE];
-                while (1)
+        int result = select(m_masterFD + 1, &readfds, NULL, NULL, &timeout);
+        if (result > 0 && FD_ISSET(m_masterFD, &readfds))
+        {
+            ssize_t bytesRead = read(m_masterFD, buffer, sizeof(buffer) - 1);
+            if (bytesRead > 0)
+            {
+                buffer[bytesRead] = '\0';
                 {
-                    ssize_t n = read(m_masterFD, buffer, sizeof(buffer));
-                    if (n > 0)
+                    std::unique_lock<std::mutex> lock(m_mutex);
                     {
-                        fwrite(buffer, 1, n, stdout);
-                        fflush(stdout);
-                    }
-                    else if (n == -1)
-                    {
-                        if (errno == EAGAIN || errno == EWOULDBLOCK)
+                        if (m_deque.size() >= FF_MAX_READ_QUEUE_SIZE)
                         {
-                            break; 
+                            m_deque.pop_front();
                         }
-                        else
-                        {
-                            spdlog::error("{}:{} {}",
-                                LOG_FILE_PATH(__FILE__), __LINE__,
-                                strerror(errno));
-                            asioFin();
-                            return;
-                        }
+
+                        m_deque.push_back(std::move(buffer));
                     }
-                    else
-                    {
-                        asioFin();
-                        return;
-                    }
-                } // while (1)
-            } // if (m_event_list[i].ident == m_masterFD)
-        } // for (int i = 0; i < nevents; ++i)
+                }
+            }
+            else if (bytesRead == -1 && errno != EAGAIN && errno != EWOULDBLOCK)
+            {
+                break;
+            }
+        } // if (result > 0 && FD_ISSET(m_masterFD, &readfds))
     } // end while (1)
 }
 

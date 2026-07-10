@@ -5,7 +5,7 @@ dotenv: ['.env']
 
 vars:
   # version info
-  FF_VERSION: "2.0"
+  FF_VERSION: "2.0-release"
   FF_COMMIT:
     sh: git rev-parse --short HEAD
   FF_BRANCH:

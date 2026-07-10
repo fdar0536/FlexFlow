@@ -75,7 +75,7 @@ export class Global
         type: "pretty",
         minLevel: isDevMode() ? 0 : 3,
     });
-    private router = inject(Router);
+    private readonly router = inject(Router);
     private echoTest = async () =>
     {
         this.logger.debug("SettingsPage.echoTest");

@@ -53,8 +53,6 @@ public:
 
     u16 listenPort = 12345;
 
-    std::string listenIP = "127.0.0.1";
-
 private:
 
     static void printVersion();

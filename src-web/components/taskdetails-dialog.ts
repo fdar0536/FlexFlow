@@ -56,5 +56,5 @@ import {
 
 export class TaskDetailsDialog
 {
-    data = inject(MAT_DIALOG_DATA);
+    readonly data = inject(MAT_DIALOG_DATA);
 }

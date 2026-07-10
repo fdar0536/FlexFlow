@@ -21,6 +21,8 @@
  * SOFTWARE.
  */
 
+#include <csignal>
+
 #include <iostream>
 
 #ifdef _WIN32

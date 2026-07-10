@@ -24,8 +24,6 @@
 #ifndef _MODEL_PROC_MACPROC_HPP_
 #define _MODEL_PROC_MACPROC_HPP_
 
-#include "sys/event.h"
-
 #include "posixproc.hpp"
 
 namespace Model
@@ -49,13 +47,6 @@ protected:
     virtual void asioFin() override;
 
     virtual void readOutputLoop() override;
-
-private:
-
-    int m_kqueue = -1;
-
-    struct kevent m_change_event;
-    struct kevent m_event_list[8];
 };
 
 } // end namespace Proc

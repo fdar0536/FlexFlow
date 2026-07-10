@@ -52,7 +52,7 @@ uint_fast8_t Server::start()
     try
     {
         grpc::ServerBuilder builder;
-        std::string listenAddr = GRPCServer::config.listenIP + ":" +
+        std::string listenAddr = "127.0.0.1:" +
                                  std::to_string(GRPCServer::config.listenPort);
         int actualPort(0);
         builder.AddListeningPort(listenAddr,

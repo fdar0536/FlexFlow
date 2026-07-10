@@ -246,6 +246,6 @@ export class QueueOptComponent
         this.global.queueConnected.set(true);
     }
 
-    global = inject(Global);
-    private dialog = inject(MatDialog);
+    readonly global = inject(Global);
+    private readonly dialog = inject(MatDialog);
 }

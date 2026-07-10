@@ -41,7 +41,6 @@ namespace GRPC
 
 std::shared_ptr<Token> connect(
     const bool ssl,
-    const std::string &target,
     const u16 port,
     const std::string username,
     const std::string password,
@@ -52,8 +51,6 @@ std::shared_ptr<Token> connect(
         LOG_FILE_PATH(__FILE__), __LINE__);
     spdlog::debug("{}:{} ssl: {}",
         LOG_FILE_PATH(__FILE__), __LINE__, ssl);
-    spdlog::debug("{}:{} target: {}",
-        LOG_FILE_PATH(__FILE__), __LINE__, target.c_str());
     spdlog::debug("{}:{} port: {}",
         LOG_FILE_PATH(__FILE__), __LINE__, port);
     spdlog::debug("{}:{} username: {}",
@@ -65,8 +62,7 @@ std::shared_ptr<Token> connect(
 
     auto channel = std::shared_ptr<grpc::ChannelInterface>();
 
-    std::string ip = target;
-    ip += ":";
+    std::string ip = "127.0.0.1:";
     ip += std::to_string(port);
     std::unique_ptr<ff::Access::Stub> stub;
 

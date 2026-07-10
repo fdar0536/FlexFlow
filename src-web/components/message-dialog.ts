@@ -48,5 +48,5 @@ import {
 
 export class MessageDialog
 {
-    data = inject(MAT_DIALOG_DATA);
+    readonly data = inject(MAT_DIALOG_DATA);
 }

@@ -34,13 +34,13 @@ service Queue {
 
   rpc ClearPending(QueueReq) returns (Empty) {
     option (google.api.http) = {
-      get: "/api/v1/queue/clearpending"
+      delete: "/api/v1/queue/clearpending"
     };
   }
 
   rpc ClearFinished(QueueReq) returns (Empty) {
     option (google.api.http) = {
-      get: "/api/v1/queue/clearfinished"
+      delete: "/api/v1/queue/clearfinished"
     };
   }
 

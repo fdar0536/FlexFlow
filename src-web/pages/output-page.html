@@ -1,0 +1,19 @@
+<common-layout
+    direction="column"
+    align_items="center"
+    justify_content="center"
+    [class.is-disabled]="this.global.disabled()"
+>
+    <h2>Output</h2>
+    <cdk-virtual-scroll-viewport
+        itemSize="20"
+        style="height: 100%; width: 100%; min-height: 400px;"
+        #viewport>
+        <p
+            *cdkVirtualFor="let log of logItems$ | async; trackBy: logTrackBy"
+            class="CommonText"
+        >
+            {{ log.value }}
+        </p>
+    </cdk-virtual-scroll-viewport>
+</common-layout>

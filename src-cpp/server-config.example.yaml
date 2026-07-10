@@ -1,7 +1,5 @@
 # set your database path
 db path: /path/to/your/database/folder
-# the ip for server listen
-ip: 127.0.0.1
 # the port for server listen
 port: 12345
 # the auth config for server

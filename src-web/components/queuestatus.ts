@@ -34,6 +34,8 @@ import {
     OnDestroy
 } from "@angular/core";
 
+import { ScrollingModule } from '@angular/cdk/scrolling';
+
 import {
     interval,
     startWith,
@@ -41,8 +43,6 @@ import {
     switchMap
 } from "rxjs";
 
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from "@angular/material/dialog";
 import { MatButtonModule } from '@angular/material/button';
 
@@ -66,10 +66,9 @@ export interface TaskDetailsRes
     templateUrl: "./queuestatus.html",
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
-        MatTabsModule,
-        MatIconModule,
         CommonLayoutComponent,
-        MatButtonModule
+        MatButtonModule,
+        ScrollingModule
     ],
     styleUrl: "../model/global.css",
 })
@@ -235,7 +234,6 @@ export class QueueStatusComponent implements AfterViewInit, OnDestroy
         this.isRefreshing.set(true);
 
         // list the tasks in queue
-        this.list.set([]);
         try
         {
             const res = await this.global.api.get<string>(
@@ -282,10 +280,15 @@ export class QueueStatusComponent implements AfterViewInit, OnDestroy
 
                 this.list.set(outList);
             } // if (rawData)
+            else
+            {
+                this.list.set([]);
+            }
         }
         catch
         {
             this.global.queueConnected.set(false);
+            this.list.set([]);
         }
 
         this.isRefreshing.set(false);
@@ -399,11 +402,17 @@ export class QueueStatusComponent implements AfterViewInit, OnDestroy
     isPending = input<boolean>(true);
 
     list = signal<number[]>([]);
+    // for angular can detect the node
+    trackByFn = (index: number, _: number) =>
+    {
+        return index; 
+    }
+
     isRefreshing = signal<boolean>(false);
     disabled = computed(() => this.global.queueDisabled() || this.isRefreshing());
 
-    global = inject(Global);
-    private dialog = inject(MatDialog);
+    readonly global = inject(Global);
+    private readonly dialog = inject(MatDialog);
 
     private dataSubscription!: Subscription;
     

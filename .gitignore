@@ -9,7 +9,8 @@
 /src-go/protos
 /src-openapi
 /src-web/model/config.ts
-/src-go/FlexFlowGateway
+/src-go/FlexFlowGateway*
+/build-*/*
 
 # Node
 /node_modules
@@ -55,3 +56,4 @@ src-cpp/client.yaml
 # System files
 .DS_Store
 Thumbs.db
+

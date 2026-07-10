@@ -77,7 +77,6 @@ u8 connect(const std::string &file)
     try
     {
         profile.ssl = config["ssl"].as<bool>();
-        profile.host = config["host"].as<std::string>();
         profile.port = config["port"].as<u16>();
         profile.username = config["username"].as<std::string>();
         profile.tokenTimeOut = config["tokenTimeOut"].as<i32>();
@@ -111,7 +110,6 @@ static u8 connect()
 
     auto token = Model::Connect::GRPC::connect(
         profile.ssl,
-        profile.host,
         profile.port,
         profile.username,
         password,

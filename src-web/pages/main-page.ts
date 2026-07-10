@@ -48,5 +48,5 @@ import { Global } from "../model/global";
 
 export class MainPage
 {
-    global = inject(Global);
+    readonly global = inject(Global);
 }

@@ -78,16 +78,16 @@ export class AboutPage implements AfterViewInit
         }, 0);
     }
 
-    version = FF_VERSION;
-    commit = FF_COMMIT;
-    branch = FF_BRANCH;
+    readonly version = FF_VERSION;
+    readonly commit = FF_COMMIT;
+    readonly branch = FF_BRANCH;
 
     // server info
     serverVersion = signal<string>("Not connected");
     serverCommit = signal<string>("Not connected");
     serverBranch = signal<string>("Not connected");
 
-    private global = inject(Global);
+    private readonly global = inject(Global);
 
     private getServerInfo = async () =>
     {

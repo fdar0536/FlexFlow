@@ -10,37 +10,40 @@
             <div class="selection-box" [style]="dragBoxStyle()"></div>
         }
 
-        @if (list().length > 0)
-        {
-            @for (ID of list(); track $index)
-            {
-                <p
-                    
-                    (click)="onItemClicked($event, ID)"
-                    (dblclick)="onItemDblClicked(ID)"
-                    class="CommonText my-item"
-                    [class.selected]="selectedIds().has(ID)"
-                    [attr.data-id]="ID"
-                >
-                    {{ ID }}
-                </p>
-            }
-        }
-        @else
-        {
-            <p class="CommonText">No data</p>
-        }
+        <cdk-virtual-scroll-viewport
+            itemSize="20"
+            class="log-viewport"
+            #viewport>
+            <p
+                *cdkVirtualFor="let ID of list(); trackBy: trackByFn"
+                (click)="onItemClicked($event, ID)"
+                (dblclick)="onItemDblClicked(ID)"
+                class="CommonText my-item"
+                [class.selected]="selectedIds().has(ID)"
+                [attr.data-id]="ID"
+            >
+                {{ ID }}
+            </p>
+        </cdk-virtual-scroll-viewport>
         <style>
             .my-box
             {
                 border: 2px solid #333333; 
-                padding: 20px;
+                padding: 10px;
                 position: relative;
                 user-select: none;
+            }
+            
+            .log-viewport
+            {
+                height: 400px; /* 您可以依據版面調整固定高度，例如 calc(100vh - 300px) */
+                width: 100%;
+                overflow-y: auto;
             }
 
             .my-item
             {
+                height: 20px;
                 padding: 8px 12px;
                 margin: 4px 0;
                 cursor: pointer;

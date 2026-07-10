@@ -49,7 +49,6 @@ namespace CLI
 typedef struct Profile
 {
     bool ssl;
-    std::string host;
     u16 port;
 
     std::string username;

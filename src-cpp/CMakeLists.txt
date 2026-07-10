@@ -22,6 +22,7 @@ else () # Windows
         endif ()
     else () # msvc or icc
         add_compile_options(/W4 /utf-8)
+        add_compile_definitions(NOMINMAX)
     endif (MINGW)
 endif (UNIX) # end if (UNIX)
 

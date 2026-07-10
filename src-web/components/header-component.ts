@@ -90,8 +90,8 @@ export class HeaderComponent
         });
     }
 
-    global = inject(Global);
+    readonly global = inject(Global);
     
-    private dialog = inject(MatDialog);
-    private router = inject(Router);
+    private readonly dialog = inject(MatDialog);
+    private readonly router = inject(Router);
 }

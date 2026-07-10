@@ -45,7 +45,6 @@ typedef struct Token
 
 std::shared_ptr<Token> connect(
     const bool ssl,
-    const std::string &target,
     const u16 port,
     const std::string username,
     const std::string password,
