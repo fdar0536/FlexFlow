@@ -1,4 +1,6 @@
-ssl: false
+# Local gRPC server port. The client always connects to 127.0.0.1.
 port: 12345
+# user name for login server
 username: test
-tokenTimeOut: 86400
+# set the token timeout in seconds
+tokenTimeOut: 86400 # 1 day

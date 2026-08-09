@@ -1,0 +1,25 @@
+version: '3'
+
+tasks:
+  buf:
+    cmds:
+      - cmake -E rm -rf src-cpp/protos src-go/protos src-openapi
+
+  cpp:
+    cmds:
+      - cmake -E rm -rf "{{.CPP_BUILD_DIR}}"
+  
+  go:
+    cmds:
+      - cmake -E rm -rf src-go/FlexFlowGateway
+
+  webui:
+    cmds:
+      - cmake -E rm -rf "{{.WEBUI_BUILD_DIR}}" src-web/model/config.ts
+
+  release:
+    cmds:
+      - cmake -E rm -rf "{{.RELEASE_OUTPUT_DIR}}"
+  
+  all:
+    deps: [cpp, buf, go, webui, release]

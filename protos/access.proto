@@ -7,13 +7,36 @@ package ff;
 import "types.proto";
 import "google/api/annotations.proto";
 
+/**
+ * Provides server information, authentication, and connectivity operations.
+ */
 service Access {
+  /**
+   * Returns version and source control information for the server.
+   */
   rpc Info(Empty) returns (InfoRes) {
     option (google.api.http) = {
       get: "/api/v1/info"
     };
   }
 
+  /**
+   * Authenticates a user with the server.
+   *
+   * For native gRPC clients, a successful response includes:
+   *
+   * - The authentication token in the "x-auth-token" response metadata field.
+   * - The effective token lifetime, in seconds, in the
+   *   "x-auth-token-timeout" response metadata field.
+   *
+   * Subsequent protected RPCs must include the authentication token in the
+   * "x-auth-token" request metadata field.
+   *
+   * When accessed through the gRPC gateway, the gateway stores the token in an
+   * HttpOnly cookie and applies the effective token lifetime to the cookie's
+   * Max-Age attribute. Browser-side scripts do not need direct access to the
+   * token or its effective lifetime.
+   */
   rpc Login(LoginReq) returns (Empty) {
     option (google.api.http) = {
       post: "/api/v1/login"
@@ -21,12 +44,21 @@ service Access {
     };
   }
 
+  /**
+   * Invalidates the authentication token associated with the current session.
+   *
+   * After logout, the invalidated token can no longer be used to access
+   * protected APIs, even if a client continues to send it.
+   */
   rpc Logout(Empty) returns (Empty) {
     option (google.api.http) = {
       post: "/api/v1/logout"
     };
   }
 
+  /**
+   * Tests connectivity with the server.
+   */
   rpc Echo(Empty) returns (Empty) {
     option (google.api.http) = {
       get: "/api/v1/echo"
@@ -34,15 +66,27 @@ service Access {
   }
 }
 
+/**
+ * Contains server version and source control information.
+ */
 message InfoRes {
-  string branch = 1;
-  string commit = 2;
-  string version = 3;
+  string branch = 1;  // Source control branch recorded at build time.
+  string commit = 2;  // Source control commit identifier recorded at build time.
+  string version = 3; // FlexFlow server version.
 }
 
+/**
+ * Parameters used to authenticate with the server.
+ */
 message LoginReq {
-  string username = 1;
-  string password = 2;
-  string otp = 3;
+  string username = 1; // Account username.
+  string password = 2; // Account password.
+  string otp = 3;      // One-time password. Leave empty when OTP is not required.
+
+  /**
+   * Requested token lifetime in seconds.
+   *
+   * The server limits this value to its configured minimum and maximum.
+   */
   int32 tokentimeout = 4;
 }

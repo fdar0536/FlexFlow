@@ -41,8 +41,11 @@ import (
 var(
     serverAddr = "localhost:9090"
     listenAddr = "localhost:8080"
-    ssl = false
     frontendDir = ""
+
+	Version = "development"
+    Branch = "main"
+    Commit = "HEAD"
 )
 
 func run() error {
@@ -133,7 +136,6 @@ func ffHttpResponseModifier(ctx context.Context,
         Value:    token,
         Path:     "/",
         HttpOnly: true, // for prevent xss
-        Secure:   ssl,
         SameSite: http.SameSiteLaxMode,
         MaxAge:   tokenTimeout,
     }
@@ -164,28 +166,31 @@ func cookieToMetadataMiddleware(next http.Handler) http.Handler {
 }
 
 func main() {
+    fmt.Printf("Flex Flow %s HTTP Gateway\n", Version)
+    fmt.Println("")
 
     var args struct {
-        ServerIp    string `arg:"-s,--server-ip" help:"grpc server ip"`
-        ServerPort  uint16 `arg:"-p,--server-port" help:"grpc server port"`
-        ListenIp    string `arg:"-l,--listen-ip" help:"http gateway listen ip"`
-        ListenPort  uint16 `arg:"-P,--listen-port" help:"http gateway listen port"`
-        SSL         bool   `arg:"-S,--ssl" help:"use ssl cookie or not"`
-        FrontendDir string `arg:"-f,--frontend-dir" help:"set where is webui data dir. if empty, just be http gateway"`
+        ServerPort  uint16 `arg:"-p,--server-port" help:"gRPC server port"`
+        ListenPort  uint16 `arg:"-P,--listen-port" help:"HTTP gateway listening port"`
+        FrontendDir string `arg:"-f,--frontend-dir" help:"Path to the Web UI directory. If omitted, only the HTTP gateway is started."`
+        PrintVersion bool  `arg:"-v,--version" help:"Print version and exit."`
     }
 
     // set default
-    args.ServerIp = "127.0.0.1"
     args.ServerPort = 12345
-    args.ListenIp = "127.0.0.1"
     args.ListenPort = 8080
-    args.SSL = false
     args.FrontendDir = ""
+    args.PrintVersion = false
 
     arg.MustParse(&args)
-    serverAddr = args.ServerIp + ":" + fmt.Sprint(args.ServerPort)
-    listenAddr = args.ListenIp + ":" + fmt.Sprint(args.ListenPort)
-    ssl = args.SSL
+    if (args.PrintVersion) {
+        fmt.Printf("Branch: %s\n", Branch)
+        fmt.Printf("Commit: %s\n", Commit)
+        return
+    }
+
+    serverAddr = "127.0.0.1:" + fmt.Sprint(args.ServerPort)
+    listenAddr = "127.0.0.1:" + fmt.Sprint(args.ListenPort)
     frontendDir = args.FrontendDir
 
     if err := run(); err != nil {

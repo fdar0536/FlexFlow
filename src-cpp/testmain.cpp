@@ -53,7 +53,6 @@ static Param param;
 
 int main(int argc, char **argv)
 {
-    UNUSED(argc);
     signal(SIGABRT, sighandler);
     signal(SIGFPE,  sighandler);
     signal(SIGILL,  sighandler);

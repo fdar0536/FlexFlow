@@ -1,3 +1,28 @@
+/*
+ * Flex Flow
+ * Copyright (c) 2026-present fdar0536
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+// Defines the Queue service for managing tasks within individual queues.
+
 syntax = "proto3";
 
 option go_package = "FF/protos";
@@ -7,82 +32,146 @@ package ff;
 import "types.proto";
 import "google/api/annotations.proto";
 
+/**
+ * Provides operations for managing tasks in an individual queue
+ */
 service Queue {
+  /**
+   * Streams the IDs of all pending tasks in the specified queue
+   */
   rpc ListPending(QueueReq) returns (stream ListTaskRes) {
     option (google.api.http) = {
       get: "/api/v1/queue/listpending"
     };
   }
 
+  /**
+   * Streams the IDs of all finished tasks in the specified queue
+   */
   rpc ListFinished(QueueReq) returns (stream ListTaskRes) {
     option (google.api.http) = {
       get: "/api/v1/queue/listfinished"
     };
   }
 
+  /**
+   * Returns details about a pending task
+   */
   rpc PendingDetails(TaskDetailsReq) returns (TaskDetailsRes) {
     option (google.api.http) = {
       get: "/api/v1/queue/pendingdetails"
     };
   }
 
+  /**
+   * Returns details about a finished task
+   */
   rpc FinishedDetails(TaskDetailsReq) returns (TaskDetailsRes) {
     option (google.api.http) = {
       get: "/api/v1/queue/finisheddetails"
     };
   }
 
+  /**
+   * Removes all pending tasks from the specified queue
+   *
+   * The task currently being executed is not affected
+   */
   rpc ClearPending(QueueReq) returns (Empty) {
     option (google.api.http) = {
       delete: "/api/v1/queue/clearpending"
     };
   }
 
+  /**
+   * Removes all finished task records from the specified queue
+   */
   rpc ClearFinished(QueueReq) returns (Empty) {
     option (google.api.http) = {
       delete: "/api/v1/queue/clearfinished"
     };
   }
 
+  /**
+   * Returns details about the task currently running in the specified queue
+   *
+   * Returns an error if no task is currently running
+   */
   rpc CurrentTask(QueueReq) returns (TaskDetailsRes) {
     option (google.api.http) = {
       get: "/api/v1/queue/currenttask"
     };
   }
-  
+
+  /**
+   * Adds a task to the pending list of the specified queue
+   *
+   * Returns the ID assigned to the task
+   */
   rpc AddTask(AddTaskReq) returns (ListTaskRes) {
     option (google.api.http) = {
       post: "/api/v1/queue/addtask"
       body: "*"
     };
   }
-  
+
+  /**
+   * Removes a task from the pending list
+   *
+   * Only pending tasks can be removed. A task that is currently running or
+   * has already finished cannot be removed using this operation
+   */
   rpc RemoveTask(TaskDetailsReq) returns (Empty) {
     option (google.api.http) = {
       post: "/api/v1/queue/removetask"
       body: "*"
     };
   }
-  
+
+  /**
+   * Reports whether a task is currently running in the specified queue
+   */
   rpc IsRunning(QueueReq) returns (IsRunningRes) {
     option (google.api.http) = {
       get: "/api/v1/queue/isrunning"
     };
   }
-  
+
+  /**
+   * Reads the currently buffered output of the task running in the specified
+   * queue
+   *
+   * Only output already present in the server-side buffer is returned. This
+   * operation does not wait for new output. Data returned by this operation is
+   * removed from the buffer and cannot be read again
+   *
+   * Output can only be read while a task is running. The stream ends after all
+   * currently buffered output has been returned, even if the task is still
+   * running
+   */
   rpc ReadCurrentOutput(QueueReq) returns (stream Msg) {
     option (google.api.http) = {
       get: "/api/v1/queue/readcurrentoutput"
     };
   }
-  
+
+  /**
+   * Starts processing pending tasks in the specified queue
+   */
   rpc Start(QueueReq) returns (Empty) {
     option (google.api.http) = {
       post: "/api/v1/queue/start"
       body: "*"
     };
   }
-  
+
+  /**
+   * Stops the task currently running in the specified queue and prevents the
+   * queue from starting the next pending task
+   *
+   * The stopped task is moved to the finished task list. Its exit code is
+   * implementation-defined
+   */
   rpc Stop(QueueReq) returns (Empty) {
     option (google.api.http) = {
       post: "/api/v1/queue/stop"
@@ -91,17 +180,26 @@ service Queue {
   }
 }
 
+/**
+ * Parameters for adding a task to a queue
+ */
 message AddTaskReq {
-  string name = 1;
-  string workDir = 2;
-  string execName = 3;
-  repeated string args = 4;
+  string name = 1;          // Queue name
+  string workDir = 2;       // Working directory used to execute the task
+  string execName = 3;      // Execution target of the task
+  repeated string args = 4; // Arguments passed to the execution target
 }
 
+/**
+ * Indicates whether a task is currently running in a queue
+ */
 message IsRunningRes {
-  bool isRunning = 1;
+  bool isRunning = 1; // Whether the queue currently has a running task
 }
 
+/**
+ * Contains a portion of task output
+ */
 message Msg {
-  string msg = 1;
+  string msg = 1; // Output removed from the server-side buffer
 }

@@ -36,54 +36,61 @@ namespace DAO
 {
 
 /**
- * @brief define the interface for queue list
+ * @brief Defines the interface for managing queues.
+ *
+ * This interface provides operations for creating, listing, deleting,
+ * renaming, and retrieving queues.
+ *
+ * @note All member functions are thread-safe.
  */
 class IQueueList
 {
 public:
-
-    virtual ~IQueueList() {}
+    virtual ~IQueueList() = default;
 
     /**
-     * @brief Create a Queue
-     * @param name the name for the new queue
-     * @return u8 return 0 if success
+     * @brief Creates a queue.
+     *
+     * @param name Name of the queue to create.
+     * @return 0 on success; otherwise, a non-zero value.
      */
     virtual u8 create(const std::string &name) = 0;
 
     /**
-     * @brief list all queue in list
-     * @param[out] out the list of queue(s)
-     * @return u8 return 0 if success
+     * @brief Lists all queues.
+     *
+     * @param[out] out Receives the names of all queues. The vector is cleared before being populated.
+     * @return 0 on success; otherwise, a non-zero value.
      */
     virtual u8 list(std::vector<std::string> &out) = 0;
 
     /**
-     * @brief delete the queue
-     * @param name the name of queue you want to delete
-     * @return u8 return 0 if success
+     * @brief Deletes a queue.
+     *
+     * @param name Name of the queue to delete.
+     * @return 0 on success; otherwise, a non-zero value.
      */
     virtual u8 delete_(const std::string &name) = 0;
 
     /**
-     * @brief rename the existed queue
-     * 
-     * @param oldName the current name of queue
-     * @param newName the new name of queue
-     * @return u8 return 0 if success
+     * @brief Renames an existing queue.
+     *
+     * @param oldName Current name of the queue.
+     * @param newName New name of the queue.
+     * @return 0 on success; otherwise, a non-zero value.
      */
     virtual u8 rename(const std::string &oldName,
                       const std::string &newName) = 0;
 
     /**
-     * @brief Get the Queue object
-     * 
-     * @param name the queue's name you want to get
-     * @return std::shared_ptr<IQueue> return nullptr if failed
+     * @brief Retrieves a queue by name.
+     *
+     * @param name Name of the queue to retrieve.
+     * @return A shared pointer to the queue, or nullptr if it cannot be
+     *         retrieved.
      */
     virtual std::shared_ptr<IQueue> get(const std::string &name) = 0;
-
-}; // end class IQueueList
+};
 
 } // end namespace DAO
 

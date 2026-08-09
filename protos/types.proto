@@ -1,30 +1,69 @@
+/*
+ * Flex Flow
+ * Copyright (c) 2026-present fdar0536
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+// Defines common message types shared by FlexFlow gRPC services.
+
 syntax = "proto3";
 
 option go_package = "FF/protos";
 
 package ff;
 
+/**
+ * An empty message.
+ */
 message Empty {
 }
 
-// for task
+/**
+ * Specifies a queue.
+ */
 message QueueReq {
-  string name = 1;
+  string name = 1; // Queue name
 }
 
+/**
+ * Task identifier.
+ */
 message ListTaskRes {
-  int32 ID = 1;
+  int32 ID = 1; // Task ID
 }
 
+/**
+ * Request parameters for retrieving task details
+ */
 message TaskDetailsReq {
-  string name = 1;
-  int32 ID = 2;
+  string name = 1; // Queue name
+  int32 ID = 2; // Task ID
 }
 
+/**
+ * Detailed information about a task.
+ */
 message TaskDetailsRes {
-  string workDir = 1;
-  string execName = 2;
-  repeated string args = 3;
-  int32 exitCode = 4;
-  int32 ID = 5;
+  string workDir = 1; // Working directory associated with the task.
+  string execName = 2; // Execution target of the task.
+  repeated string args = 3; // Arguments passed to the execution target.
+  int32 exitCode = 4; // Completion status reported after the task enters the finished list. Its exact meaning is implementation-defined.
+  int32 ID = 5; // Task ID.
 }

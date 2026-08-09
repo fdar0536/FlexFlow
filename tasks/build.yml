@@ -1,0 +1,24 @@
+version: '3'
+
+tasks:
+  cpp:
+    deps: [":prepare:config:cpp"]
+    cmds:
+      - cmake --build "{{.CPP_BUILD_DIR}}" -j {{.JOBS}}
+  
+  gateway:
+    deps: [":prepare:generate-buf", ":prepare:go"]
+    dir: ./src-go
+    sources:
+      - ./**/*.go
+      - go.mod
+      - go.sum
+    generates:
+      - FlexFlowGateway
+    cmds:
+      - go build -ldflags "-X main.Version={{.FF_VERSION}} -X main.Commit={{.FF_COMMIT}} -X main.Branch={{.FF_BRANCH}}" .
+
+  webui:
+    deps: [":prepare:config:webui"]
+    cmds:
+      - npx ng build --base-href ./ --output-path={{.WEBUI_BUILD_DIR}} --delete-output-path=false

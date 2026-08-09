@@ -1,13 +1,17 @@
 # set your database path
 db path: /path/to/your/database/folder
-# the port for server listen
+# Local gRPC listening port.
+# The server always binds to 127.0.0.1 and does not provide TLS directly.
+# Remote access must be provided through a reverse proxy or another local
+# proxy that terminates TLS.
 port: 12345
 # the auth config for server
 auth:
   username: test
-  # type your password, server will update it to hashed
+  # type your password, server will update it to hashed when salt is empty
   password: 12345
   # if salt is empty, server will generate hashed password and its salt then write back here
+  # If salt is not empty, the server will assume the password has already been hashed and will not hash the password for you.
   salt: ""
   # Base32 TOTP key, if it's empty, server will generate a new one then write back here
   totp key: ""
@@ -16,5 +20,5 @@ auth:
   # how many time can be failed to try
   max retry: 5
   # how long will token expire in seconds
-  default token timeout: 86400 # 1 day
+  min token timeout: 86400 # 1 day
   max token timeout: 2592000 # 1 month

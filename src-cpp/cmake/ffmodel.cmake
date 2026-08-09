@@ -1,11 +1,10 @@
 set(FF_model_LIBS
     protobuf::libprotobuf
     gRPC::grpc++
-    SQLite3::SQLite3
+    SQLite::SQLite3
     spdlog::spdlog
     OpenSSL::Crypto
     OpenSSL::SSL
-    OpenSSL::applink
 
     grpc_common
 )
@@ -66,7 +65,6 @@ set(MODEL_SRC
     model/utils.hpp
 
     # proc
-    model/proc/iproc.cpp
     model/proc/iproc.hpp
     model/proc/task.cpp
     model/proc/task.hpp

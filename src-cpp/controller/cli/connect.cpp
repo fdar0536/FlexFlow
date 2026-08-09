@@ -76,7 +76,6 @@ u8 connect(const std::string &file)
 
     try
     {
-        profile.ssl = config["ssl"].as<bool>();
         profile.port = config["port"].as<u16>();
         profile.username = config["username"].as<std::string>();
         profile.tokenTimeOut = config["tokenTimeOut"].as<i32>();
@@ -101,15 +100,12 @@ static u8 connect()
     setEcho(true);
     std::cout << std::endl;
 
-    std::cout << "Enter your TOTP code (no echo): ";
-    setEcho(false);
+    std::cout << "Enter your TOTP code: ";
     std::string code;
     std::cin >> code;
-    setEcho(true);
     std::cout << std::endl;
 
     auto token = Model::Connect::GRPC::connect(
-        profile.ssl,
         profile.port,
         profile.username,
         password,

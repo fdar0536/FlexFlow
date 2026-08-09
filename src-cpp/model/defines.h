@@ -24,23 +24,18 @@
 #ifndef _MODEL_DEFINES_H_
 #define _MODEL_DEFINES_H_
 
-#include <stdint.h>
+#include <cstdint>
 
 /**
- * @brief the wrapper for suppress compiler's warning
+ * @brief Marks a value as intentionally unused.
+ *
+ * This macro suppresses compiler warnings for unused variables or parameters.
  */
 #define UNUSED(x) static_cast<void>(x)
 
-/** @name Define the backend */
-/**{@*/
-/// @brief GRPC backend
-#define BACKEND_GRPC   0
-/// @brief SQLite backend
-#define BACKEND_SQLITE 1
-/**@}*/
-
-/** @name Define the alias for convenience */
-/**{@*/
+/** @name Fixed-width type aliases
+ * @{
+ */
 typedef uint8_t  u8;
 typedef uint16_t u16;
 typedef uint32_t u32;
@@ -53,16 +48,6 @@ typedef int64_t i64;
 
 typedef float  f32;
 typedef double f64;
-/**@}*/
-
-#if defined _WIN32 || defined __CYGWIN__
-#ifdef __MINGW32__
-#define FF_MODEL_API __attribute__((dllexport))
-#else
-#define FF_MODEL_API __declspec(dllexport)
-#endif // __MINGW32__
-#else
-#define FF_MODEL_API __attribute__((visibility("default")))
-#endif
+/** @} */
 
 #endif // _MODEL_DEFINES_H_

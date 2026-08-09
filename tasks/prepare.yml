@@ -1,0 +1,91 @@
+version: '3'
+
+tasks:
+  generate-buf:
+    internal: true
+    cmds:
+      - go run lock.go {{.BUILD_LOCK_PORT}} task prepare:exec-gen-buf
+
+  exec-gen-buf:
+    sources:
+      - protos/**/*.proto
+    generates:
+      - src-cpp/protos/**/*
+      - src-go/protos/**/*
+      - src-openapi/protos/**/*
+    cmds:
+      - buf dep update protos
+      - buf generate --template buf.gen.yaml protos
+
+  config:cpp:
+    deps: [generate-buf]
+    sources:
+      - src-cpp/**/CMakeLists.txt
+      - src-cpp/**/*.cmake
+      - src-cpp/**/*.h
+      - src-cpp/**/*.hpp
+    generates:
+      - '{{.CPP_BUILD_DIR}}/CMakeCache.txt'
+    cmds:
+      - cmake -E make_directory {{.CPP_BUILD_DIR}}
+      - cmake -E make_directory {{.INSTALL_PREFIX}}
+      - >
+        cmake -S src-cpp -B "{{.CPP_BUILD_DIR}}" -G "{{.CMAKE_GENERATOR}}" 
+        -DENABLE_SERVER={{.ENABLE_SERVER}} 
+        -DENABLE_CLI={{.ENABLE_CLI}} 
+        -DCMAKE_BUILD_TYPE={{.BUILD_TYPE}} 
+        -DFF_VERSION={{.FF_VERSION}} 
+        -DFF_COMMIT={{.FF_COMMIT}} 
+        -DFF_BRANCH={{.FF_BRANCH}} 
+        -DCLIENT_TIMEOUT={{.MODEL_CLIENT_TIMEOUT}} 
+        -DREAD_BUFFER_SIZE={{.MODEL_READ_BUFFER_SIZE}} 
+        -DMAX_READ_QUEUE_SIZE={{.MODEL_MAX_READ_QUEUE_SIZE}}
+        -DBUNDLE_LIB_SEARCH_DIR={{.BUNDLE_LIB_SEARCH_DIR}}
+        -DCMAKE_INSTALL_PREFIX={{.INSTALL_PREFIX}}
+        {{.CMAKE_EXTRA_ARGS}}
+
+  webui-dir:
+    internal: true
+    cmds:
+      - { cmd: 'cmake -E make_directory "{{.WEBUI_BUILD_DIR | replace "/" "\\" }}"', platforms: [windows] }
+      - { cmd: 'cmake -E make_directory "{{.WEBUI_BUILD_DIR}}"', platforms: [linux, darwin] }
+  
+  webui-version:
+    internal: true
+    sources:
+      - src-web/model/config.ts.in
+    generates:
+      - src-web/model/config.ts
+    cmds:
+      # windows
+      - { cmd: 'powershell -Command "(Get-Content src-web\\model\\config.ts.in) -replace ''@FF_VERSION@'', ''{{.FF_VERSION}}'' -replace ''@FF_COMMIT@'', ''{{.FF_COMMIT}}'' -replace ''@FF_BRANCH@'', ''{{.FF_BRANCH}}'' -replace ''@MODEL_MAX_READ_QUEUE_SIZE@'', ''{{.MODEL_MAX_READ_QUEUE_SIZE}}'' | Set-Content src-web\\model\\config.ts"', platforms: [windows] }
+
+      # others
+      - { cmd: 'sed -e "s#@FF_VERSION@#{{.FF_VERSION}}#g" -e "s#@FF_COMMIT@#{{.FF_COMMIT}}#g" -e "s#@FF_BRANCH@#{{.FF_BRANCH}}#g" -e "s#@MODEL_MAX_READ_QUEUE_SIZE@#{{.MODEL_MAX_READ_QUEUE_SIZE}}#g" src-web/model/config.ts.in > src-web/model/config.ts', platforms: [linux, darwin] }
+
+  config:webui:
+    internal: true
+    deps: [webui-dir, webui-version]
+    sources:
+      - package.json
+      - pnpm-lock.yaml
+    generates:
+      - node_modules/.task-install-marker
+    cmds:
+      - pnpm install --frozen-lockfile
+      - cmake -E touch node_modules/.task-install-marker
+  
+  go:
+    internal: true
+    dir: ./src-go
+    sources:
+      - go.mod
+      - go.sum
+    cmds:
+      - go mod download
+  
+  tidy-go:
+    desc: Update Go module metadata
+    dir: ./src-go
+    cmds:
+      - go mod tidy

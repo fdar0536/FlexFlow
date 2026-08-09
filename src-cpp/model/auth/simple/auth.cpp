@@ -118,9 +118,9 @@ u8 Auth::login(const std::string &username,
     }
 
     // handle token timeout
-    if (tokenTimeout <= defaultTokenTimeout)
+    if (tokenTimeout <= minTokenTimeout)
     {
-        tokenTimeout = defaultTokenTimeout;
+        tokenTimeout = minTokenTimeout;
     }
     else if (tokenTimeout > maxTokenTimeout)
     {

@@ -40,7 +40,6 @@ namespace GRPC
 {
 
 std::shared_ptr<Token> connect(
-    const bool ssl,
     const u16 port,
     const std::string username,
     const std::string password,
@@ -49,8 +48,6 @@ std::shared_ptr<Token> connect(
 {
     spdlog::debug("{}:{} Model::Connect::GRPC::connect",
         LOG_FILE_PATH(__FILE__), __LINE__);
-    spdlog::debug("{}:{} ssl: {}",
-        LOG_FILE_PATH(__FILE__), __LINE__, ssl);
     spdlog::debug("{}:{} port: {}",
         LOG_FILE_PATH(__FILE__), __LINE__, port);
     spdlog::debug("{}:{} username: {}",
@@ -79,16 +76,8 @@ std::shared_ptr<Token> connect(
     try
     {
         // connect to server
-        if (ssl)
-        {
-            channel = grpc::CreateChannel(ip,
-            grpc::SslCredentials(grpc::SslCredentialsOptions()));
-        }
-        else
-        {
-            channel = grpc::CreateChannel(ip, 
-                grpc::InsecureChannelCredentials());
-        }
+        channel = grpc::CreateChannel(ip,
+            grpc::InsecureChannelCredentials());
 
         if (channel == nullptr)
         {

@@ -21,6 +21,8 @@
  * SOFTWARE.
  */
 
+#include "model/defines.h"
+
 #include "token.hpp"
 
 namespace Model
@@ -41,13 +43,13 @@ Token::~Token()
 
     if (stmt)
     {
-        static_cast<void>(sqlite3_finalize(stmt));
+        UNUSED(sqlite3_finalize(stmt));
         stmt = nullptr;
     }
 
     if (db)
     {
-        static_cast<void>(sqlite3_close(db));
+        UNUSED(sqlite3_close(db));
         db = nullptr;
     }
 }

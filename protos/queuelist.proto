@@ -1,3 +1,28 @@
+/*
+ * Flex Flow
+ * Copyright (c) 2026-present fdar0536
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+// Defines the QueueList service for managing queues.
+
 syntax = "proto3";
 
 option go_package = "FF/protos";
@@ -7,7 +32,13 @@ package ff;
 import "types.proto";
 import "google/api/annotations.proto";
 
+/**
+ * Provides operations for managing queues
+ */
 service QueueList {
+  /**
+   * Creates a queue with the specified name
+   */
   rpc Create(QueueReq) returns (Empty) {
     option (google.api.http) = {
       post: "/api/v1/queuelist/create"
@@ -15,6 +46,9 @@ service QueueList {
     };
   }
 
+  /**
+   * Renames an existing queue
+   */
   rpc Rename(RenameQueueReq) returns (Empty) {
     option (google.api.http) = {
       post: "/api/v1/queuelist/rename"
@@ -22,18 +56,28 @@ service QueueList {
     };
   }
 
+  /**
+   * Deletes the specified queue
+   */
   rpc Delete(QueueReq) returns (Empty) {
     option (google.api.http) = {
       delete: "/api/v1/queuelist/delete"
     };
   }
 
+  /**
+   * Streams all queues, returning one response for each queue
+   */
   rpc List(Empty) returns (stream ListQueueRes) {
     option (google.api.http) = {
       get: "/api/v1/queuelist/list"
     };
   }
 
+  /**
+   * Checks whether the specified queue exists
+   * Returns an error if the queue does not exist
+   */
   rpc Get(QueueReq) returns (Empty) {
     option (google.api.http) = {
       get: "/api/v1/queuelist/get"
@@ -41,11 +85,17 @@ service QueueList {
   }
 }
 
+/**
+ * Parameters for renaming a queue
+ */
 message RenameQueueReq {
-  string oldName = 1;
-  string newName = 2;
+  string oldName = 1; // Current queue name
+  string newName = 2; // New queue name
 }
 
+/**
+ * Represents a queue returned by the list operation
+ */
 message ListQueueRes {
-  string name = 1;
+  string name = 1; // Queue name
 }

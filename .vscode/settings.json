@@ -1,6 +1,17 @@
 {
-    "cmake.sourceDirectory": "${workspaceFolder}/src-cpp",
-    "cmake.buildDirectory": "$env{TEMP}/build-FlexFlow",
-    "cmake.generator": "Ninja",
-    "C_Cpp.errorSquiggles": "disabled"
+    "yaml.disableSchemaDetection": [],
+    "yaml.schemas": {
+        "file:///Users/gtx/.vscode/extensions/continue.continue-1.2.22-darwin-arm64/config-yaml-schema.json": [
+            ".continue/**/*.yaml"
+        ],
+        "~/.vscode/extensions/continue.continue-1.2.22-darwin-arm64/config-yaml-schema.json": [
+            ".continue/**/*.yaml"
+        ],
+        "https://taskfile.dev/schema.json": [
+            "tasks/build.yml",
+            "tasks/clean.yml",
+            "tasks/prepare.yml",
+            "tasks/release.yml",
+        ]
+    }
 }

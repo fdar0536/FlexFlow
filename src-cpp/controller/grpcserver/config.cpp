@@ -21,6 +21,7 @@
  * SOFTWARE.
  */
 
+#include "model/defines.h"
 #include <vector>
 #ifdef _WIN32
 #include "direct.h"
@@ -38,6 +39,8 @@
 #include "init.hpp"
 
 #include "config.hpp"
+
+#define MIN_LOGIN_TIMEOUT 1800 // 30 mins
 
 namespace Controller
 {
@@ -87,20 +90,24 @@ u8 Config::parse(Config *in, int argc, char **argv)
     }
 
     std::string configFile("");
+
+    std::string appName = "Flex Flow ";
+    appName.append(FF_VERSION);
+    appName.append(" gRPC Server");
     
-    CLI::App app("Flex Flow Server");
+    CLI::App app(appName);
     app.set_help_flag();
     
     app.add_option("-c,--config-file", configFile, 
-        "path to config file")->default_str("config.yaml");
-    app.add_flag("-v,--version","print version info");
-    app.add_flag("-h,--help","print help info");
+        "path to server configuration file")->default_str("config.yaml");
+    app.add_flag("-v,--version","print version and exit");
+    app.add_flag("-h,--help","print help and exit");
 
     CLI11_PARSE(app, argc, argv);
 
     if (app.count("-v"))
     {
-        printVersion();
+        printVersion(argv[0]);
         return 2;
     }
 
@@ -172,12 +179,11 @@ uint_fast8_t Config::parse(Config *obj, const std::string &path)
 }
 
 // private member functions
-void Config::printVersion()
+void Config::printVersion(const char *name)
 {
-    fmt::println("FFSERVER version info:");
-    fmt::println("branch:  " FF_BRANCH);
-    fmt::println("commit:  " FF_COMMIT);
-    fmt::println("version: " FF_VERSION);
+    fmt::println("{} {}", name, FF_VERSION);
+    fmt::println("Branch:  " FF_BRANCH);
+    fmt::println("Commit:  " FF_COMMIT);
 }
 
 u8 Config::parseAuth(YAML::Node &config, const std::string &path)
@@ -304,27 +310,27 @@ u8 Config::parseAuth(YAML::Node &config, const std::string &path)
 
     simpleAuth->banTime = authConfig["ban time"].as<i32>();
     simpleAuth->maxRetry = authConfig["max retry"].as<u8>();
-    simpleAuth->defaultTokenTimeout = authConfig["default token timeout"].as<i32>();
+    simpleAuth->minTokenTimeout = authConfig["min token timeout"].as<i32>();
     simpleAuth->maxTokenTimeout = authConfig["max token timeout"].as<i32>();
 
-    if (simpleAuth->defaultTokenTimeout > simpleAuth->maxTokenTimeout)
+    if (simpleAuth->minTokenTimeout > simpleAuth->maxTokenTimeout)
     {
         spdlog::error("{}:{} default token timeout is greater than max token timeout",
             LOG_FILE_PATH(__FILE__), __LINE__);
         return 1;
     }
 
-    if (simpleAuth->defaultTokenTimeout < 3600) // 1 hr
+    if (simpleAuth->minTokenTimeout < MIN_LOGIN_TIMEOUT)
     {
-        spdlog::error("{}:{} default token timeout is less than 1 hour",
-            LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} default token timeout is less than {} s",
+            LOG_FILE_PATH(__FILE__), __LINE__, MIN_LOGIN_TIMEOUT);
         return 1;
     }
 
-    if (simpleAuth->maxTokenTimeout < 3600) // 1 hr
+    if (simpleAuth->maxTokenTimeout < MIN_LOGIN_TIMEOUT)
     {
-        spdlog::error("{}:{} max token timeout is less than 1 hour",
-            LOG_FILE_PATH(__FILE__), __LINE__);
+        spdlog::error("{}:{} max token timeout is less than {} s",
+            LOG_FILE_PATH(__FILE__), __LINE__, MIN_LOGIN_TIMEOUT);
         return 1;
     }
 

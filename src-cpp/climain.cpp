@@ -28,13 +28,52 @@
 #include "controller/cli/connect.hpp"
 #include "controller/cli/queuelist.hpp"
 #include "controller/cli/queue.hpp"
-#include "model/dao/iqueuelist.hpp"
 #include "model/dao/iqueue.hpp"
+#include "model/dao/iqueuelist.hpp"
 #include "model/utils.hpp"
 
 #include "config.h"
 
 static std::string profile;
+
+static void print_recursive_help(const CLI::App* app)
+{
+    std::cout << "----------------------------------------" << std::endl;
+    std::cout << app->get_name() << std::endl;
+    if (app->get_options().empty())
+    {
+        if (!app->get_description().empty())
+        {
+            std::cout << app->get_description() << std::endl;
+        }
+    }
+    else
+    {
+        std::cout << app->help();
+    }
+    std::cout << "----------------------------------------" << std::endl;
+    std::cout << std::endl;
+    
+    for (const auto* sub : app->get_subcommands([](const CLI::App*) { return true; }))
+    {
+        print_recursive_help(sub);
+    }
+}
+
+static void printExample(const char *name)
+{
+    std::cout << "Example:" << std::endl;
+    std::cout << name << " create --name Build" << std::endl;
+    std::cout << name << " queue -n build add-task -e cmake -a \"--build build\" -w ." << std::endl;
+    std::cout << name << " queue -n build start" << std::endl;
+}
+
+static void printVersion(const char *name)
+{
+    std::cout << name << " " << FF_VERSION << std::endl;
+    std::cout << "Branch: " << FF_BRANCH << std::endl;
+    std::cout << "Commit: " << FF_COMMIT << std::endl;
+}
 
 int main(int argc, char **argv)
 {
@@ -48,55 +87,64 @@ int main(int argc, char **argv)
     }
 #endif
 
+    bool showFullHelp(false);
+    bool showHelp(false);
+    bool showVersion(false);
+
     // build command line parser
     std::string appName = "Flex Flow ";
     appName.append(FF_VERSION);
     appName.append(" Command Line Interface");
-
     CLI::App app{appName, argv[0]};
+    app.set_help_flag();
+    auto fullHelp = app.add_flag("--full-help", showFullHelp, "Show all help message and exit");
+    auto help = app.add_flag("-h,--help", showHelp, "Show help message and exit");
+    app.add_flag("-v,--version", showVersion, "Show version and exit");
 
-    app.add_option("-p,--profile", profile, "Profile file path");
+    help->excludes(fullHelp);
+
+    app.add_option("-p,--profile", profile, "Path to the client profile.");
 
     // for queue list
     auto createQueue = app.add_subcommand("create", "Create a new queue");
-    createQueue->add_option("-n,--name")->required();
+    createQueue->add_option("-n,--name", "Queue name")->required();
     
-    auto listQueue = app.add_subcommand("list", "List all queue");
+    auto listQueue = app.add_subcommand("list", "List all queues");
     
     auto deleteQueue = app.add_subcommand("delete", "Delete a queue");
     deleteQueue->add_option("-n,--name")->required();
     
     auto renameQueue = app.add_subcommand("rename", "Rename a queue");
-    renameQueue->add_option("-o,--old-name")->required();
-    renameQueue->add_option("-n,--new-name")->required();
+    renameQueue->add_option("-o,--old-name", "Current queue name")->required();
+    renameQueue->add_option("-n,--new-name", "New queue name")->required();
 
     // for queue
-    auto queue = app.add_subcommand("queue", "Manage a queue");
-    queue->add_option("-n,--name")->required();
+    auto queue = app.add_subcommand("queue", "Manage an execution queue");
+    queue->add_option("-n,--name", "The name of queue you want to manage")->required();
     
-    auto listPending = queue->add_subcommand("list-pending", "List pending tasks");
+    auto listPending = queue->add_subcommand("list-pending", "List all pending tasks");
     
-    auto listFinished = queue->add_subcommand("list-finished", "List finished tasks");
+    auto listFinished = queue->add_subcommand("list-finished", "List all finished tasks");
     
     auto pendingDetails = queue->add_subcommand("pending-details", "Get pending task details");
-    pendingDetails->add_option("-i,--id")->required();
+    pendingDetails->add_option("-i,--id", "Pending task ID")->required();
     
     auto finishedDetails = queue->add_subcommand("finished-details", "Get finished task details");
-    finishedDetails->add_option("-i,--id")->required();
+    finishedDetails->add_option("-i,--id", "Finished task ID")->required();
     
-    auto clearPending = queue->add_subcommand("clear-pending", "Clear pending tasks");
+    auto clearPending = queue->add_subcommand("clear-pending", "Clear all pending tasks");
     
-    auto clearFinished = queue->add_subcommand("clear-finished", "Clear finished tasks");
+    auto clearFinished = queue->add_subcommand("clear-finished", "Clear all finished tasks");
     
-    auto currentTask = queue->add_subcommand("current-task", "Get current task");
+    auto currentTask = queue->add_subcommand("current-task", "Get the currently running task");
     
     auto addTask = queue->add_subcommand("add-task", "Add a task");
-    addTask->add_option("-e,--exec-name")->required();
-    addTask->add_option("-a,--args")->required();
-    addTask->add_option("-w,--work-dir")->required();
+    addTask->add_option("-e,--exec-name", "Execution target")->required();
+    addTask->add_option("-a,--args", "Arguments passed to the executable")->required();
+    addTask->add_option("-w,--work-dir", "Working directory")->required();
     
-    auto removeTask = queue->add_subcommand("remove-task", "Remove a task");
-    removeTask->add_option("-i,--id")->required();
+    auto removeTask = queue->add_subcommand("remove-task", "Remove a task from pending list");
+    removeTask->add_option("-i,--id", "Task ID")->required();
     
     auto start = queue->add_subcommand("start", "Start the queue");
     
@@ -104,9 +152,33 @@ int main(int argc, char **argv)
 
     auto isRunning = queue->add_subcommand("is-running", "Check if the queue is running");
 
-    auto readCurrentOutput = queue->add_subcommand("read-current-output", "Read current output");
+    auto readCurrentOutput = queue->add_subcommand("read-current-output", "Read current task output");
 
     CLI11_PARSE(app, argc, argv);
+    if (showHelp)
+    {
+        std::cout << app.help() << std::endl;
+        printExample(argv[0]);
+        return 0;
+    }
+
+    if (showFullHelp)
+    {
+        std::cout << app.help() << std::endl;
+        for (const auto* sub : app.get_subcommands([](const CLI::App*) { return true; }))
+        {
+            print_recursive_help(sub);
+        }
+
+        printExample(argv[0]);
+        return 0;
+    }
+
+    if (showVersion)
+    {
+        printVersion(argv[0]);
+        return 0;
+    }
 
     try
     {

@@ -5,16 +5,25 @@ dotenv: ['.env']
 
 vars:
   # version info
-  FF_VERSION: "2.0-release"
+  FF_OS_RAW:
+    sh: go env GOOS
+  FF_ARCH:
+    sh: go env GOARCH
+
+  FF_OS: '{{if eq .FF_OS_RAW "darwin"}}MacOS{{else if eq .FF_OS_RAW "linux"}}Linux{{else if eq .FF_OS_RAW "windows"}}Windows{{else}}{{.FF_OS_RAW}}{{end}}'
+  FF_NAME: "FlexFlow"
+  FF_VERSION: "2.1-release"
   FF_COMMIT:
     sh: git rev-parse --short HEAD
   FF_BRANCH:
     sh: git rev-parse --abbrev-ref HEAD
+  
+  TAR_EXE: '{{if eq .FF_OS_RAW "windows"}}tar.exe{{else}}tar{{end}}'
 
   # global settings
   TMP_DIR: '{{.TEMP | default .TMPDIR | default "/tmp" }}'
   BUILD_TYPE: '{{ .BUILD_TYPE | default "Release" }}'
-  PROTO_VERSION: '{{.PROTO_VERSION | default "v33.4"}}'
+  BUILD_LOCK_PORT: '{{.BUILD_LOCK_PORT | default 54321 }}'
 
   # for cpp
   CPP_BUILD_DIR: '{{ .CPP_BUILD_DIR | default (printf "%s/build-cpp" .TMP_DIR) }}'
@@ -30,116 +39,38 @@ vars:
   # for webui
   WEBUI_BUILD_DIR: '{{ .WEBUI_BUILD_DIR | default (printf "%s/build-webui" .TMP_DIR) }}'
 
+  # for package
+  BUNDLE_LIB_SEARCH_DIR: '{{ .BUNDLE_LIB_SEARCH_DIR | default "" }}'
+  INSTALL_PREFIX: '{{ .INSTALL_PREFIX | default (printf "%s/install" .TMP_DIR) }}'
+  RELEASE_OUTPUT_DIR: '{{ .RELEASE_OUTPUT_DIR | default (printf "%s/release" .TMP_DIR) }}'
+  RELEASE_GPG_ID: '{{ .RELEASE_GPG_ID | default "" }}'
+  RELEASE_GPG_PUBLIC_KEY_FILE: '{{ .RELEASE_GPG_PUBLIC_KEY_FILE | default "" }}'
+
 tasks:
-  # wrapper
-  build-cpp:
-    deps: [config-cmake]
+  install:
+    deps: [build:cpp, build:gateway]
     cmds:
-      - cmake --build "{{.CPP_BUILD_DIR}}" -j {{.JOBS}}
+      - task: 'install:{{OS}}'
   
-  build-gateway:
-    deps: [generate-buf]
-    dir: ./src-go
-    cmds:
-      - go mod tidy
-      - go build
-    sources:
-      - ./**/*.go
-    generates:
-      - FlexFlowGateway
-
-  build-webui:
-    deps: [config-webui]
-    cmds:
-      - npx ng build --base-href ./ --output-path={{.WEBUI_BUILD_DIR}} --delete-output-path=false
-  
-  clean:
-    deps: [clean-cmake, clean-buf, clean-go, clean-webui]
-    cmds:
-      - echo "Clean done!"
-  
-  # prepare
-  generate-buf:
-    internal: true
-    sources:
-      - protos/**/*.proto
-    generates:
-      - src-cpp/protos/**/*
-      - src-go/protos/**/*
-      - src-openapi/protos/**/*
-    cmds:
-      - { cmd: 'powershell -Command "(Get-Content buf.gen.yaml) -replace ''protocolbuffers/cpp:v[\d.]+'', ''protocolbuffers/cpp:{{.PROTO_VERSION}}'' | Set-Content buf.gen.temp.yaml"', platforms: [windows] }
-      - { cmd: 'sed "s#protocolbuffers/cpp:v[0-9.]*#protocolbuffers/cpp:{{.PROTO_VERSION}}#g" buf.gen.yaml > buf.gen.temp.yaml', platforms: [linux, darwin] }
-      - buf dep update protos
-      - buf generate --template buf.gen.temp.yaml protos
-      - cmake -E rm buf.gen.temp.yaml
-
-  config-cmake:
-    internal: true
-    deps: [generate-buf]
-    sources:
-      - src-cpp/**/CMakeLists.txt
-      - src-cpp/**/*.cmake
-    generates:
-      - '{{.CPP_BUILD_DIR}}/CMakeCache.txt'
-    cmds:
-      - cmake -E make_directory {{.CPP_BUILD_DIR}}
-      - >
-        cmake -S src-cpp -B "{{.CPP_BUILD_DIR}}" -G "{{.CMAKE_GENERATOR}}" 
-        -DENABLE_SERVER={{.ENABLE_SERVER}} 
-        -DENABLE_CLI={{.ENABLE_CLI}} 
-        -DCMAKE_BUILD_TYPE={{.BUILD_TYPE}} 
-        -DFF_VERSION={{.FF_VERSION}} 
-        -DFF_COMMIT={{.FF_COMMIT}} 
-        -DFF_BRANCH={{.FF_BRANCH}} 
-        -DCLIENT_TIMEOUT={{.MODEL_CLIENT_TIMEOUT}} 
-        -DREAD_BUFFER_SIZE={{.MODEL_READ_BUFFER_SIZE}} 
-        -DMAX_READ_QUEUE_SIZE={{.MODEL_MAX_READ_QUEUE_SIZE}}
-        {{.CMAKE_EXTRA_ARGS}}
-
-  prepare-webui-dir:
+  install:windows:
     internal: true
     cmds:
-      - { cmd: 'cmake -E make_directory "{{.WEBUI_BUILD_DIR | replace "/" "\\" }}"', platforms: [windows] }
-      - { cmd: 'cmake -E make_directory "{{.WEBUI_BUILD_DIR}}"', platforms: [linux, darwin] }
+      - cmake --install {{.CPP_BUILD_DIR}}
+      - cmake -E copy src-go/FlexFlowGateway.exe {{.INSTALL_PREFIX}}/FlexFlowGateway.exe
   
-  prepare-webui-version:
+  install:linux:
     internal: true
     cmds:
-      # windows
-      - { cmd: 'powershell -Command "(Get-Content src-web\\model\\config.ts.in) -replace ''@FF_VERSION@'', ''{{.FF_VERSION}}'' -replace ''@FF_COMMIT@'', ''{{.FF_COMMIT}}'' -replace ''@FF_BRANCH@'', ''{{.FF_BRANCH}}'' -replace ''@MODEL_MAX_READ_QUEUE_SIZE@'', ''{{.MODEL_MAX_READ_QUEUE_SIZE}}'' | Set-Content src-web\\model\\config.ts"', platforms: [windows] }
+      - cmake --install {{.CPP_BUILD_DIR}}
+      - cmake -E copy src-go/FlexFlowGateway {{.INSTALL_PREFIX}}/FlexFlowGateway
 
-      # others
-      - { cmd: 'sed -e "s#@FF_VERSION@#{{.FF_VERSION}}#g" -e "s#@FF_COMMIT@#{{.FF_COMMIT}}#g" -e "s#@FF_BRANCH@#{{.FF_BRANCH}}#g" -e "s#@MODEL_MAX_READ_QUEUE_SIZE@#{{.MODEL_MAX_READ_QUEUE_SIZE}}#g" src-web/model/config.ts.in > src-web/model/config.ts', platforms: [linux, darwin] }
-
-  config-webui:
+  install:darwin:
     internal: true
-    deps: [prepare-webui-dir, prepare-webui-version]
-    sources:
-      - package.json
-      - pnpm-lock.yaml
-      - src-web/model/config.ts.in
-    generates:
-      - node_modules/**
-      - src-web/model/config.ts
     cmds:
-      - pnpm install
-
-  # clean
-  clean-buf:
-    cmds:
-      - >
-        cmake -E rm -rf 
-        src-cpp/protos src-go/protos src-openapi
-
-  clean-cmake:
-    cmds:
-      - cmake -E rm -rf "{{.CPP_BUILD_DIR}}"
+      - task: 'install:linux'
   
-  clean-go:
-    cmds:
-      - cmake -E rm -rf src-go/FlexFlowGateway
-
-  clean-webui:
-    cmds:
-      - cmake -E rm -rf "{{.WEBUI_BUILD_DIR}}" src-web/model/config.ts
+includes:
+  prepare: ./tasks/prepare.yml
+  build: ./tasks/build.yml
+  clean: ./tasks/clean.yml
+  release: ./tasks/release.yml

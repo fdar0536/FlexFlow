@@ -85,7 +85,7 @@ public:
 
     i32 tokenTimeout = 86400; // 1 day
 
-    i32 defaultTokenTimeout = 86400; // 1 day
+    i32 minTokenTimeout = 86400; // 1 day
 
     i32 maxTokenTimeout = 2592000; // 30 days
 

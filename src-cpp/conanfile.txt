@@ -1,0 +1,11 @@
+[requires]
+sqlite3/3.53.4
+spdlog/1.17.0
+grpc/1.83.0
+openssl/3.6.3
+yaml-cpp/0.9.0
+cli11/2.6.2
+
+[generators]
+CMakeDeps
+CMakeToolchain

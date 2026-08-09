@@ -55,7 +55,7 @@ public:
 
 private:
 
-    static void printVersion();
+    static void printVersion(const char *);
 
     static u8 parseAuth(YAML::Node &, const std::string &path);
 };

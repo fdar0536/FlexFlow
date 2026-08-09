@@ -26,17 +26,16 @@ else () # Windows
     endif (MINGW)
 endif (UNIX) # end if (UNIX)
 
-# options
-if(ENABLE_TEST)
-    enable_testing()
-endif(ENABLE_TEST)
-
 # variables
 set(FF_NAME FlexFlow)
 
 if((CLIENT_TIMEOUT GREATER 61) OR (CLIENT_TIMEOUT LESS 1))
     set(CLIENT_TIMEOUT 31)
 endif((CLIENT_TIMEOUT GREATER 61) OR (CLIENT_TIMEOUT LESS 1))
+
+if ((NOT ENABLE_SERVER) AND (NOT ENABLE_CLI))
+    set(ENABLE_SERVER 1)
+endif ((NOT ENABLE_SERVER) AND (NOT ENABLE_CLI))
 
 set(PROJECT_ROOT_DIR ${CMAKE_SOURCE_DIR})
 if (WIN32)
@@ -55,6 +54,7 @@ include_directories(After SYSTEM
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/protos
 )
+
 include(GNUInstallDirs)
 
 find_package(Protobuf REQUIRED)
